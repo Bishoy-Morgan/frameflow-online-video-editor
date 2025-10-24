@@ -9,7 +9,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Edit your video clips easily | Editar",
+  title: "Editar | Edit your video clips easily",
   description: "Editar is a user-friendly web application that allows you to effortlessly trim and edit your video clips online. Whether you need to cut out unwanted sections or create highlights, Editar provides a simple and efficient solution for all your video editing needs.",
 };
 
