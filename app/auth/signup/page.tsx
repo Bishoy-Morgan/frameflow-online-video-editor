@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import Image from "next/image";
 import googleIcon from '@/public/icons/google.svg'
 import Button from "@/components/ui/Button";
+import rightImage from '@/public/images/1.jpg'
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -51,26 +52,31 @@ export default function SignUpPage() {
 
           {error && <p className="text-red-600 text-sm">{error}</p>}
 
-          {/* Google Sign Up */}
           <button
-            type="button"
-            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-            className="w-full flex items-center justify-center relative gap-2 border border-gray-300 rounded-md py-2.5 hover:bg-gray-50 transition-all cursor-pointer"
-          >
-            {/* Google Icon on the left */}
-            <Image
-              src={googleIcon}
-              alt="Google icon"
-              width={22}
-              height={22}
-              className="absolute left-3"
-            />
-
-            {/* Centered text */}
-            <span className="text-gray-700 font-medium">
-              Continue with Google
-            </span>
-          </button>
+          type="button"
+          onClick={() => {
+            const baseUrl =
+              process.env.NEXT_PUBLIC_NEXTAUTH_URL || window.location.origin;
+            const googleUrl = `${baseUrl}/api/auth/signin/google?callbackUrl=${encodeURIComponent(
+              `${baseUrl}/dashboard`
+            )}`;
+            window.open(
+              googleUrl,
+              "Editar Google Sign-In",
+              "width=600,height=700,top=150,left=400,noopener,noreferrer"
+            );
+          }}
+          className="w-full flex items-center justify-center relative gap-2 border border-gray-300 rounded-md py-2.5 hover:bg-gray-50 transition-all cursor-pointer"
+        >
+          <Image
+            src={googleIcon}
+            alt="Google icon"
+            width={22}
+            height={22}
+            className="absolute left-3"
+          />
+          <span className="text-gray-700 font-medium">Continue with Google</span>
+        </button>
 
           {/* Divider */}
           <div className="flex items-center justify-center my-3">
@@ -117,13 +123,13 @@ export default function SignUpPage() {
       </div>
 
       {/* Right Side - Visual Section */}
-      <div className="w-1/2 bg-black text-white h-full flex flex-col justify-center items-center p-10">
-        
-        {/* <h1 className="text-4xl font-bold mb-3">Editar</h1>
-        <p className="text-gray-400 text-center max-w-sm">
-          The easiest way to turn your ideas into professional-grade videos.  
-          Simple, fast, and designed for creators like you.
-        </p> */}
+      <div className="relative w-1/2 h-full after:bg-linear-to-t after:from-black/30 after:to-transparent after:absolute after:inset-0">
+        <Image 
+        src={rightImage}
+        alt="Image"
+        fill
+        className="object-cover object-right "
+        />
       </div>
     </div>
   );
