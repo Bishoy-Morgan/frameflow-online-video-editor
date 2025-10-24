@@ -8,15 +8,38 @@ export async function POST(req: Request) {
     await connectDB();
 
     const existingUser = await User.findOne({ email });
-    if (existingUser)
-      return Response.json({ message: "User already exists" }, { status: 400 });
+
+    if (existingUser) {
+      if (!existingUser.password) {
+        return Response.json(
+          { error: "This email is already registered using Google. Please sign in with Google." },
+          { status: 400 }
+        );
+      }
+
+      return Response.json(
+        { error: "This email is already registered. Please sign in instead." },
+        { status: 400 }
+      );
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ name, email, password: hashedPassword });
 
-    return Response.json({ message: "User created successfully", user: newUser }, { status: 201 });
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+    });
+
+    return Response.json(
+      { message: "User created successfully", user: newUser },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error(error);
-    return Response.json({ message: "Internal Server Error" }, { status: 500 });
+    console.error("Signup error:", error);
+    return Response.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

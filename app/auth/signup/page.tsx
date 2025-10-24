@@ -112,10 +112,7 @@ export default function SignUpPage() {
             className="w-full py-3 flex items-center justify-center gap-2"
           >
             {loading ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Creating account...
-              </>
+              <div className="w-5 h-5 border-3 border-[#2980B9] border-t-transparent rounded-full animate-spin"></div>
             ) : (
               "Continue"
             )}

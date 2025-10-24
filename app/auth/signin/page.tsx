@@ -126,9 +126,13 @@ export default function SignInPage() {
             variant="primary"
             type="submit"
             disabled={loading}
-            className="w-full py-3"
+            className="w-full py-3 flex items-center justify-center gap-2"
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? (
+              <div className="w-5 h-5 border-3 border-[#2980B9] border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              "Sign In"
+            )}
           </Button>
 
           <p className="text-sm text-center text-gray-500">
