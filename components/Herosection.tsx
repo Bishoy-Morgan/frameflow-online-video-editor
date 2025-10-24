@@ -5,7 +5,6 @@ import Button from './ui/Button'
 import Image from 'next/image'
 import laptopMockup from '@/public/images/laptop-mockup.webp'
 
-
 const Herosection = () => {
 
     const handleButtonClick = () => {
@@ -23,7 +22,7 @@ const Herosection = () => {
                 </p>
                 <Button 
                 variant='primary' 
-                className='mt-8 mb-4 py-4 px-8 text-xl '
+                className='mt-8 mb-4 py-4 px-8 text-xl'
                 onClick={handleButtonClick}
                 >
                     Sign up for free

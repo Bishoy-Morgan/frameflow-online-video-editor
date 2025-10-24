@@ -1,6 +1,7 @@
 import Image from 'next/image'
-import logo from '@/public/logo.png'
 import Button from './ui/Button'
+import logo from '@/public/logo.png'
+
 
 const Navbar = () => {
     return (
@@ -9,12 +10,12 @@ const Navbar = () => {
                 <Image
                 src={logo}
                 alt="Logo"
-                width={30}
-                height={30}
+                width={40}
+                height={40}
                 />
                 <span className='block text-white text-xl font-semibold tracking-wider'>Editar</span>
             </div>
-            <Button variant='secondary' className='px-4 py-2'>
+            <Button variant='secondary' className='px-4 py-2!'>
                 Sign In
             </Button>
         </div>
