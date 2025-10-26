@@ -1,4 +1,4 @@
-import DashboardContent from "./components/DashboardContent";
+import DashboardContent from "./components/dashboardContent/DashboardContent";
 
 export default function DashboardPage() {
   return (
