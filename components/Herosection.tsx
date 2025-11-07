@@ -14,8 +14,8 @@ const Herosection = () => {
     };
     
     return (
-        <main className="gradient-bg w-full h-screen px-24 flex justify-center items-end pb-16 ">
-            <div className='w-1/2 flex flex-col items-start justify-center '>
+        <main className="gradient-bg w-full h-auto md:h-screen px-4 md:px-24 md:pb-16 pt-40 pb-10 md:pt-0  flex flex-col md:flex-row justify-center md:items-end items-center ">
+            <div className='w-full  md:w-1/2 flex flex-col items-start justify-center '>
                 <h1 className="text-6xl font-bold text-black">Free Online Video Editor</h1>
                 <p className="mt-4 text-lg text-gray-700 max-w-xl">
                     Looking for free templates and smart tools to make videos free online to market your business and personal branding? CapCut&apos;s online video editor has you covered. Social media reels, promo videos, slideshows, and more are just at your fingertips. Start your free trial right now!
@@ -31,7 +31,7 @@ const Herosection = () => {
                     *No credit card required
                 </span>
             </div>
-            <div className='relative w-1/2 h-3/4 flex items-center justify-end'>
+            <div className='relative w-full  md:w-1/2 h-3/4 flex items-center justify-end'>
                 <Image
                     src={laptopMockup}
                     alt="Hero Image"

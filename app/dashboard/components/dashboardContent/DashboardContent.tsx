@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import TopPanel from "./TopPanel";
 import BottomPanel from "./BottomPanel";
 
@@ -10,6 +10,9 @@ export default function DashboardContent() {
   const minTop = 50;
   const maxTop = 90;
   const frameRef = useRef<number | null>(null);
+
+  // ✅ This ref must be created in the parent so both children share it
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     return () => {
@@ -53,19 +56,19 @@ export default function DashboardContent() {
 
   return (
     <div className="w-full h-screen flex flex-col select-none">
-      {/* Top Section */}
-      <TopPanel height={`${topHeight}vh`} isDragging={isDragging} />
+      {/* ✅ Pass the ref to TopPanel */}
+      <TopPanel height={`${topHeight}vh`} isDragging={isDragging} videoRef={videoRef} />
 
       {/* Divider */}
       <div
         onMouseDown={handleMouseDown}
-        className={`h-0.5 bg-gray-400 cursor-row-resize hover:bg-cyan-500 active:bg-cyan-500 transition-all duration-150 ${
+        className={`h-[3px] bg-gray-400 cursor-row-resize hover:bg-cyan-500 active:bg-cyan-500 transition-all duration-150 ${
           isDragging ? "opacity-100" : "opacity-0 hover:opacity-100"
         }`}
       />
 
-      {/* Bottom Section */}
-      <BottomPanel height={`${bottomHeight}vh`} isDragging={isDragging} />
+      {/* ✅ Pass the same ref to BottomPanel */}
+      <BottomPanel height={`${bottomHeight}vh`} isDragging={isDragging} videoRef={videoRef} />
     </div>
   );
 }
