@@ -4,8 +4,10 @@ import React from 'react'
 import Button from './ui/Button'
 import Image from 'next/image'
 import laptopMockup from '@/public/images/laptop-mockup.webp'
+// import { useTheme } from '@/hooks/useTheme'
 
 const Herosection = () => {
+    // const { isDark } = useTheme()
 
     const handleButtonClick = () => {
         if (typeof window !== 'undefined') {
@@ -13,35 +15,48 @@ const Herosection = () => {
         }
     };
     
+    
     return (
-        <main className="gradient-bg w-full h-auto md:h-screen px-4 md:px-24 md:pb-16 pt-40 pb-10 md:pt-0  flex flex-col md:flex-row justify-center md:items-end items-center ">
-            <div className='w-full  md:w-1/2 flex flex-col items-start justify-center '>
-                <h1 className="text-6xl font-bold text-black">Free Online Video Editor</h1>
-                <p className="mt-4 text-lg text-gray-700 max-w-xl">
-                    Looking for free templates and smart tools to make videos free online to market your business and personal branding? CapCut&apos;s online video editor has you covered. Social media reels, promo videos, slideshows, and more are just at your fingertips. Start your free trial right now!
-                </p>
-                <Button 
-                variant='primary' 
-                className='mt-8 mb-4 py-4 px-8 text-xl'
-                onClick={handleButtonClick}
-                >
-                    Sign up for free
-                </Button>
-                <span className='text-sm text-gray-500'>
-                    *No credit card required
-                </span>
+        <section className="gradient-bg w-full min-h-screen pt-32 pb-16 md:pt-52 md:pb-20">
+            <div className="container ">
+                <div className="flex flex-col md:flex-row items-start justify-between gap-12 md:gap-16">
+                    {/* Left Content */}
+                    <div className="w-full md:w-3/5 flex flex-col items-start">
+                        <h1>
+                            Frameflow is a Free Online Video Editor for Social Media and Marketing
+                        </h1>
+                        <p className="text-lead" style={{ color: 'color-mix(in srgb, var(--text) 70%, transparent)' }}>
+                            Frameflow lets you edit videos directly in your browser with fast, intuitive
+                            tools and ready-made templates. Create social media reels, promo videos, and
+                            marketing content without downloads or complicated software.
+                        </p>
+                        <Button 
+                            variant="primary" 
+                            className="mt-6 mb-2"
+                            onClick={handleButtonClick}
+                        >
+                            Sign up for free
+                        </Button>
+                        <span className="text-small ml-2">
+                            *No credit card required
+                        </span>
+                    </div>
+
+                    {/* Right Image */}
+                    <div className="w-full md:w-2/5 flex items-start justify-center md:justify-end">
+                        <Image
+                            src={laptopMockup}
+                            alt="Frameflow Video Editor Interface"
+                            width={650}
+                            height={524}
+                            quality={85}
+                            priority
+                            className="w-full h-auto max-w-lg"
+                        />
+                    </div>
+                </div>
             </div>
-            <div className='relative w-full  md:w-1/2 h-3/4 flex items-center justify-end'>
-                <Image
-                    src={laptopMockup}
-                    alt="Hero Image"
-                    width={1.24 * 650}
-                    height={650}
-                    quality={75}
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 650px"
-                />
-            </div>
-        </main>
+        </section>
     )
 }
 

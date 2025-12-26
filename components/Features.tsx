@@ -1,7 +1,8 @@
 'use client'
 
-import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
+import { useTheme } from '@/hooks/useTheme';
+import Image from 'next/image';
 import man from '@/public/images/features/man.jpg'
 import edit from '@/public/images/features/edit.jpg'
 import Button from './ui/Button';
@@ -9,33 +10,39 @@ import Button from './ui/Button';
 const Features = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [fadeIn, setFadeIn] = useState(true);
+    const { isDark } = useTheme();
 
     const features = [
         {
             id: 1,
-            title: 'Speech to Text',
-            description: 'CapCut online free video editor uses AI to auto-generate subtitles with near-perfect accuracy. This makes your video editor online workflow faster, more accessible, and SEO-friendly for global reach.',
+            title: 'Auto Captions',
+            description:
+            'Generate accurate captions in seconds and make your videos easier to watch, search, and share. Frameflow helps you add subtitles that improve engagement and accessibility across all platforms.',
             image: man,
         },
         {
             id: 2,
-            title: 'Text to Speech',
-            description: "Convert text files into natural voiceovers to make your video content more informative and captivating with CapCut's video editor online. Plus, the built-in AI design agent powered by Seedream 4.0 lets you generate eye-catching visuals from text prompts, which can be used in backgrounds, overlays, or as creative assets to enrich your video content.",
+            title: 'Text-Based Editing',
+            description:
+            'Edit videos as easily as editing text. Remove pauses, cut scenes, and rearrange clips by working directly with the transcript — faster workflows with full creative control.',
             image: edit,
         },
         {
             id: 3,
-            title: 'Remove Background',
-            description: "Remove video background in 1 click and change its color and backdrop, making it more authentic using CapCut's best video editor online. For still images, the integrated Seedream 4.0 image generator delivers precise background removal and replacement, giving you polished visuals to insert into your videos.",
+            title: 'Background Removal',
+            description:
+            'Remove or replace backgrounds with a single click. Perfect for creators, presentations, and social videos that need a clean and professional look.',
             image: man,
         },
         {
             id: 4,
-            title: 'Cloud Storage',
-            description: 'Store and access your projects from anywhere with secure cloud storage integration.',
+            title: 'Cloud Projects',
+            description:
+            'Access your video projects anywhere. Frameflow saves your work securely in the cloud so you can edit, preview, and export without losing progress.',
             image: edit,
         },
     ];
+
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -52,30 +59,36 @@ const Features = () => {
     const currentFeature = features[currentIndex];
 
     return (
-        <main className="w-full min-h-screen py-44 px-8 md:px-24 flex items-center justify-center">
-            <div className="w-full h-full flex flex-col md:flex-row items-center justify-between gap-32">
+        <main className="w-full min-h-screen py-44 flex items-center justify-center">
+            <div className="container h-full flex flex-col md:flex-row items-center justify-between gap-32">
                 
                 <div className="w-full md:w-1/2 space-y-4">
-                    <h2>
+                    <h2 className='mb-20'>
                         Make a video with smart features
                     </h2>
                     
                     <div className="space-y-6">
                         {features.map((feature, index) => (
                             <div key={feature.id}>
-                                <h4 
-                                    className={`font-medium transition-all duration-300 ${
+                                <h3 
+                                    className={`transition-all duration-300 ${
                                         index === currentIndex 
-                                            ? 'text-gray-900 opacity-100 ml-6' 
-                                            : 'text-gray-400 opacity-50'
+                                            ? 'ml-4' 
+                                            : 'text-neutral-400/70'
                                     }`}
+                                    style={{
+                                        color: index === currentIndex ? 'var(--text)' : undefined
+                                    }}
                                 >
                                     {feature.title}
-                                </h4>
+                                </h3>
                                 {index === currentIndex && (
-                                    <p className={`text-lg text-gray-600 leading-relaxed mt-6 transition-opacity duration-300 bg-gray-100 p-8 rounded-xl ${
+                                    <p className={`text-body font-medium text-neutral-800 mt-6 transition-opacity duration-300 p-8 rounded-xl backdrop-blur-3xl ${
                                         fadeIn ? 'opacity-100' : 'opacity-0'
-                                    }`}>
+                                    } ${
+                                        isDark ? 'shadow-xl shadow-white/20 border-white/5 border bg-white/5' : 'shadow-xl shadow-black/20 border-black/5 border bg-black/5'
+                                    }
+                                    `}>
                                         {feature.description}
                                     </p>
                                 )}
@@ -83,7 +96,7 @@ const Features = () => {
                         ))}
                     </div>
 
-                    <div className="text-sm text-gray-400 mt-16">
+                    <div className="text-caption text-neutral-500 mt-16">
                         Feature {currentIndex + 1} of {features.length}
                     </div>
                     <div className="flex gap-2 mb-6">
@@ -91,12 +104,12 @@ const Features = () => {
                             <div
                                 key={index}
                                 className={`h-1 rounded-full transition-all duration-300 ${
-                                index === currentIndex ? 'w-12 bg-gray-600' : 'w-8 bg-gray-300'
+                                index === currentIndex ? 'w-12 bg-hotPink' : 'w-8 bg-neutral-400'
                                 }`}
                             />
                         ))}
                     </div>
-                    <Button variant='primary' className='mt-8 mb-4 py-4 px-8 text-xl '>
+                    <Button variant='secondary' className='mt-8 mb-4 '>
                         Sign up for free
                     </Button>
                 </div>

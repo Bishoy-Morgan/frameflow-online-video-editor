@@ -49,20 +49,20 @@ export default function SignUpPage() {
     <div className="w-full flex items-center justify-center h-screen">
       {/* Left Side - Form Section */}
       <div className="w-1/2 flex items-center justify-center h-full shadow-lg">
-        <form onSubmit={handleSubmit} className="w-1/2 space-y-5">
+        <form onSubmit={handleSubmit} className="w-3/5 space-y-5">
           <div className="text-center">
-            <h3 className="font-semibold text-2xl">Create your Editar account</h3>
-            <p className="text-gray-500 text-sm mt-1">
+            <h2>Create your Frameflow account</h2>
+            <p className="text-neutral-500 text-lead mt-1">
               Start editing smarter — join the new era of video creation.
             </p>
           </div>
 
-          {error && <p className="text-red-600 text-sm">{error}</p>}
+          {error && <p className="text-red-600 text-caption">{error}</p>}
 
           <button 
           type="button" 
           onClick={handleGoogleButton} 
-          className="w-full flex items-center justify-center relative gap-2 border border-gray-300 rounded-md py-2.5 hover:bg-gray-50 transition-all cursor-pointer" > 
+          className="w-full flex items-center justify-center relative gap-2 border border-neutral-300 rounded-md py-2.5 hover:bg-neutral-50 transition-all cursor-pointer" > 
             <Image 
             src={googleIcon} 
             alt="Google icon" 
@@ -70,16 +70,16 @@ export default function SignUpPage() {
             height={22} 
             className="absolute left-3" 
             />
-            <span className="text-gray-700 font-medium">
+            <span className="text-black font-semibold text-lead">
               Continue with Google
             </span> 
           </button>
 
           {/* Divider */}
           <div className="flex items-center justify-center my-3">
-            <div className="h-px bg-gray-300 w-1/3"></div>
-            <span className="text-gray-400 text-sm mx-2">or</span>
-            <div className="h-px bg-gray-300 w-1/3"></div>
+            <div className="h-px bg-neutral-300 w-1/3"></div>
+            <span className="text-neutral-400 text-caption mx-2">or</span>
+            <div className="h-px bg-neutral-300 w-1/3"></div>
           </div>
 
           {/* Email Signup */}
@@ -88,7 +88,7 @@ export default function SignUpPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-gray-300 rounded-md px-4 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2980B9]"
+            className="w-full border border-neutral-300 rounded-md px-4 py-2 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#FF007F]"
             required
           />
 
@@ -98,13 +98,13 @@ export default function SignUpPage() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-4 py-2 pr-10 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2980B9]"
+              className="w-full border border-neutral-300 rounded-md px-4 py-2 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#FF007F]"
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-900 transition-colors"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -117,16 +117,16 @@ export default function SignUpPage() {
             className="w-full py-3 flex items-center justify-center gap-2"
           >
             {loading ? (
-              <div className="w-5 h-5 border-3 border-[#2980B9] border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-5 h-5 border-3 border-[#FF007F] border-t-transparent rounded-full animate-spin"></div>
             ) : (
               "Continue"
             )}
           </Button>
           
 
-          <p className="text-sm text-center text-gray-500">
+          <p className="text-body text-center text-neutral-500">
             Already have an account?{" "}
-            <a href="/auth/signin" className="text-[#2980B9] hover:underline">
+            <a href="/auth/signin" className="text-[#FF007F] hover:underline">
               Sign in
             </a>
           </p>

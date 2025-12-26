@@ -12,7 +12,7 @@ import {
   Blocks,
 } from "lucide-react";
 import Image from "next/image";
-import logo from "@/public/logo.png";
+import logo from "@/public/whiteLogo.png";
 
 const navItems = [
   { icon: UploadCloud, label: "Media" },

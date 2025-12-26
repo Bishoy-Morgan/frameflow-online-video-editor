@@ -74,7 +74,7 @@ export default function Header({ user }: HeaderProps) {
     <header className="flex items-center justify-end gap-4 bg-white py-3 px-6 shadow-xs relative" ref={menuRef}>
 
       {/* Export button  */}
-      <button className="flex items-center justify-center space-x-1 px-3 py-2 rounded-lg sky-gradient-bg transition-all duration-300 ease-linear text-white cursor-pointer">
+      <button className="flex items-center justify-center space-x-1 px-3 py-2 rounded-lg pink-gradient-bg transition-all duration-300 ease-linear text-white cursor-pointer">
         <Upload size={14}  />
         <span className="text-xs font-semibold">Export</span>
       </button>

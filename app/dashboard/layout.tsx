@@ -1,6 +1,5 @@
-import { getServerSession } from "next-auth";
+import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/authOptions";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 
@@ -9,21 +8,24 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   if (!session) {
     redirect("/auth/signin");
   }
 
   return (
-    <div className="flex min-h-screen bg-[#f8fcff]">
+    <div 
+      className="flex min-h-screen"
+      style={{ backgroundColor: 'var(--bg)' }}
+    >
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main content area */}
       <div className="flex flex-col flex-1">
         <Header user={session.user} />
-        <main className="">{children}</main>
+        <main className="flex-1">{children}</main>
       </div>
     </div>
   );

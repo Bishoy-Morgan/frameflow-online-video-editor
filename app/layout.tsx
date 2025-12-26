@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { DM_Serif_Display, Quicksand } from "next/font/google";
 import "./globals.css";
 
-const poppins = Poppins({
+const dmSerifDisplay = DM_Serif_Display({
   subsets: ["latin"],
-  variable: "--font-poppins",
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-dm-serif-display",
+  weight: ["400"],
+});
+
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  variable: "--font-quicksand",
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Editar | Edit your video clips easily",
-  description: "Editar is a user-friendly web application that allows you to effortlessly trim and edit your video clips online. Whether you need to cut out unwanted sections or create highlights, Editar provides a simple and efficient solution for all your video editing needs.",
-};
+  title: "Frameflow | Online Video Editor for Fast, Professional Content",
+  description:
+    "Frameflow is an online video editor that lets you edit videos directly in your browser. Create social media reels, promo videos, and marketing content with fast tools, ready-made templates, and smooth performance—no downloads required.",
+}
 
 export default function RootLayout({
   children,
@@ -19,9 +26,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Prevent flash of wrong theme */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const theme = localStorage.getItem('theme');
+                  if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
-        className={`${poppins.variable} antialiased`}
+        className={`${dmSerifDisplay.variable} ${quicksand.variable} antialiased`}
+        suppressHydrationWarning
       >
         {children}
       </body>

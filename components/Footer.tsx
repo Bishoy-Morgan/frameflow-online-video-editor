@@ -1,27 +1,39 @@
-import React from 'react'
-import Button from './ui/Button'
+'use client'
+
+import React from 'react';
+import { useTheme } from '@/hooks/useTheme';
+import Button from './ui/Button';
 
 const Footer = () => {
-    return (
-        <footer className="w-full bg-black text-white flex flex-col items-center ">
-            <div className='text-center px-4 py-24 space-y-12'>
-                <h2>
-                    Inspire your creativity and create like a pro
-                </h2>
-                <p className='text-gray-300 text-xl'>
-                    Turn you creative ideas into reality with CapCut video editor online.
-                </p>
-                <Button variant='secondary' className='py-4 px-8 text-xl'>
-                    Sign up for free
-                </Button>
-            </div>
-            <div className='w-[90%] px-8 border-t border-gray-500/50 py-6 '>
-                <p className='text-sm'>
-                    © 2023 Editar. All rights reserved.
-                </p>
-            </div>
-        </footer>
-    )
-}
+  const { isDark } = useTheme();
 
-export default Footer
+  return (
+    <footer className="w-full surface flex flex-col items-center">
+      <div className="text-center px-4 py-24 space-y-12">
+        <h2>
+          Inspire your creativity and create like a pro
+        </h2>
+        <p className="opacity-70 text-xl">
+          Turn your creative ideas into reality with FrameFlow video editor online.
+        </p>
+        <Button 
+          variant="primary"
+          style={{ 
+            color: 'var(--bg)' 
+          }}
+        >
+          Sign up for free
+        </Button>
+      </div>
+      <div className={`w-[90%] px-8 py-6 ${
+        isDark ? 'border-t border-white/20' : 'border-t border-black/20'
+      }`}>
+        <p className="text-sm opacity-60">
+          © 2024 FrameFlow. All rights reserved.
+        </p>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;

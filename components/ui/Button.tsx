@@ -3,8 +3,9 @@
 import { motion } from "framer-motion";
 import clsx from "clsx";
 import { ReactNode, ComponentPropsWithoutRef, useState } from "react";
+import { useTheme } from "@/hooks/useTheme";
 
-type Variant = "primary" | "secondary" | "tertiary";
+type Variant = "primary" | "secondary";
 
 interface ButtonProps extends ComponentPropsWithoutRef<typeof motion.button> {
     variant?: Variant;
@@ -19,14 +20,21 @@ export default function Button({
     ...props
 }: ButtonProps) {
     const [isHovered, setIsHovered] = useState(false);
+    const { isDark } = useTheme();
 
     const baseStyles =
-        "relative inline-flex items-center justify-center overflow-hidden rounded-md px-6 py-3 text-sm font-medium transition-all duration-300 focus:outline-none cursor-pointer";
+        "relative inline-flex items-center justify-center overflow-hidden rounded-xl px-8 py-3 text-lead !leading-sung font-bold transition-all duration-300 focus:outline-none cursor-pointer";
 
-    const variants: Record<Variant, string> = {
-        primary: "bg-black text-white border border-black",
-        secondary: "bg-white text-black border border-gray-300",
-        tertiary: "bg-linear-to-r bg-cyan-400 to-cyan-600 ",
+    const getVariantStyles = () => {
+        if (variant === "primary") {
+            return isDark
+                ? "bg-white text-black border border-white" 
+                : "bg-black text-white border border-black";
+        }
+        if (variant === "secondary") {
+            return "bg-[#FF007F] text-white border border-[#FF007F]";
+        }
+        return "";
     };
 
     const overlayVariants = {
@@ -42,12 +50,43 @@ export default function Button({
         },
     };
 
+    const getOverlayColor = () => {
+        if (variant === "primary") {
+            return isDark ? "bg-black" : "bg-white";
+        }
+        if (variant === "secondary") {
+            return isDark ? 'bg-black' : 'bg-white';
+        }
+        return "bg-white";
+    };
+
+    // Get text colors based on variant and theme
+    const getTextColors = () => {
+        if (variant === "primary") {
+            return isDark 
+                ? { initial: "#000000", hover: "#ffffff" }
+                : { initial: "#ffffff", hover: "#000000" };
+        }
+        if (variant === "secondary") {
+            return {
+                initial: "#000000",
+                hover: "#FF007F"
+            };
+        }
+        return {
+            initial: "#ffffff",
+            hover: "#000000"
+        };
+    };
+
+    const textColors = getTextColors();
+
     const textVariants = {
         initial: {
-            color: variant === "primary" ? "#ffffff" : "#000000",
+            color: textColors.initial,
         },
         hover: {
-            color: variant === "primary" ? "#000000" : "#ffffff",
+            color: textColors.hover,
             transition: {
                 duration: 0.3,
                 delay: 0.1,
@@ -60,14 +99,14 @@ export default function Button({
             whileTap={{ scale: 0.97 }}
             onHoverStart={() => setIsHovered(true)}
             onHoverEnd={() => setIsHovered(false)}
-            className={clsx(baseStyles, variants[variant], className)}
+            className={clsx(baseStyles, getVariantStyles(), className)}
             {...props}
         >
             {/* Curved overlay with circular top */}
             <motion.div
                 className={clsx(
-                    "absolute inset-x-0 bottom-0 ",
-                    variant === "primary" ? "bg-white" : "bg-black"
+                    "absolute inset-x-0 bottom-0",
+                    getOverlayColor()
                 )}
                 initial="initial"
                 animate={isHovered ? "hover" : "initial"}
