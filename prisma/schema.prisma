@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String?
+  image     String?
+
+  projects  Project[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String
+
+  user      User     @relation(fields: [userId], references: [id])
+  assets    MediaAsset[]
+  timelines Timeline[]
+  renders   RenderJob[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model MediaAsset {
+  id        String   @id @default(cuid())
+  projectId String
+
+  type      AssetType
+  url       String
+  duration  Float?
+  width     Int?
+  height    Int?
+
+  project   Project  @relation(fields: [projectId], references: [id])
+
+  clips Clip[] 
+
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+}
+
+model Timeline {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String
+
+  project   Project @relation(fields: [projectId], references: [id])
+  clips     Clip[]
+
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+}
+
+model Clip {
+  id         String   @id @default(cuid())
+  timelineId String
+  assetId    String
+
+  startTime  Float
+  endTime    Float
+  position   Int
+
+  timeline   Timeline   @relation(fields: [timelineId], references: [id])
+  asset      MediaAsset @relation(fields: [assetId], references: [id])
+
+  @@index([timelineId])
+  @@index([assetId])
+}
+
+model RenderJob {
+  id        String   @id @default(cuid())
+  projectId String
+
+  status    RenderStatus
+  outputUrl String?
+
+  project   Project @relation(fields: [projectId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+}
+
+enum AssetType {
+  VIDEO
+  AUDIO
+  IMAGE
+}
+
+enum RenderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
