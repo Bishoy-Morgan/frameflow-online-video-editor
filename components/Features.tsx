@@ -83,10 +83,12 @@ const Features = () => {
                                     {feature.title}
                                 </h3>
                                 {index === currentIndex && (
-                                    <p className={`text-body font-medium text-neutral-800 mt-6 transition-opacity duration-300 p-8 rounded-xl backdrop-blur-3xl ${
+                                    <p className={`text-body font-semibold mt-6 transition-opacity duration-300 p-8 rounded-xl backdrop-blur-3xl ${
                                         fadeIn ? 'opacity-100' : 'opacity-0'
                                     } ${
-                                        isDark ? 'shadow-xl shadow-white/20 border-white/5 border bg-white/5' : 'shadow-xl shadow-black/20 border-black/5 border bg-black/5'
+                                        isDark 
+                                        ? 'shadow-xl shadow-white/20 border-turquoise border bg-turquoise text-neutral-800!' 
+                                        : 'shadow-xl shadow-black/20 border-turquoise border bg-turquoise text-neutral-800'
                                     }
                                     `}>
                                         {feature.description}

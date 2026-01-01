@@ -7,8 +7,7 @@
     --bg: #FEFEFE;
     --text: #020202;
 
-    --hotPink: #FF007F;
-    --skyBlue: #6DD5FA;
+    --turquoise: #00FFC8;
   }
 
   .dark {
@@ -22,6 +21,7 @@
     color: var(--text);
     font-family: var(--font-quicksand), sans-serif;
     transition: background-color 300ms ease, color 300ms ease;
+    margin: 0 auto;
   }
 
   /* Headers */
@@ -78,7 +78,7 @@
 
   /* Links */
   a {
-    color: var(--hotPink);
+    color: var(--turquoise);
     text-decoration: none;
     transition: opacity 300ms ease;
   }
@@ -118,7 +118,6 @@
   /* Container */
   .container {
     width: 80%;
-    max-width: 1400px;
     margin-left: auto;
     margin-right: auto;
   }
@@ -126,19 +125,18 @@
   /* Gradients */
   .gradient-bg {
     background-image: linear-gradient(
-      to right,
+      to top,
       var(--bg) 5%,
-      rgba(255, 0, 127, 0.35) 50%,
-      var(--hotPink) 100%
+      var(--turquoise) 100%
     );
   }
 
-  .pink-gradient-bg {
-    background-image: linear-gradient(
-      to right,
-      rgba(255, 0, 127, 0.65),
-      var(--hotPink)
-    );
+  .bg-turquoise {
+    background-color: var(--turquoise);
+  }
+
+  .border-turquoise {
+    border-color: var(--turquoise);
   }
 
   .surface {
@@ -183,12 +181,12 @@
     color: color-mix(in srgb, var(--text) 50%, transparent);
   }
 
-  .bg-hotPink {
-    background-color: var(--hotPink);
+  .bg-turquoise {
+    background-color: var(--turquoise);
   }
 
-  .border-hotPink {
-    border-color: var(--hotPink);
+  .border-turquoise {
+    border-color: var(--turquoise);
   }
 
   /* Sidebar button */
@@ -218,7 +216,7 @@
       to bottom right,
       transparent 25%,
       rgba(255, 0, 127, 0.55),
-      var(--hotPink)
+      var(--turquoise)
     );
 
     opacity: 0;

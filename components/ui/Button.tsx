@@ -28,11 +28,11 @@ export default function Button({
     const getVariantStyles = () => {
         if (variant === "primary") {
             return isDark
-                ? "bg-white text-black border border-white" 
-                : "bg-black text-white border border-black";
+                ? "bg-turquoise text-black border border-turquoise" 
+                : "bg-turquoise text-black border border-turquoise";
         }
         if (variant === "secondary") {
-            return "bg-[#FF007F] text-white border border-[#FF007F]";
+            return "bg-turquoise text-black border border-turquoise";
         }
         return "";
     };
@@ -64,18 +64,18 @@ export default function Button({
     const getTextColors = () => {
         if (variant === "primary") {
             return isDark 
-                ? { initial: "#000000", hover: "#ffffff" }
-                : { initial: "#ffffff", hover: "#000000" };
+                ? { initial: "#020202", hover: "#fefefe" }
+                : { initial: "#020202", hover: "#020202" };
         }
         if (variant === "secondary") {
             return {
-                initial: "#000000",
-                hover: "#FF007F"
+                initial: "#020202",
+                hover: "#00FFC8"
             };
         }
         return {
-            initial: "#ffffff",
-            hover: "#000000"
+            initial: "#fefefe",
+            hover: "#020202"
         };
     };
 

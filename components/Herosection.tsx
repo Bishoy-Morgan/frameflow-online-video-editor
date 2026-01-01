@@ -17,8 +17,8 @@ const Herosection = () => {
     
     
     return (
-        <section className="gradient-bg w-full min-h-screen pt-32 pb-16 md:pt-52 md:pb-20">
-            <div className="container ">
+        <section className="gradient-bg w-full h-svh flex items-end 2xl:items-center pb-4 max-h-[1000px] border-black border-8">
+            <div className="container">
                 <div className="flex flex-col md:flex-row items-start justify-between gap-12 md:gap-16">
                     {/* Left Content */}
                     <div className="w-full md:w-3/5 flex flex-col items-start">

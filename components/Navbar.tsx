@@ -7,11 +7,19 @@ import { useTheme } from '@/hooks/useTheme'
 import whiteLogo from '@/public/whiteLogo.png'
 import blackLogo from '@/public/blackLogo.png'
 import { Moon, Sun } from 'lucide-react'
+import Link from 'next/link'
 
 
 const Navbar = () => {
     const router = useRouter()
     const { isDark, toggleTheme, mounted } = useTheme()
+
+    const links = [
+        { name: 'Home', href: '#' },
+        { name: 'Features', href: '#' },
+        { name: 'Pricing', href: '#' },
+        { name: 'About', href: '#' },
+    ]
 
     return (
         <div
@@ -26,14 +34,14 @@ const Navbar = () => {
             style={{
                 backgroundColor: mounted
                     ? isDark 
-                        ? 'rgba(0, 0, 0)' 
-                        : 'rgba(255, 255, 255)'
-                    : 'rgba(255, 255, 255)',
+                        ? 'rgba(2, 2, 2)' 
+                        : 'rgb(254, 254, 254)'
+                    : 'rgb(254, 254, 254)',
                 boxShadow: mounted
                     ? isDark
-                        ? 'inset 4px 4px 10px rgba(255, 255, 255, 0.1)'
-                        : '0 8px 32px rgba(0, 0, 0, 0.4)'
-                    : '0 8px 32px rgba(0, 0, 0, 0.1)', 
+                        ? 'inset 4px 4px 10px rgba(254, 254, 254, 0.1)'
+                        : '0 8px 32px rgba(2, 2, 2, 0.4)'
+                    : '0 8px 32px rgba(2, 2, 2, 0.1)', 
                 color: 'var(--text)'
             }}
         >
@@ -42,7 +50,7 @@ const Navbar = () => {
                 <div
                     className="absolute top-0 left-0 right-0 h-16 pointer-events-none"
                     style={{
-                        background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, transparent 100%)',
+                        background: 'linear-gradient(to bottom, rgba(254, 254, 254, 0.1) 0%, transparent 100%)',
                         borderRadius: '1rem 1rem 0 0',
                     }}
                 />
@@ -54,8 +62,8 @@ const Navbar = () => {
                     className="absolute inset-0 pointer-events-none"
                     style={{
                         background: isDark
-                            ? 'radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.15) 0%, transparent 50%)'
-                            : 'radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.8) 0%, transparent 50%)',
+                            ? 'radial-gradient(circle at 100% 0%, rgba(254, 254, 254, 0.15) 0%, transparent 50%)'
+                            : 'radial-gradient(circle at 100% 0%, rgba(254, 254, 254, 0.8) 0%, transparent 50%)',
                         mixBlendMode: isDark ? 'soft-light' : 'overlay'
                     }}
                 />
@@ -70,9 +78,26 @@ const Navbar = () => {
                     height={40}
                     priority
                 />
-                {/* <span className="text-xl font-semibold tracking-tighter">
-                    Frameflow
-                </span> */}
+                <ul 
+                    className='flex items-center space-x-6 ml-10 '
+                >
+                    {links.map((link) => (
+                        <li 
+                            key={link.name}
+                        >
+                            <Link 
+                                href={link.href}
+                                className="text-body font-semibold"
+                                style={{
+                                    color: 'var(--text)',
+                                    textDecoration: 'none'
+                                }}
+                            >
+                                {link.name}
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
             </div>
 
             {/* Right */}
