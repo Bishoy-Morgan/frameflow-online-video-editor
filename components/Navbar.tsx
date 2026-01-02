@@ -24,11 +24,11 @@ const Navbar = () => {
     return (
         <div
             className="
-                absolute top-4 left-1/2 -translate-x-1/2
+                absolute top-[3%] left-1/2 -translate-x-1/2
                 container z-50
                 flex items-center justify-between
                 py-3 px-6 md:px-8
-                rounded-2xl
+                rounded-xl
                 overflow-hidden
             "
             style={{

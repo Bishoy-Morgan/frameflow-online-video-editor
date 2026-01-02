@@ -1,4 +1,3 @@
-import Navbar from "@/components/Navbar";
 import Herosection from "@/components/Herosection";
 import Features from "@/components/Features";
 import TemplatesSection from "@/components/TemplatesSection";
@@ -9,7 +8,6 @@ import CTASection from "@/components/CTASection";
 export default function Home() {
   return (
     <div>
-      <Navbar />
       <Herosection />
       <Features />
       <TemplatesSection />

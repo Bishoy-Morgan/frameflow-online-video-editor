@@ -18,20 +18,16 @@ export default function TemplatesSection() {
   ];
 
   return (
-    <section className="py-24 relative overflow-hidden">
-      <div className="container relative z-10">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
+    <section className="w-full py-20 lg:py-32 flex items-center justify-center">
+      <div className="container flex flex-col gap-12 lg:gap-20 max-w-7xl">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
             <h2 className="mb-4">Ready-to-Use Templates</h2>
-            <p className="text-lead opacity-80">Start creating in seconds with professional templates</p>
+            <p className="text-body font-semibold opacity-80">Start creating in seconds with professional templates</p>
           </div>
-          <Button className={`${
-            isDark 
-              ? 'border border-white/20 hover:bg-white/10' 
-              : 'border border-black/20 hover:bg-black/10'
-          }`}>
+          <Button variant="secondary">
             Browse All
-            <ArrowRight className="w-5 h-5 inline-block ml-2 " />
+            <ArrowRight className="w-5 h-5 inline-block ml-2" />
           </Button>
         </div>
 
