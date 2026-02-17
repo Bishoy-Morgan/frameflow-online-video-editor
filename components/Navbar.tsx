@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Button from './ui/Button'
 import { useTheme } from '@/hooks/useTheme'
 import whiteLogo from '@/public/whiteLogo.png'
@@ -11,15 +11,19 @@ import Link from 'next/link'
 
 
 const Navbar = () => {
-    const router = useRouter()
+    const router   = useRouter()
+    const pathname = usePathname()
     const { isDark, toggleTheme, mounted } = useTheme()
 
     const links = [
-        { name: 'Home', href: '#' },
-        { name: 'Features', href: '#' },
-        { name: 'Pricing', href: '#' },
-        { name: 'About', href: '#' },
+        { name: 'Home',     href: '/'         },
+        { name: 'Features', href: '/features' },
+        { name: 'Pricing',  href: '/pricing'  },
+        { name: 'About',    href: '/about'    },
     ]
+
+    const isActive = (href: string) =>
+        href === '/' ? pathname === '/' : pathname.startsWith(href)
 
     return (
         <div
@@ -33,19 +37,19 @@ const Navbar = () => {
             "
             style={{
                 backgroundColor: mounted
-                    ? isDark 
-                        ? 'rgba(2, 2, 2)' 
+                    ? isDark
+                        ? 'rgba(2, 2, 2)'
                         : 'rgb(254, 254, 254)'
                     : 'rgb(254, 254, 254)',
                 boxShadow: mounted
                     ? isDark
                         ? 'inset 4px 4px 10px rgba(254, 254, 254, 0.1)'
                         : '0 8px 32px rgba(2, 2, 2, 0.4)'
-                    : '0 8px 32px rgba(2, 2, 2, 0.1)', 
-                color: 'var(--text)'
+                    : '0 8px 32px rgba(2, 2, 2, 0.1)',
+                color: 'var(--text)',
             }}
         >
-            {/* Glass effect on inner top - Dark mode only */}
+            {/* Glass inner top — dark mode only */}
             {mounted && isDark && (
                 <div
                     className="absolute top-0 left-0 right-0 h-16 pointer-events-none"
@@ -56,7 +60,7 @@ const Navbar = () => {
                 />
             )}
 
-            {/* Shining gradient overlay from top-right */}
+            {/* Shine overlay */}
             {mounted && (
                 <div
                     className="absolute inset-0 pointer-events-none"
@@ -64,12 +68,12 @@ const Navbar = () => {
                         background: isDark
                             ? 'radial-gradient(circle at 100% 0%, rgba(254, 254, 254, 0.15) 0%, transparent 50%)'
                             : 'radial-gradient(circle at 100% 0%, rgba(254, 254, 254, 0.8) 0%, transparent 50%)',
-                        mixBlendMode: isDark ? 'soft-light' : 'overlay'
+                        mixBlendMode: isDark ? 'soft-light' : 'overlay',
                     }}
                 />
             )}
 
-            {/* Left */}
+            {/* Left — logo + nav */}
             <div className="flex items-center space-x-3 relative z-10">
                 <Image
                     src={mounted ? (isDark ? whiteLogo : blackLogo) : blackLogo}
@@ -78,73 +82,64 @@ const Navbar = () => {
                     height={40}
                     priority
                 />
-                <ul 
-                    className='flex items-center space-x-6 ml-10 '
-                >
-                    {links.map((link) => (
-                        <li 
-                            key={link.name}
-                        >
-                            <Link 
-                                href={link.href}
-                                className="text-body font-semibold"
-                                style={{
-                                    color: 'var(--text)',
-                                    textDecoration: 'none'
-                                }}
-                            >
-                                {link.name}
-                            </Link>
-                        </li>
-                    ))}
+                <ul className="flex items-center space-x-6 ml-10">
+                    {links.map((link) => {
+                        const active = isActive(link.href)
+                        return (
+                            <li key={link.name}>
+                                <Link
+                                    href={link.href}
+                                    className="relative text-body font-semibold transition-colors duration-200"
+                                    style={{
+                                        color: active ? 'var(--turquoise)' : 'var(--text)',
+                                        textDecoration: 'none',
+                                    }}
+                                >
+                                    {link.name}
+
+                                    {active && (
+                                        <span
+                                            style={{ boxShadow: '0 0 5px var(--turquoise)' }}
+                                        />
+                                    )}
+                                </Link>
+                            </li>
+                        )
+                    })}
                 </ul>
             </div>
 
-            {/* Right */}
+            {/* Right — theme toggle + sign in */}
             <div className="flex items-center gap-6 relative z-10">
-                {/* Theme Switcher */}
                 <button
                     onClick={toggleTheme}
                     aria-label="Toggle theme"
-                    className="
-                        relative h-9 w-20 rounded-xl
-                        flex items-center
-                        border transition-all duration-300
-                        hover:border-opacity-40
-                    "
+                    className="relative h-9 w-20 rounded-xl flex items-center border transition-all duration-300"
                     style={{
                         borderColor: 'color-mix(in srgb, var(--text) 20%, transparent)',
-                        backgroundColor: 'transparent'
+                        backgroundColor: 'transparent',
                     }}
                 >
-                    {/* Sliding indicator */}
+                    {/* Sliding pill */}
                     {mounted && (
                         <div
                             className="absolute top-1 bottom-1 w-8 rounded-lg transition-all duration-300 ease-in-out"
                             style={{
                                 left: isDark ? 'calc(100% - 2.25rem)' : '0.25rem',
-                                backgroundColor: 'color-mix(in srgb, var(--text) 15%, transparent)'
+                                backgroundColor: 'color-mix(in srgb, var(--text) 15%, transparent)',
                             }}
                         />
                     )}
-                    
-                    {/* Icons */}
                     <div className="relative w-full flex items-center justify-between px-2.5">
-                        <Sun 
-                            className="transition-opacity duration-300 z-10"
+                        <Sun
                             size={18}
-                            style={{
-                                color: 'var(--text)',
-                                opacity: mounted ? (isDark ? 0.4 : 1) : 1
-                            }}
+                            className="transition-opacity duration-300 z-10"
+                            style={{ color: 'var(--text)', opacity: mounted ? (isDark ? 0.4 : 1) : 1 }}
                         />
-                        <Moon 
-                            className="transition-opacity duration-300 z-10"
+                        <Moon
                             size={18}
-                            style={{
-                                color: 'var(--text)',
-                                opacity: mounted ? (isDark ? 1 : 0.4) : 0.4
-                            }}
+                            className="transition-opacity duration-300 z-10"
+                            style={{ color: 'var(--text)', opacity: mounted ? (isDark ? 1 : 0.4) : 0.4 }}
                         />
                     </div>
                 </button>

@@ -11,7 +11,7 @@ const Herosection = () => {
 
     const handleButtonClick = () => {
         if (typeof window !== 'undefined') {
-            window.open('/auth/signup', '_blank');
+            window.open('/auth/signup', '_self');
         }
     };
     

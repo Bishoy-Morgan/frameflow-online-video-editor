@@ -40,7 +40,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="gradient-bg w-full flex items-center justify-center h-screen">
+    <div className="gradient-bg w-full flex items-center justify-center h-svh">
       {/* Left Side - Visual Section */}
       <div className="relative w-full h-full ">
         <Image 

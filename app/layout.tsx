@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Serif_Display, Quicksand } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
 
 const dmSerifDisplay = DM_Serif_Display({
   subsets: ["latin"],
@@ -49,7 +48,6 @@ export default function RootLayout({
         className={`${dmSerifDisplay.variable} ${quicksand.variable} antialiased`}
         suppressHydrationWarning
       >
-        <Navbar />
         {children}
       </body>
     </html>

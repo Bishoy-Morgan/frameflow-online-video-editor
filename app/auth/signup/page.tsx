@@ -46,7 +46,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="w-full flex items-center justify-center h-screen">
+    <div className="w-full flex items-center justify-center h-svh">
       {/* Left Side - Form Section */}
       <div className="w-1/2 flex items-center justify-center h-full shadow-lg">
         <form onSubmit={handleSubmit} className="w-3/5 space-y-5">

@@ -1,18 +1,48 @@
 @import "tailwindcss";
 
-/* Base theme */
+
 @layer base {
   :root {
-    /* Light theme (default) */
-    --bg: #FEFEFE;
-    --text: #020202;
+    --bg:         #FEFEFE;
+    --text:       #020202;
+    --turquoise:  #00FFC8;
 
-    --turquoise: #00FFC8;
+    /* ── Turquoise alpha scale ── */
+    --turquoise-4:   color-mix(in srgb, #00FFC8  4%, transparent);
+    --turquoise-6:   color-mix(in srgb, #00FFC8  6%, transparent);
+    --turquoise-8:   color-mix(in srgb, #00FFC8  8%, transparent);
+    --turquoise-10:  color-mix(in srgb, #00FFC8 10%, transparent);
+    --turquoise-16:  color-mix(in srgb, #00FFC8 16%, transparent);
+    --turquoise-20:  color-mix(in srgb, #00FFC8 20%, transparent);
+    --turquoise-22:  color-mix(in srgb, #00FFC8 22%, transparent);
+    --turquoise-32:  color-mix(in srgb, #00FFC8 32%, transparent);
+    --turquoise-35:  color-mix(in srgb, #00FFC8 35%, transparent);
+    --turquoise-40:  color-mix(in srgb, #00FFC8 40%, transparent);
+    --turquoise-42:  color-mix(in srgb, #00FFC8 42%, transparent);
+    --turquoise-45:  color-mix(in srgb, #00FFC8 45%, transparent);
+    --turquoise-65:  color-mix(in srgb, #00FFC8 65%, transparent);
+
+    /* ── Text alpha scale ── */
+    --text-5:    color-mix(in srgb, var(--text)  5%, transparent);
+    --text-7:    color-mix(in srgb, var(--text)  7%, transparent);
+    --text-8:    color-mix(in srgb, var(--text)  8%, transparent);
+    --text-10:   color-mix(in srgb, var(--text) 10%, transparent);
+    --text-18:   color-mix(in srgb, var(--text) 18%, transparent);
+    --text-28:   color-mix(in srgb, var(--text) 28%, transparent);
+    --text-35:   color-mix(in srgb, var(--text) 35%, transparent);
+    --text-48:   color-mix(in srgb, var(--text) 48%, transparent);
+    --text-55:   color-mix(in srgb, var(--text) 55%, transparent);
+    --text-60:   color-mix(in srgb, var(--text) 60%, transparent);
+    --text-62:   color-mix(in srgb, var(--text) 62%, transparent);
+    --text-65:   color-mix(in srgb, var(--text) 65%, transparent);
+    --text-70:   color-mix(in srgb, var(--text) 70%, transparent);
+    --text-72:   color-mix(in srgb, var(--text) 72%, transparent);
+    --text-75:   color-mix(in srgb, var(--text) 75%, transparent);
+    --text-80:   color-mix(in srgb, var(--text) 80%, transparent);
   }
 
   .dark {
-    /* Dark theme */
-    --bg: #020202;
+    --bg:   #020202;
     --text: #FEFEFE;
   }
 
@@ -24,7 +54,6 @@
     margin: 0 auto;
   }
 
-  /* Headers */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-dm-serif-display), serif;
     font-weight: 600;
@@ -33,96 +62,92 @@
     transition: color 300ms ease;
   }
 
-  h1 {
-    font-size: 4rem;
-    line-height: 1.2;
-    margin-bottom: 1.5rem;
-  }
+  h1 { font-size: 4rem;    line-height: 1.2; margin-bottom: 1.5rem;   }
+  h2 { font-size: 3.25rem; line-height: 1.3; margin-bottom: 1.25rem;  }
+  h3 { font-size: 2.25rem; line-height: 1.3; margin-bottom: 1rem;     }
+  h4 { font-size: 1.5rem;  line-height: 1.4; margin-bottom: 0.875rem; }
+  h5 { font-size: 1.25rem; line-height: 1.4; margin-bottom: 0.75rem;  }
+  h6 { font-size: 1rem;    line-height: 1.5; margin-bottom: 0.5rem;   }
 
-  h2 {
-    font-size: 3.25rem;
-    line-height: 1.3;
-    margin-bottom: 1.25rem;
-  }
-
-  h3 {
-    font-size: 2.25rem;
-    line-height: 1.3;
-    margin-bottom: 1rem;
-  }
-
-  h4 {
-    font-size: 1.5rem;
-    line-height: 1.4;
-    margin-bottom: 0.875rem;
-  }
-
-  h5 {
-    font-size: 1.25rem;
-    line-height: 1.4;
-    margin-bottom: 0.75rem;
-  }
-
-  h6 {
-    font-size: 1rem;
-    line-height: 1.5;
-    margin-bottom: 0.5rem;
-  }
-
-  /* Paragraphs */
   p {
     margin: 0 0 1rem 0;
     color: var(--text);
     transition: color 300ms ease;
   }
 
-  /* Links */
+  /* ── Links ── */
   a {
     color: var(--turquoise);
     text-decoration: none;
     transition: opacity 300ms ease;
   }
+  a:hover { opacity: 0.8; }
 
-  a:hover {
-    opacity: 0.8;
-  }
-
-  /* Responsive heading sizes */
+  /* ── Responsive headings ── */
   @media (max-width: 768px) {
-    h1 {
-      font-size: 2.5rem;
-      line-height: 1.2;
-    }
-
-    h2 {
-      font-size: 2rem;
-      line-height: 1.3;
-    }
-
-    h3 {
-      font-size: 1.75rem;
-      line-height: 1.3;
-    }
-
-    h4 {
-      font-size: 1.25rem;
-      line-height: 1.4;
-    }
+    h1 { font-size: 2.5rem;  line-height: 1.2; }
+    h2 { font-size: 2rem;    line-height: 1.3; }
+    h3 { font-size: 1.75rem; line-height: 1.3; }
+    h4 { font-size: 1.25rem; line-height: 1.4; }
   }
 }
 
 
-   /* Utilities */
-
+/* Utilities */
 @layer utilities {
-  /* Container */
+
   .container {
     width: 80%;
     margin-left: auto;
     margin-right: auto;
   }
 
-  /* Gradients */
+  .surface {
+    background-color: var(--bg);
+    color: var(--text);
+  }
+
+  .bg-turquoise        { background-color: var(--turquoise); }
+  .text-turquoise      { color: var(--turquoise); }
+  .border-turquoise    { border-color: var(--turquoise); }
+  .shadow-turquoise    { box-shadow: 0 0 6px var(--turquoise); }
+  .glow-turquoise      { box-shadow: 0 8px 28px var(--turquoise-32); }
+
+  .bg-turquoise-4      { background-color: var(--turquoise-4);  }
+  .bg-turquoise-6      { background-color: var(--turquoise-6);  }
+  .bg-turquoise-8      { background-color: var(--turquoise-8);  }
+  .bg-turquoise-10     { background-color: var(--turquoise-10); }
+  .bg-turquoise-16     { background-color: var(--turquoise-16); }
+
+  .border-turquoise-20 { border-color: var(--turquoise-20); }
+  .border-turquoise-22 { border-color: var(--turquoise-22); }
+  .border-turquoise-35 { border-color: var(--turquoise-35); }
+  .border-turquoise-40 { border-color: var(--turquoise-40); }
+  .border-turquoise-42 { border-color: var(--turquoise-42); }
+  .border-turquoise-45 { border-color: var(--turquoise-45); }
+
+  .text-turquoise-65   { color: var(--turquoise-65); }
+
+  .text-muted-5        { color: var(--text-5);  }
+  .text-muted-7        { color: var(--text-7);  }
+  .text-muted-28       { color: var(--text-28); }
+  .text-muted-35       { color: var(--text-35); }
+  .text-muted-48       { color: var(--text-48); }
+  .text-muted-55       { color: var(--text-55); }
+  .text-muted-60       { color: var(--text-60); }
+  .text-muted-62       { color: var(--text-62); }
+  .text-muted-65       { color: var(--text-65); }
+  .text-muted-70       { color: var(--text-70); }
+  .text-muted-72       { color: var(--text-72); }
+  .text-muted-80       { color: var(--text-80); }
+
+  .border-muted-8      { border-color: var(--text-8);  }
+  .border-muted-10     { border-color: var(--text-10); }
+  .border-muted-18     { border-color: var(--text-18); }
+
+  .bg-muted-5          { background-color: var(--text-5);  }
+  .bg-muted-8          { background-color: var(--text-8);  }
+
   .gradient-bg {
     background-image: linear-gradient(
       to top,
@@ -131,116 +156,122 @@
     );
   }
 
-  .bg-turquoise {
-    background-color: var(--turquoise);
+  .section-grid {
+    background-image:
+      linear-gradient(var(--text-5) 1px, transparent 1px),
+      linear-gradient(90deg, var(--text-5) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, black 30%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, black 30%, transparent 100%);
   }
 
-  .border-turquoise {
-    border-color: var(--turquoise);
+  .fade-top {
+    background: linear-gradient(to bottom, var(--bg), transparent);
+  }
+  .fade-bottom {
+    background: linear-gradient(to top, var(--bg), transparent);
   }
 
-  .surface {
+  .line-fade-right {
+    background: linear-gradient(90deg, var(--text-10), transparent);
+  }
+  .line-fade-left {
+    background: linear-gradient(90deg, transparent, var(--text-10));
+  }
+  .line-turquoise {
+    background: linear-gradient(90deg, transparent, var(--turquoise-40), transparent);
+  }
+
+  .badge-turquoise {
+    background-color: var(--turquoise-8);
+    border: 1px solid var(--turquoise-35);
+    color: var(--turquoise);
+  }
+
+  /* ── Icon box ── */
+  .icon-box {
+    background-color: var(--turquoise-10);
+    border: 1px solid var(--turquoise-22);
+  }
+
+  /* ── Card surface ── */
+  .card {
     background-color: var(--bg);
-    color: var(--text);
+    border: 1px solid var(--text-10);
+    backdrop-filter: blur(8px);
+    transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .card:hover {
+    border-color: var(--turquoise-42);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px var(--turquoise-8);
   }
 
-  /* Paragraph variants */
-  .text-hero {
-    font-size: 1.25rem;
-    line-height: 1.8;
-    color: var(--text);
+  /* ── Metric callout box ── */
+  .metric-box {
+    background-color: var(--turquoise-8);
+    border: 1px solid var(--turquoise-20);
   }
 
-  .text-lead {
-    font-size: 1.125rem;
-    line-height: 1.75;
-    color: var(--text);
+  /* ── Active panel (detail / selected state) ── */
+  .panel-active {
+    background-color: var(--turquoise-4);
+    border: 1px solid var(--turquoise-20);
   }
 
-  .text-body {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: var(--text);
-  }
-
-  .text-caption {
-    font-size: 0.875rem;
-    line-height: 1.5;
-    color: color-mix(in srgb, var(--text) 70%, transparent);
-  }
-
-  .text-small {
-    font-size: 0.75rem;
-    line-height: 1.4;
-    color: color-mix(in srgb, var(--text) 60%, transparent);
-  }
-
-  .text-tiny {
-    font-size: 0.625rem;
-    line-height: 1.3;
-    color: color-mix(in srgb, var(--text) 50%, transparent);
-  }
-
-  .bg-turquoise {
+  /* ── Turquoise glow dot ── */
+  .dot-turquoise {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
     background-color: var(--turquoise);
+    box-shadow: 0 0 6px var(--turquoise);
   }
 
-  .border-turquoise {
-    border-color: var(--turquoise);
-  }
+  /* ── Paragraph variants ── */
+  .text-hero    { font-size: 1.25rem;  line-height: 1.8;  color: var(--text); }
+  .text-lead    { font-size: 1.125rem; line-height: 1.75; color: var(--text); }
+  .text-body    { font-size: 1rem;     line-height: 1.6;  color: var(--text); }
+  .text-caption { font-size: 0.875rem; line-height: 1.5;  color: var(--text-70); }
+  .text-small   { font-size: 0.75rem;  line-height: 1.4;  color: var(--text-60); }
+  .text-tiny    { font-size: 0.625rem; line-height: 1.3;  color: var(--text-48); }
 
-  /* Sidebar button */
+  /* ── Sidebar button ── */
   .sidebar-button {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
     min-width: 3.5rem;
     min-height: 3.5rem;
-
     border-radius: 0.5rem;
     background: transparent;
     overflow: hidden;
-
     transition: color 200ms ease;
   }
-
   .sidebar-button::before {
     content: "";
     position: absolute;
     inset: 0;
-
     background-image: linear-gradient(
       to bottom right,
       transparent 25%,
       rgba(255, 0, 127, 0.55),
       var(--turquoise)
     );
-
     opacity: 0;
     transition: opacity 300ms ease;
     pointer-events: none;
     z-index: 0;
   }
+  .sidebar-button > * { position: relative; z-index: 1; }
+  .sidebar-button:hover::before { opacity: 1; }
 
-  .sidebar-button > * {
-    position: relative;
-    z-index: 1;
-  }
-
-  .sidebar-button:hover::before {
-    opacity: 1;
-  }
-
-  /* Scrollbar hide */
+  /* ── Scrollbar hide ── */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
 }
