@@ -1,5 +1,5 @@
 import Herosection from "@/components/Herosection";
-import Features from "@/components/Features";
+import HomepageFeatures from "@/components/HomepageFeatures";
 import TemplatesSection from "@/components/TemplatesSection";
 import HowToUse from "@/components/HowToUse";
 import Footer from "@/components/Footer";
@@ -12,7 +12,7 @@ export default function Home() {
       <main>
         <Navbar />
         <Herosection />
-        <Features />
+        <HomepageFeatures />
         <TemplatesSection />
         <HowToUse />
         <CTASection />

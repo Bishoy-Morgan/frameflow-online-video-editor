@@ -1,44 +1,89 @@
 'use client'
 
-import React from 'react';
-import { Download, Play } from 'lucide-react';
-import { useTheme } from '@/hooks/useTheme';
-import Button from './ui/Button';
+import React, { useEffect, useRef } from 'react'
+import { Play, ArrowRight } from 'lucide-react'
+import Button from './ui/Button'
+import SectionGrid from './ui/SectionGrid'
 
-export default function CTASection() {
-  const { isDark } = useTheme();
+const CTASection = () => {
+    const headlineRef = useRef<HTMLHeadingElement>(null)
+    const subRef      = useRef<HTMLParagraphElement>(null)
+    const ctaRef      = useRef<HTMLDivElement>(null)
 
-  return (
-    <section className="py-24">
-      <div className="container">
-        <div className={`rounded-3xl p-16 text-center relative overflow-hidden ${
-          isDark 
-            ? 'shadow-xl shadow-white/20 border-white/5 border bg-white/5' 
-            : 'shadow-xl shadow-black/20 border-black/5 border bg-black/5'
-        }`}>
-          <div className="relative z-10">
-            <h2 className="mb-6">Ready to Create Something Amazing?</h2>
-            <p className="text-hero max-w-2xl mx-auto mb-8 opacity-90">
-              Join millions of creators and start making professional videos today
-            </p>
+    useEffect(() => {
+        const seq = [
+            { el: headlineRef.current, delay: 0   },
+            { el: subRef.current,      delay: 120 },
+            { el: ctaRef.current,      delay: 240 },
+        ]
+        seq.forEach(({ el, delay }) => {
+            if (!el) return
+            el.style.opacity = '0'
+            el.style.transform = 'translateY(14px)'
+            setTimeout(() => {
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease'
+                el.style.opacity = '1'
+                el.style.transform = 'translateY(0)'
+            }, delay)
+        })
+    }, [])
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                variant='secondary'
-              >
-                <Download className="w-5 h-5 inline-block mr-3 mb-1 " />
-                Download Free
-              </Button>
-              <Button variant='primary'>
-                <Play className="w-5 h-5 inline-block mr-3 mb-1 " />
-                Watch Demo
-              </Button>
+    return (
+        <section className="relative w-full overflow-hidden py-28 surface">
+
+            <div className="opacity-70"><SectionGrid /></div>
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-32 surface" />
+            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
+
+            {/* Centered glow */}
+            <div
+                aria-hidden
+                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
+                style={{ background: 'radial-gradient(circle, var(--turquoise-10) 0%, transparent 65%)', filter: 'blur(48px)' }}
+            />
+
+            <div className="container relative z-10 flex flex-col items-center text-center gap-8">
+
+                <h2
+                    ref={headlineRef}
+                    className="font-normal m-0 max-w-[600px]"
+                    style={{ fontSize: 'clamp(2.25rem, 5vw, 4rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
+                >
+                    Start creating{' '}
+                    <span className="italic text-turquoise">something great.</span>
+                </h2>
+
+                <p ref={subRef} className="m-0 text-base leading-relaxed text-tertiary max-w-[420px]">
+                    Join creators building faster, cleaner video workflows — directly in the browser.
+                </p>
+
+                <div ref={ctaRef} className="flex flex-wrap items-center justify-center gap-4">
+                    <Button
+                        variant="primary"
+                        size="lg"
+                        icon={<ArrowRight size={15} strokeWidth={2} />}
+                        iconPosition="right"
+                        onClick={() => window.open('/auth/signup', '_self')}
+                    >
+                        Sign up for free
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="lg"
+                        icon={<Play size={14} strokeWidth={2} />}
+                        iconPosition="left"
+                    >
+                        Watch Demo
+                    </Button>
+                </div>
+
+                <p className="m-0 text-xs text-tertiary font-medium">
+                    No credit card required · Free forever plan available
+                </p>
+
             </div>
-
-            <p className="text-caption mt-6 opacity-75">No credit card required • Free forever</p>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+        </section>
+    )
 }
+
+export default CTASection
