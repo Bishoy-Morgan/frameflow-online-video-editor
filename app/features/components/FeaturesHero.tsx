@@ -2,16 +2,10 @@
 
 import React, { useEffect, useRef } from 'react'
 import { Play, ArrowRight } from 'lucide-react'
+import SectionGrid from '@/components/ui/SectionGrid'
 import Button from '@/components/ui/Button'
 
 
-export const SectionGrid = () => (
-    <>
-        <div aria-hidden className="pointer-events-none absolute inset-0 section-grid" />
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-32 fade-top" />
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-32 fade-bottom" />
-    </>
-)
 
 export const SectionLabel = ({ children }: { children: React.ReactNode }) => (
     <div className="flex items-center gap-3 mb-4">
@@ -59,7 +53,7 @@ const FeaturesHero = () => {
     }, [])
 
     return (
-        <section className="relative w-full min-h-svh flex items-center overflow-hidden surface">
+        <section className="relative w-full h-svh flex items-center overflow-hidden surface max-h-[1200px]">
 
             <SectionGrid />
 
@@ -67,7 +61,7 @@ const FeaturesHero = () => {
             <div aria-hidden className="pointer-events-none absolute -top-[20%] -right-[10%] w-[600px] h-[600px] rounded-full bg-turquoise-16" style={{ filter: 'blur(80px)' }} />
             <div aria-hidden className="pointer-events-none absolute bottom-[5%] -left-[8%] w-[400px] h-[400px] rounded-full bg-turquoise-8" style={{ filter: 'blur(60px)' }} />
 
-            <div className="container relative z-10 pt-40 pb-28">
+            <div className="container relative z-10 pt-52 pb-28">
                 <div className="max-w-[820px]">
 
                     {/* Headline */}
@@ -95,6 +89,12 @@ const FeaturesHero = () => {
                     {/* CTAs */}
                     <div ref={ctaRef} className="flex flex-wrap items-center gap-4">
 
+                        {/*
+                            primary — solid turquoise fill, --bg text.
+                            On hover: wipe reveals --bg underneath, text transitions to turquoise.
+                            Play icon inherits the same color transition via the icon prop.
+                            No fill needed on the icon — `currentColor` picks it up automatically.
+                        */}
                         <Button
                             variant="primary"
                             icon={<Play size={14} strokeWidth={2.5} />}
@@ -103,8 +103,13 @@ const FeaturesHero = () => {
                             View Editor
                         </Button>
 
+                        {/*
+                            secondary — transparent bg, turquoise border + text.
+                            On hover: wipe fills turquoise, text transitions to --bg.
+                            ArrowRight icon transitions in sync via the icon prop.
+                        */}
                         <Button
-                            variant="ghost"
+                            variant="secondary"
                             icon={<ArrowRight size={14} strokeWidth={2} />}
                             iconPosition="right"
                         >

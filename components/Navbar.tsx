@@ -2,157 +2,151 @@
 
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import Button from './ui/Button'
 import { useTheme } from '@/hooks/useTheme'
-import whiteLogo from '@/public/whiteLogo.png'
-import blackLogo from '@/public/blackLogo.png'
 import { Moon, Sun } from 'lucide-react'
 import Link from 'next/link'
+import Button from './ui/Button'
+import whiteLogo from '@/public/whiteLogo.png'
+import blackLogo from '@/public/blackLogo.png'
 
+const links = [
+    { name: 'Home',     href: '/'         },
+    { name: 'Features', href: '/features' },
+    { name: 'Pricing',  href: '/pricing'  },
+    { name: 'About',    href: '/about'    },
+]
 
 const Navbar = () => {
     const router   = useRouter()
     const pathname = usePathname()
     const { isDark, toggleTheme, mounted } = useTheme()
 
-    const links = [
-        { name: 'Home',     href: '/'         },
-        { name: 'Features', href: '/features' },
-        { name: 'Pricing',  href: '/pricing'  },
-        { name: 'About',    href: '/about'    },
-    ]
-
     const isActive = (href: string) =>
         href === '/' ? pathname === '/' : pathname.startsWith(href)
 
     return (
-        <div
-            className="
-                absolute top-[3%] left-1/2 -translate-x-1/2
-                container z-50
-                flex items-center justify-between
-                py-3 px-6 md:px-8
-                rounded-xl
-                overflow-hidden
-            "
-            style={{
-                backgroundColor: mounted
-                    ? isDark
-                        ? 'rgba(2, 2, 2)'
-                        : 'rgb(254, 254, 254)'
-                    : 'rgb(254, 254, 254)',
-                boxShadow: mounted
-                    ? isDark
-                        ? 'inset 4px 4px 10px rgba(254, 254, 254, 0.1)'
-                        : '0 8px 32px rgba(2, 2, 2, 0.4)'
-                    : '0 8px 32px rgba(2, 2, 2, 0.1)',
-                color: 'var(--text)',
-            }}
-        >
-            {/* Glass inner top — dark mode only */}
-            {mounted && isDark && (
-                <div
-                    className="absolute top-0 left-0 right-0 h-16 pointer-events-none"
-                    style={{
-                        background: 'linear-gradient(to bottom, rgba(254, 254, 254, 0.1) 0%, transparent 100%)',
-                        borderRadius: '1rem 1rem 0 0',
-                    }}
-                />
-            )}
+        <header className="fixed top-0 inset-x-0 z-50 flex justify-center pt-5 px-4 pointer-events-none">
+            <nav
+                className="pointer-events-auto w-full max-w-[1100px] flex items-center justify-between px-5 py-3 rounded-2xl"
+                style={{
+                    backgroundColor: 'var(--bg)',
+                    border: '1px solid var(--border-default)',
+                    boxShadow: mounted && isDark
+                        ? '0 0 0 1px var(--border-subtle), 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)'
+                        : '0 0 0 1px var(--border-subtle), 0 8px 32px rgba(2,2,2,0.08)',
+                }}
+            >
+                {/* ── Left — logo + links ── */}
+                <div className="flex items-center gap-8">
 
-            {/* Shine overlay */}
-            {mounted && (
-                <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                        background: isDark
-                            ? 'radial-gradient(circle at 100% 0%, rgba(254, 254, 254, 0.15) 0%, transparent 50%)'
-                            : 'radial-gradient(circle at 100% 0%, rgba(254, 254, 254, 0.8) 0%, transparent 50%)',
-                        mixBlendMode: isDark ? 'soft-light' : 'overlay',
-                    }}
-                />
-            )}
-
-            {/* Left — logo + nav */}
-            <div className="flex items-center space-x-3 relative z-10">
-                <Image
-                    src={mounted ? (isDark ? whiteLogo : blackLogo) : blackLogo}
-                    alt="Logo"
-                    width={40}
-                    height={40}
-                    priority
-                />
-                <ul className="flex items-center space-x-6 ml-10">
-                    {links.map((link) => {
-                        const active = isActive(link.href)
-                        return (
-                            <li key={link.name}>
-                                <Link
-                                    href={link.href}
-                                    className="relative text-body font-semibold transition-colors duration-200"
-                                    style={{
-                                        color: active ? 'var(--turquoise)' : 'var(--text)',
-                                        textDecoration: 'none',
-                                    }}
-                                >
-                                    {link.name}
-
-                                    {active && (
-                                        <span
-                                            style={{ boxShadow: '0 0 5px var(--turquoise)' }}
-                                        />
-                                    )}
-                                </Link>
-                            </li>
-                        )
-                    })}
-                </ul>
-            </div>
-
-            {/* Right — theme toggle + sign in */}
-            <div className="flex items-center gap-6 relative z-10">
-                <button
-                    onClick={toggleTheme}
-                    aria-label="Toggle theme"
-                    className="relative h-9 w-20 rounded-xl flex items-center border transition-all duration-300"
-                    style={{
-                        borderColor: 'color-mix(in srgb, var(--text) 20%, transparent)',
-                        backgroundColor: 'transparent',
-                    }}
-                >
-                    {/* Sliding pill */}
-                    {mounted && (
-                        <div
-                            className="absolute top-1 bottom-1 w-8 rounded-lg transition-all duration-300 ease-in-out"
-                            style={{
-                                left: isDark ? 'calc(100% - 2.25rem)' : '0.25rem',
-                                backgroundColor: 'color-mix(in srgb, var(--text) 15%, transparent)',
-                            }}
+                    {/* Logo */}
+                    <Link href="/" className="shrink-0">
+                        <Image
+                            src={mounted ? (isDark ? whiteLogo : blackLogo) : blackLogo}
+                            alt="Frameflow"
+                            width={32}
+                            height={32}
+                            priority
                         />
-                    )}
-                    <div className="relative w-full flex items-center justify-between px-2.5">
-                        <Sun
-                            size={18}
-                            className="transition-opacity duration-300 z-10"
-                            style={{ color: 'var(--text)', opacity: mounted ? (isDark ? 0.4 : 1) : 1 }}
-                        />
-                        <Moon
-                            size={18}
-                            className="transition-opacity duration-300 z-10"
-                            style={{ color: 'var(--text)', opacity: mounted ? (isDark ? 1 : 0.4) : 0.4 }}
-                        />
-                    </div>
-                </button>
+                    </Link>
 
-                <Button
-                    variant="primary"
-                    className="py-1!"
-                    onClick={() => router.push('/auth/signin')}
-                >
-                    Sign In
-                </Button>
-            </div>
-        </div>
+                    {/* Divider */}
+                    <div
+                        className="hidden md:block w-px h-4 shrink-0"
+                        style={{ backgroundColor: 'var(--border-strong)' }}
+                    />
+
+                    {/* Nav links */}
+                    <ul className="hidden md:flex items-center gap-0.5 m-0 p-0 list-none">
+                        {links.map((link) => {
+                            const active = isActive(link.href)
+                            return (
+                                <li key={link.name}>
+                                    <Link
+                                        href={link.href}
+                                        className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200"
+                                        style={{
+                                            color: active ? 'var(--turquoise)' : 'var(--text-tertiary)',
+                                            backgroundColor: active ? 'var(--turquoise-8)' : 'transparent',
+                                            textDecoration: 'none',
+                                        }}
+                                        onMouseEnter={e => {
+                                            if (!active) {
+                                                e.currentTarget.style.color = 'var(--text)'
+                                                e.currentTarget.style.backgroundColor = 'var(--surface-raised)'
+                                            }
+                                        }}
+                                        onMouseLeave={e => {
+                                            if (!active) {
+                                                e.currentTarget.style.color = 'var(--text-tertiary)'
+                                                e.currentTarget.style.backgroundColor = 'transparent'
+                                            }
+                                        }}
+                                    >
+                                        {link.name}
+                                    </Link>
+                                </li>
+                            )
+                        })}
+                    </ul>
+                </div>
+
+                {/* ── Right — theme toggle + CTA ── */}
+                <div className="flex items-center gap-3">
+
+                    {/* Theme toggle */}
+                    <button
+                        onClick={toggleTheme}
+                        aria-label="Toggle theme"
+                        className="relative flex items-center h-8 w-18 rounded-lg cursor-pointer focus:outline-none"
+                        style={{
+                            backgroundColor: 'var(--surface-raised)',
+                            border: '1px solid var(--border-default)',
+                        }}
+                    >
+                        {/* Sliding pill */}
+                        {mounted && (
+                            <div
+                                className="absolute top-[3px] bottom-[3px] w-[1.85rem] rounded-md transition-all duration-300 ease-in-out"
+                                style={{
+                                    left: isDark ? 'calc(100% - 2.1rem)' : '3px',
+                                    backgroundColor: 'var(--bg)',
+                                    border: '1px solid var(--border-strong)',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+                                }}
+                            />
+                        )}
+                        <div className="relative w-full flex items-center justify-between px-2">
+                            <Sun
+                                size={13}
+                                style={{
+                                    color: 'var(--text)',
+                                    opacity: mounted ? (isDark ? 0.3 : 1) : 1,
+                                    transition: 'opacity 0.2s ease',
+                                }}
+                            />
+                            <Moon
+                                size={13}
+                                style={{
+                                    color: 'var(--text)',
+                                    opacity: mounted ? (isDark ? 1 : 0.3) : 0.3,
+                                    transition: 'opacity 0.2s ease',
+                                }}
+                            />
+                        </div>
+                    </button>
+
+                    {/* Sign In */}
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => router.push('/auth/signin')}
+                    >
+                        Sign In
+                    </Button>
+                </div>
+            </nav>
+        </header>
     )
 }
 
