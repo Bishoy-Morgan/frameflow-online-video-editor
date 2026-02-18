@@ -5,149 +5,295 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useTheme } from "@/hooks/useTheme";
 import Image from "next/image";
-import googleIcon from "@/public/icons/google.svg";
-import Button from "@/components/ui/Button";
+import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-import signinImage from '@/public/images/signin2.jpg'
+import googleIcon from "@/public/icons/google.svg";
+import whiteLogo  from '@/public/whiteLogo.png';
+import blackLogo  from '@/public/blackLogo.png';
+import Button      from "@/components/ui/Button";
+import SectionGrid from "@/components/ui/SectionGrid";
 
+const inputStyle: React.CSSProperties = {
+    width: '100%',
+    backgroundColor: 'var(--surface-raised)',
+    border: '1px solid var(--border-default)',
+    borderRadius: '0.625rem',
+    padding: '0.625rem 1rem',
+    fontSize: '0.875rem',
+    fontFamily: 'var(--font-quicksand), sans-serif',
+    fontWeight: 500,
+    color: 'var(--text)',
+    outline: 'none',
+    transition: 'border-color 0.2s ease',
+}
 
 export default function SignInPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const { isDark } = useTheme()
+    const router = useRouter();
+    const { isDark, mounted } = useTheme();
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+    const [email,        setEmail]        = useState("");
+    const [password,     setPassword]     = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [error,        setError]        = useState("");
+    const [loading,      setLoading]      = useState(false);
 
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
 
-    if (res?.error) {
-      setError("Invalid email or password");
-      setLoading(false);
-    } else {
-      router.push("/dashboard");
+        const res = await signIn("credentials", { email, password, redirect: false });
+
+        if (res?.error) {
+            setError("Invalid email or password.");
+            setLoading(false);
+        } else {
+            router.push("/dashboard");
+        }
     }
-  }
 
-  return (
-    <div className="gradient-bg w-full flex items-center justify-center h-svh">
-      {/* Left Side - Visual Section */}
-      <div className="relative w-full h-full ">
-        <Image 
-          src={signinImage}
-          alt="Video edit Image"
-          fill
-          className="object-cover"
-        />
-      </div>
-      {/* Right Side - Form Section */}
-      <div 
-        className={`absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-1/3 flex items-center justify-center p-8 rounded-xl h-fit ${
-          isDark ? "bg-black shadow-white/20 shadow" : "bg-white shadow-black/20 shadow"
-        }`}
-        style={{
-            color: 'var(--text)',
-        }}
-      >
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="text-center">
-            <h2>Welcome back to Frameflow</h2>
-            <p className="text-lead mt-1">
-              Continue your creative journey — sign in to edit your videos online.
-            </p>
-          </div>
+    return (
+        <div className="w-full flex h-svh surface">
 
-          {error && <p className="text-red-600 text-sm text-center">{error}</p>}
-
-          {/* Google Sign In */}
-          <button
-            type="button"
-            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-            className="w-full flex items-center justify-center relative gap-2 border border-neutral-300 rounded-md py-2.5 hover:bg-neutral-50 transition-all cursor-pointer"
-          >
-            {/* Google Icon on the left */}
-            <Image
-              src={googleIcon}
-              alt="Google icon"
-              width={22}
-              height={22}
-              className="absolute left-3"
-            />
-
-            {/* Centered text */}
-            <span className="text-black font-semibold text-lead">
-              Continue with Google
-            </span>
-          </button>
-
-          {/* Divider */}
-          <div className="flex items-center justify-center my-3">
-            <div className="h-px bg-neutral-300 w-1/3"></div>
-            <span className="text-neutral-400 text-caption mx-2">or</span>
-            <div className="h-px bg-neutral-300 w-1/3"></div>
-          </div>
-
-          {/* Email Input */}
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-neutral-300 rounded-md px-4 py-2 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#FF007F]"
-            required
-          />
-
-          {/* Password Input */}
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-neutral-300 rounded-md px-4 py-2 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#FF007F]"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-900 transition-colors"
+            {/* ── Left — visual panel ── */}
+            <div className="hidden lg:flex relative w-1/2 h-full flex-col items-center justify-center overflow-hidden"
+                style={{ backgroundColor: 'var(--surface-sunken)' }}
             >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
-          </div>
+                <SectionGrid />
 
-          {/* Sign In Button */}
-          <Button
-            variant="primary"
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <div className="w-5 h-5 border-3 border-[#FF007F] border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              "Sign In"
-            )}
-          </Button>
+                {/* Center glow */}
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full"
+                    style={{ background: 'radial-gradient(circle, var(--turquoise-10) 0%, transparent 65%)', filter: 'blur(60px)' }}
+                />
 
-          <p className="text-body text-center text-neutral-500">
-            Don’t have an account?{" "}
-            <a href="/auth/signup" className="text-[#FF007F] hover:underline">
-              Sign up
-            </a>
-          </p>
-        </form>
-      </div>
-    </div>
-  );
+                <div className="relative z-10 flex flex-col items-center text-center gap-8 px-12">
+                    <div className="flex flex-col items-center gap-3">
+                        <Image
+                            src={mounted ? (isDark ? whiteLogo : blackLogo) : blackLogo}
+                            alt="Frameflow"
+                            width={56}
+                            height={56}
+                            priority
+                        />
+                        <span
+                            className="font-normal"
+                            style={{ fontFamily: 'var(--font-dm-serif-display), serif', fontSize: '2rem', color: 'var(--text)' }}
+                        >
+                            Frameflow
+                        </span>
+                    </div>
+
+                    <p className="m-0 text-base leading-relaxed text-tertiary" style={{ maxWidth: '300px' }}>
+                        Welcome back. Your projects are right where you left them.
+                    </p>
+
+                    <div className="flex flex-col gap-3 w-full max-w-[280px]">
+                        {[
+                            { stat: '60fps',  label: 'Timeline playback'  },
+                            { stat: '4K',     label: 'Export quality'      },
+                            { stat: '< 2s',   label: 'Project load time'   },
+                        ].map(({ stat, label }) => (
+                            <div
+                                key={stat}
+                                className="flex items-center justify-between px-5 py-3 rounded-xl"
+                                style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border-default)' }}
+                            >
+                                <span
+                                    className="font-normal text-turquoise"
+                                    style={{ fontFamily: 'var(--font-dm-serif-display), serif', fontSize: '1.1rem' }}
+                                >
+                                    {stat}
+                                </span>
+                                <span className="text-xs font-semibold text-tertiary">{label}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="absolute bottom-8 left-0 right-0 flex justify-center">
+                    <span className="text-[0.65rem] font-medium tracking-widest uppercase text-tertiary">
+                        Browser Video Editor
+                    </span>
+                </div>
+            </div>
+
+            {/* ── Right — form panel ── */}
+            <div className="relative w-full lg:w-1/2 flex items-center justify-center h-full overflow-hidden">
+
+                <SectionGrid />
+
+                {/* Glows */}
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute -top-[20%] -right-[10%] w-[400px] h-[400px] rounded-full"
+                    style={{ background: 'radial-gradient(circle, var(--turquoise-8) 0%, transparent 70%)', filter: 'blur(60px)' }}
+                />
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute -bottom-[20%] -left-[10%] w-[300px] h-[300px] rounded-full"
+                    style={{ background: 'radial-gradient(circle, var(--turquoise-6) 0%, transparent 70%)', filter: 'blur(50px)' }}
+                />
+
+                {/* Form card */}
+                <div
+                    className="relative z-10 w-full max-w-[420px] mx-6 flex flex-col gap-6 p-8 rounded-2xl"
+                    style={{
+                        backgroundColor: 'var(--bg)',
+                        border: '1px solid var(--border-default)',
+                        boxShadow: '0 8px 40px rgba(0,0,0,0.08)',
+                    }}
+                >
+                    {/* Logo + brand */}
+                    <div className="flex flex-col gap-3">
+                        <Link href="/" style={{ textDecoration: 'none' }} className="flex items-center gap-2.5">
+                            <Image
+                                src={mounted ? (isDark ? whiteLogo : blackLogo) : blackLogo}
+                                alt="Frameflow"
+                                width={28}
+                                height={28}
+                                priority
+                            />
+                            <span
+                                className="font-normal"
+                                style={{ fontFamily: 'var(--font-dm-serif-display), serif', fontSize: '1.1rem', color: 'var(--text)' }}
+                            >
+                                Frameflow
+                            </span>
+                        </Link>
+                        <div>
+                            <h2 className="font-normal m-0" style={{ fontSize: 'clamp(1.4rem, 2.5vw, 1.85rem)', lineHeight: 1.15 }}>
+                                Welcome back.
+                            </h2>
+                            <p className="m-0 mt-1 text-sm text-tertiary">
+                                Sign in to continue editing.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Google */}
+                    <button
+                        type="button"
+                        onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                        disabled={loading}
+                        className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl cursor-pointer transition-all duration-200 focus:outline-none"
+                        style={{
+                            backgroundColor: 'var(--surface-raised)',
+                            border: '1px solid var(--border-default)',
+                            color: 'var(--text-secondary)',
+                            fontSize: '0.875rem',
+                            fontFamily: 'var(--font-quicksand), sans-serif',
+                            fontWeight: 600,
+                        }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.borderColor = 'var(--border-strong)'
+                            e.currentTarget.style.backgroundColor = 'var(--surface-sunken)'
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.borderColor = 'var(--border-default)'
+                            e.currentTarget.style.backgroundColor = 'var(--surface-raised)'
+                        }}
+                    >
+                        <Image src={googleIcon} alt="Google" width={18} height={18} />
+                        Continue with Google
+                    </button>
+
+                    {/* Divider */}
+                    <div className="flex items-center gap-3">
+                        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-default)' }} />
+                        <span className="text-xs font-semibold text-tertiary">or</span>
+                        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-default)' }} />
+                    </div>
+
+                    {/* Error */}
+                    {error && (
+                        <p
+                            className="m-0 text-xs font-semibold px-4 py-2.5 rounded-lg"
+                            style={{
+                                color: '#ef4444',
+                                backgroundColor: 'rgba(239,68,68,0.08)',
+                                border: '1px solid rgba(239,68,68,0.2)',
+                            }}
+                        >
+                            {error}
+                        </p>
+                    )}
+
+                    {/* Fields */}
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+
+                        <input
+                            type="email"
+                            placeholder="Email address"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            required
+                            style={inputStyle}
+                            onFocus={e => e.currentTarget.style.borderColor = 'var(--turquoise-42)'}
+                            onBlur={e  => e.currentTarget.style.borderColor = 'var(--border-default)'}
+                        />
+
+                        <div className="relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Password"
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                required
+                                style={{ ...inputStyle, paddingRight: '2.75rem' }}
+                                onFocus={e => e.currentTarget.style.borderColor = 'var(--turquoise-42)'}
+                                onBlur={e  => e.currentTarget.style.borderColor = 'var(--border-default)'}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(p => !p)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 focus:outline-none cursor-pointer transition-colors duration-150"
+                                style={{ color: 'var(--text-subtle)', background: 'none', border: 'none', padding: 0 }}
+                                onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
+                                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-subtle)'}
+                            >
+                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
+
+                        {/* Forgot password */}
+                        <div className="flex justify-end -mt-1">
+                            <Link
+                                href="/auth/forgot-password"
+                                className="text-xs font-semibold text-tertiary transition-colors duration-150"
+                                style={{ textDecoration: 'none' }}
+                                onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
+                                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}
+                            >
+                                Forgot password?
+                            </Link>
+                        </div>
+
+                        <Button
+                            variant="primary"
+                            type="submit"
+                            disabled={loading}
+                            className="w-full justify-center"
+                        >
+                            {loading
+                                ? <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />
+                                : 'Sign in'
+                            }
+                        </Button>
+                    </form>
+
+                    {/* Sign up */}
+                    <p className="m-0 text-sm text-center text-tertiary">
+                        Don&apos;t have an account?{' '}
+                        <Link href="/auth/signup" className="font-semibold text-turquoise" style={{ textDecoration: 'none' }}>
+                            Sign up free
+                        </Link>
+                    </p>
+
+                </div>
+            </div>
+
+        </div>
+    );
 }

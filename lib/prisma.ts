@@ -1,6 +1,3 @@
-// NOTE: We intentionally use the generated Prisma client path
-// for tighter control and explicit generation.
-
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
