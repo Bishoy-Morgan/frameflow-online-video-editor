@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -28,7 +28,7 @@ const inputStyle: React.CSSProperties = {
 }
 
 export default function SignUpPage() {
-    const router = useRouter();
+    // const router = useRouter();
     const { isDark, mounted } = useTheme();
 
     const [name,         setName]         = useState("");
@@ -38,45 +38,40 @@ export default function SignUpPage() {
     const [error,        setError]        = useState("");
     const [loading,      setLoading]      = useState(false);
 
-    async function handleSubmit(e: React.FormEvent) {
-        e.preventDefault();
-        setLoading(true);
-        setError("");
+async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
-        const res = await fetch("/api/auth/register", {
-            method:  "POST",
-            headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ name, email, password }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            setError(data.error || "Something went wrong.");
-            setLoading(false);
-            return;
-        }
-
-        const result = await signIn("credentials", {
-            email,
+    const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            name,
+            email: email.toLowerCase(),
             password,
-            redirect: false,
-        });
+        }),
+    });
 
-        if (result?.error) {
-            setError("Account created, but auto login failed. Please sign in.");
-            setLoading(false);
+    const data = await res.json();
+
+    if (!res.ok) {
+        setError(data.error || "Something went wrong.");
+        setLoading(false);
         return;
-        }
-
-        router.push("/dashboard");
-
     }
 
-    const handleGoogle = async () => {
-        setLoading(true);
-        await signIn("google", { callbackUrl: "/dashboard" });
-    };
+    await signIn("credentials", {
+        email: email.toLowerCase(),
+        password,
+        callbackUrl: "/dashboard",
+    });
+}
+
+const handleGoogle = async () => {
+    setLoading(true);
+    await signIn("google", { callbackUrl: "/dashboard" });
+};
 
     return (
         <div className="w-full flex h-svh surface">
@@ -90,18 +85,18 @@ export default function SignUpPage() {
                 {/* Glows */}
                 <div
                     aria-hidden
-                    className="pointer-events-none absolute -top-[20%] -right-[10%] w-[400px] h-[400px] rounded-full"
+                    className="pointer-events-none absolute -top-[20%] -right-[10%] w-100 h-100 rounded-full"
                     style={{ background: 'radial-gradient(circle, var(--turquoise-8) 0%, transparent 70%)', filter: 'blur(60px)' }}
                 />
                 <div
                     aria-hidden
-                    className="pointer-events-none absolute -bottom-[20%] -left-[10%] w-[300px] h-[300px] rounded-full"
+                    className="pointer-events-none absolute -bottom-[20%] -left-[10%] w-75 h-75 rounded-full"
                     style={{ background: 'radial-gradient(circle, var(--turquoise-6) 0%, transparent 70%)', filter: 'blur(50px)' }}
                 />
 
                 {/* Form card — solid background so grid doesn't bleed through */}
                 <div
-                    className="relative z-10 w-full max-w-[420px] mx-6 flex flex-col gap-6 p-8 rounded-2xl"
+                    className="relative z-10 w-full max-w-105 mx-6 flex flex-col gap-6 p-8 rounded-2xl"
                     style={{
                         backgroundColor: 'var(--bg)',
                         border: '1px solid var(--border-default)',
@@ -274,7 +269,7 @@ export default function SignUpPage() {
                 {/* Center glow */}
                 <div
                     aria-hidden
-                    className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full"
+                    className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-125 h-125 rounded-full"
                     style={{ background: 'radial-gradient(circle, var(--turquoise-12) 0%, transparent 65%)', filter: 'blur(60px)' }}
                 />
 
@@ -301,7 +296,7 @@ export default function SignUpPage() {
                     </p>
 
                     {/* Three trust stats */}
-                    <div className="flex flex-col gap-3 w-full max-w-[280px]">
+                    <div className="flex flex-col gap-3 w-full max-w-70">
                         {[
                             { stat: '60fps',  label: 'Timeline playback'    },
                             { stat: '4K',     label: 'Export quality'        },

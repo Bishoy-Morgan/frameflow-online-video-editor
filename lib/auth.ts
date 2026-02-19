@@ -34,8 +34,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           return null;
         }
 
+        const normalizedEmail = credentials.email.toLowerCase();
+
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email: normalizedEmail },
         });
 
         if (!user || !user.password) {
@@ -65,27 +67,15 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     signIn: "/auth/signin",
   },
 
-callbacks: {
-  async session({ session }) {
-    if (!session.user?.email) return session;
-
-    const dbUser = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: {
-        id: true,
-        role: true,
-      },
-    });
-
-    if (dbUser) {
-      session.user.id = dbUser.id;
-      session.user.role = dbUser.role;
-    }
-
-    return session;
+  callbacks: {
+    async session({ session, user }) {
+      if (session.user) {
+        session.user.id = user.id;
+        session.user.role = user.role;
+      }
+      return session;
+    },
   },
-},
-
 
   secret: process.env.NEXTAUTH_SECRET,
 });
