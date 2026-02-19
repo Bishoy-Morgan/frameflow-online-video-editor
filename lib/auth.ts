@@ -1,11 +1,11 @@
-import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
-import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
+import { type NextAuthOptions } from "next-auth";
 
-export const { auth, handlers, signIn, signOut } = NextAuth({
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
 
   session: {
@@ -13,12 +13,12 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   },
 
   providers: [
-    Google({
+    GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
 
-    Credentials({
+    CredentialsProvider({
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "text" },
@@ -26,18 +26,12 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       },
 
       async authorize(credentials) {
-        if (
-          !credentials ||
-          typeof credentials.email !== "string" ||
-          typeof credentials.password !== "string"
-        ) {
+        if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
-        const normalizedEmail = credentials.email.toLowerCase();
-
         const user = await prisma.user.findUnique({
-          where: { email: normalizedEmail },
+          where: { email: credentials.email.toLowerCase() },
         });
 
         if (!user || !user.password) {
@@ -49,9 +43,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           user.password
         );
 
-        if (!isValid) {
-          return null;
-        }
+        if (!isValid) return null;
 
         return {
           id: user.id,
@@ -78,4 +70,4 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   },
 
   secret: process.env.NEXTAUTH_SECRET,
-});
+};
