@@ -26,10 +26,10 @@ export const authOptions: NextAuthOptions = {
             },
 
             async authorize(credentials) {
-                if (!credentials) return null;
+                if (!credentials?.email || !credentials?.password) return null;
 
                 const user = await prisma.user.findUnique({
-                    where: { email: credentials.email },
+                    where: { email: credentials.email.toLowerCase() },
                 });
 
                 if (!user || !user.password) return null;
@@ -41,8 +41,13 @@ export const authOptions: NextAuthOptions = {
 
                 if (!isValid) return null;
 
-                return user;
-            },
+                return {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                };
+            }
         }),
     ],
 

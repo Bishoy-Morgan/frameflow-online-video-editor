@@ -57,8 +57,20 @@ export default function SignUpPage() {
             return;
         }
 
-        await signIn("credentials", { email, password, redirect: false });
+        const result = await signIn("credentials", {
+            email,
+            password,
+            redirect: false,
+        });
+
+        if (result?.error) {
+            setError("Account created, but auto login failed. Please sign in.");
+            setLoading(false);
+        return;
+        }
+
         router.push("/dashboard");
+
     }
 
     const handleGoogle = async () => {

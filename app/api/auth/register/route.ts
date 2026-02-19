@@ -23,10 +23,11 @@ export async function POST(req: Request) {
         }
 
         const { name, email, password } = parsed.data;
+        const normalizedEmail = email.toLowerCase();
 
-        // Check if user already exists
+
         const existingUser = await prisma.user.findUnique({
-            where: { email },
+            where: { email: normalizedEmail },
         });
 
         if (existingUser) {
@@ -46,7 +47,6 @@ export async function POST(req: Request) {
                 email,
                 password: hashedPassword,
                 emailVerified: null,
-                // role is optional because it defaults to USER
             },
             select: {
                 id: true,
