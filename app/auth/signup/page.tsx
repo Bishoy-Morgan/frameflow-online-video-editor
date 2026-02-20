@@ -64,7 +64,7 @@ async function handleSubmit(e: React.FormEvent) {
     await signIn("credentials", {
         email: email.toLowerCase(),
         password,
-        callbackUrl: "/features",
+        callbackUrl: "/dashboard",
     });
 }
 
