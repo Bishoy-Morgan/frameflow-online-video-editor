@@ -29,7 +29,7 @@ const inputStyle: React.CSSProperties = {
 
 export default function SignInPage() {
     const router = useRouter();
-    const { isDark, mounted } = useTheme();
+    const { isDark } = useTheme();
 
     const [email,        setEmail]        = useState("");
     const [password,     setPassword]     = useState("");
@@ -64,18 +64,19 @@ export default function SignInPage() {
                 {/* Center glow */}
                 <div
                     aria-hidden
-                    className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full"
+                    className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-125 h-125 rounded-full"
                     style={{ background: 'radial-gradient(circle, var(--turquoise-10) 0%, transparent 65%)', filter: 'blur(60px)' }}
                 />
 
                 <div className="relative z-10 flex flex-col items-center text-center gap-8 px-12">
                     <div className="flex flex-col items-center gap-3">
                         <Image
-                            src={mounted ? (isDark ? whiteLogo : blackLogo) : blackLogo}
+                            src={isDark ? whiteLogo : blackLogo}
                             alt="Frameflow"
                             width={56}
                             height={56}
                             priority
+                            suppressHydrationWarning
                         />
                         <span
                             className="font-normal"
@@ -89,7 +90,7 @@ export default function SignInPage() {
                         Welcome back. Your projects are right where you left them.
                     </p>
 
-                    <div className="flex flex-col gap-3 w-full max-w-[280px]">
+                    <div className="flex flex-col gap-3 w-full max-w-70">
                         {[
                             { stat: '60fps',  label: 'Timeline playback'  },
                             { stat: '4K',     label: 'Export quality'      },
@@ -127,18 +128,18 @@ export default function SignInPage() {
                 {/* Glows */}
                 <div
                     aria-hidden
-                    className="pointer-events-none absolute -top-[20%] -right-[10%] w-[400px] h-[400px] rounded-full"
+                    className="pointer-events-none absolute -top-[20%] -right-[10%] w-100 h-100 rounded-full"
                     style={{ background: 'radial-gradient(circle, var(--turquoise-8) 0%, transparent 70%)', filter: 'blur(60px)' }}
                 />
                 <div
                     aria-hidden
-                    className="pointer-events-none absolute -bottom-[20%] -left-[10%] w-[300px] h-[300px] rounded-full"
+                    className="pointer-events-none absolute -bottom-[20%] -left-[10%] w-75 h-75 rounded-full"
                     style={{ background: 'radial-gradient(circle, var(--turquoise-6) 0%, transparent 70%)', filter: 'blur(50px)' }}
                 />
 
                 {/* Form card */}
                 <div
-                    className="relative z-10 w-full max-w-[420px] mx-6 flex flex-col gap-6 p-8 rounded-2xl"
+                    className="relative z-10 w-full max-w-105 mx-6 flex flex-col gap-6 p-8 rounded-2xl"
                     style={{
                         backgroundColor: 'var(--bg)',
                         border: '1px solid var(--border-default)',
@@ -149,11 +150,12 @@ export default function SignInPage() {
                     <div className="flex flex-col gap-3">
                         <Link href="/" style={{ textDecoration: 'none' }} className="flex items-center gap-2.5">
                             <Image
-                                src={mounted ? (isDark ? whiteLogo : blackLogo) : blackLogo}
+                                src={isDark ? whiteLogo : blackLogo}
                                 alt="Frameflow"
                                 width={28}
                                 height={28}
                                 priority
+                                suppressHydrationWarning
                             />
                             <span
                                 className="font-normal"
