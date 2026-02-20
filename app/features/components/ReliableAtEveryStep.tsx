@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import SectionGrid from '@/components/ui/SectionGrid'
 import { SectionLabel, SectionSeparator } from './FeaturesHero'
 
-// ── Pillars ───────────────────────────────────────────────────────────────────
+// Pillars
 const pillars = [
     {
         tag: '01',
@@ -26,7 +26,7 @@ const pillars = [
     },
 ]
 
-// ── Status log — implied robustness without explaining it ─────────────────────
+// Status log — implied robustness without explaining it
 const logLines = [
     { type: 'ok',   text: 'project.load',           detail: '12ms'       },
     { type: 'ok',   text: 'timeline.deserialize',    detail: '4ms'        },
