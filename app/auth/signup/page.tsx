@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-// import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -28,8 +27,7 @@ const inputStyle: React.CSSProperties = {
 }
 
 export default function SignUpPage() {
-    // const router = useRouter();
-    const { isDark, mounted } = useTheme();
+    const { isDark } = useTheme();
 
     const [name,         setName]         = useState("");
     const [email,        setEmail]        = useState("");
@@ -108,11 +106,12 @@ const handleGoogle = async () => {
                     <div className="flex flex-col gap-3">
                         <Link href="/" style={{ textDecoration: 'none' }} className="flex items-center gap-2.5">
                             <Image
-                                src={mounted ? (isDark ? whiteLogo : blackLogo) : blackLogo}
+                                src={isDark ? whiteLogo : blackLogo}
                                 alt="Frameflow"
                                 width={28}
                                 height={28}
                                 priority
+                                suppressHydrationWarning
                             />
                             <span
                                 className="font-normal"
@@ -277,11 +276,12 @@ const handleGoogle = async () => {
                 <div className="relative z-10 flex flex-col items-center text-center gap-8 px-12">
                     <div className="flex flex-col items-center gap-3">
                         <Image
-                            src={mounted ? (isDark ? whiteLogo : blackLogo) : blackLogo}
+                            src={isDark ? whiteLogo : blackLogo}
                             alt="Frameflow"
                             width={56}
                             height={56}
                             priority
+                            suppressHydrationWarning
                         />
                         <span
                             className="font-normal"

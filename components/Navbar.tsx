@@ -19,7 +19,7 @@ const links = [
 const Navbar = () => {
     const router   = useRouter()
     const pathname = usePathname()
-    const { isDark, toggleTheme, mounted } = useTheme()
+    const { isDark, toggleTheme } = useTheme()
 
     const isActive = (href: string) =>
         href === '/' ? pathname === '/' : pathname.startsWith(href)
@@ -27,11 +27,12 @@ const Navbar = () => {
     return (
         <header className="fixed top-0 inset-x-0 z-50 flex justify-center pt-5 px-4 pointer-events-none">
             <nav
-                className="pointer-events-auto w-full max-w-[1100px] flex items-center justify-between px-5 py-3 rounded-2xl"
+                suppressHydrationWarning
+                className="pointer-events-auto w-full max-w-275 flex items-center justify-between px-5 py-3 rounded-2xl"
                 style={{
                     backgroundColor: 'var(--bg)',
                     border: '1px solid var(--border-default)',
-                    boxShadow: mounted && isDark
+                    boxShadow: isDark
                         ? '0 0 0 1px var(--border-subtle), 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)'
                         : '0 0 0 1px var(--border-subtle), 0 8px 32px rgba(2,2,2,0.08)',
                 }}
@@ -42,11 +43,12 @@ const Navbar = () => {
                     {/* Logo */}
                     <Link href="/" className="shrink-0">
                         <Image
-                            src={mounted ? (isDark ? whiteLogo : blackLogo) : blackLogo}
+                            src={isDark ? whiteLogo : blackLogo}
                             alt="Frameflow"
                             width={32}
                             height={32}
                             priority
+                            suppressHydrationWarning
                         />
                     </Link>
 
@@ -105,31 +107,32 @@ const Navbar = () => {
                         }}
                     >
                         {/* Sliding pill */}
-                        {mounted && (
-                            <div
-                                className="absolute top-[3px] bottom-[3px] w-[1.85rem] rounded-md transition-all duration-300 ease-in-out"
-                                style={{
-                                    left: isDark ? 'calc(100% - 2.1rem)' : '3px',
-                                    backgroundColor: 'var(--bg)',
-                                    border: '1px solid var(--border-strong)',
-                                    boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
-                                }}
-                            />
-                        )}
+                        <div
+                            suppressHydrationWarning
+                            className="absolute top-0.75 bottom-0.75 w-[1.85rem] rounded-md transition-all duration-300 ease-in-out"
+                            style={{
+                                left: isDark ? 'calc(100% - 2.1rem)' : '3px',
+                                backgroundColor: 'var(--bg)',
+                                border: '1px solid var(--border-strong)',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+                            }}
+                        />
                         <div className="relative w-full flex items-center justify-between px-2">
                             <Sun
                                 size={13}
+                                suppressHydrationWarning
                                 style={{
                                     color: 'var(--text)',
-                                    opacity: mounted ? (isDark ? 0.3 : 1) : 1,
+                                    opacity: isDark ? 0.3 : 1,
                                     transition: 'opacity 0.2s ease',
                                 }}
                             />
                             <Moon
                                 size={13}
+                                suppressHydrationWarning
                                 style={{
                                     color: 'var(--text)',
-                                    opacity: mounted ? (isDark ? 1 : 0.3) : 0.3,
+                                    opacity: isDark ? 1 : 0.3,
                                     transition: 'opacity 0.2s ease',
                                 }}
                             />

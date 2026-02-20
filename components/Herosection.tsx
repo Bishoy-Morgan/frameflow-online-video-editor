@@ -42,12 +42,12 @@ const HeroSection = () => {
             {/* Glows */}
             <div
                 aria-hidden
-                className="pointer-events-none absolute -top-[15%] -right-[5%] w-[650px] h-[650px] rounded-full"
+                className="pointer-events-none absolute -top-[15%] -right-[5%] w-162.5 h-162.5 rounded-full"
                 style={{ background: 'radial-gradient(circle, var(--turquoise-10) 0%, transparent 70%)', filter: 'blur(72px)' }}
             />
             <div
                 aria-hidden
-                className="pointer-events-none absolute bottom-0 -left-[10%] w-[400px] h-[400px] rounded-full"
+                className="pointer-events-none absolute bottom-0 -left-[10%] w-100 h-100 rounded-full"
                 style={{ background: 'radial-gradient(circle, var(--turquoise-6) 0%, transparent 70%)', filter: 'blur(60px)' }}
             />
 
@@ -113,7 +113,7 @@ const HeroSection = () => {
 
                     {/* ── Right — mockup ── */}
                     <div ref={imageRef} className="w-full lg:w-1/2 flex items-center justify-center lg:justify-end">
-                        <div className="relative w-full max-w-[580px]">
+                        <div className="relative w-full max-w-145">
 
                             {/* Glow behind image */}
                             <div

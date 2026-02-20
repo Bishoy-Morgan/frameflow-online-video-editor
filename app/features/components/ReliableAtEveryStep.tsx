@@ -210,7 +210,7 @@ const ReliableAtEveryStep = () => {
             {/* Glow — bottom left */}
             <div
                 aria-hidden
-                className="pointer-events-none absolute -bottom-[15%] -left-[5%] w-[500px] h-[500px] rounded-full bg-turquoise-8"
+                className="pointer-events-none absolute -bottom-[15%] -left-[5%] w-125 h-125 rounded-full bg-turquoise-8"
                 style={{ filter: 'blur(80px)' }}
             />
 
@@ -225,7 +225,7 @@ const ReliableAtEveryStep = () => {
             <div className="container relative z-10">
 
                 {/* Header */}
-                <div ref={headerRef} className="max-w-[540px] mb-14">
+                <div ref={headerRef} className="max-w-135 mb-14">
                     <SectionLabel>Reliable at Every Step</SectionLabel>
                     <h2 className="font-normal leading-tight mb-3" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
                         Structured, predictable,<br />safely stored.
