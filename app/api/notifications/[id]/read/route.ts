@@ -1,12 +1,14 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 export async function PATCH(
-    _req: Request,
-    { params }: { params: { id: string } }
+    _req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params
+
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.email) {
@@ -14,7 +16,7 @@ export async function PATCH(
     }
 
     const user = await prisma.user.findUnique({
-        where:  { email: session.user.email },
+        where: { email: session.user.email },
         select: { id: true },
     })
 
@@ -24,7 +26,7 @@ export async function PATCH(
 
     // Ensure the notification belongs to this user
     const notification = await prisma.notification.findFirst({
-        where: { id: params.id, userId: user.id },
+        where: { id, userId: user.id },
     })
 
     if (!notification) {
@@ -32,8 +34,8 @@ export async function PATCH(
     }
 
     await prisma.notification.update({
-        where: { id: params.id },
-        data:  { read: true },
+        where: { id },
+        data: { read: true },
     })
 
     return NextResponse.json({ success: true })

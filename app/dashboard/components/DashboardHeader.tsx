@@ -39,7 +39,7 @@ const notifIcon = (type: NotifType) => {
     return                         <Info         size={13} strokeWidth={2} style={{ color: 'var(--text-tertiary)' }} />
 }
 
-// ── Notification panel ────────────────────────────────────────────────────────
+// Notification panel
 function NotificationDropdown() {
     const [open, setOpen]     = useState(false)
     const [notifs, setNotifs] = useState<Notification[]>(INITIAL_NOTIFS)
