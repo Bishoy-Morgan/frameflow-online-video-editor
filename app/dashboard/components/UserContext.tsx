@@ -9,6 +9,7 @@ export interface DashboardUser {
     email:     string
     image:     string | null
     role:      UserRole
+    password:  string | null 
     createdAt: Date
     _count:    { projects: number }
     projects:  { updatedAt: Date }[]

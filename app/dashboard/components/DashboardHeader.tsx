@@ -13,7 +13,7 @@ import {
     CheckCheck, Trash2, Info, AlertCircle, CheckCircle,
 } from 'lucide-react'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// Types
 type NotifType = 'info' | 'success' | 'warning'
 
 interface Notification {
@@ -25,7 +25,7 @@ interface Notification {
     read:    boolean
 }
 
-// ── Mock notifications — replace with real fetch later ────────────────────────
+// Mock notifications — replace with real fetch later
 const INITIAL_NOTIFS: Notification[] = [
     { id: '1', type: 'success', title: 'Export complete',      body: 'Product Demo v3 is ready to download.',       time: '2 min ago',  read: false },
     { id: '2', type: 'info',    title: 'New feature available', body: 'Auto-captions now support Arabic.',            time: '1 hour ago', read: false },

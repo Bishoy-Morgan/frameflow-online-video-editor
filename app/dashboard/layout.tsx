@@ -22,6 +22,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             email:     true,
             image:     true,
             role:      true,
+            password:  true,
             createdAt: true,
             _count: {
                 select: { projects: true }
