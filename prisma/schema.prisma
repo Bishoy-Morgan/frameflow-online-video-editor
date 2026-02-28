@@ -3,29 +3,29 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id             String        @id @default(cuid())
-  name           String?
-  email          String        @unique
-  emailVerified  DateTime?
-  password       String?       // Used for Credentials login
-  image          String?
+  id            String        @id @default(cuid())
+  name          String?
+  email         String        @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
 
-  role           UserRole      @default(USER)
+  role          UserRole      @default(USER)
 
-  projects       Project[]
+  projects      Project[]
+  accounts      Account[]
+  sessions      Session[]
+  notifications Notification[]
+  settings      UserSettings?
 
-  accounts       Account[]
-  sessions       Session[]
-
-  Notifications   Notification[]
-
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 enum UserRole {
@@ -34,18 +34,18 @@ enum UserRole {
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -69,24 +69,62 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model UserSettings {
+  id           String @id @default(cuid())
+  userId       String @unique
+
+  defaultRatio String @default("9:16")
+  defaultStyle String @default("Cinematic")
+  defaultFps   Int    @default(30)
+
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model Project {
-  id        String   @id @default(cuid())
-  name      String
-  userId    String
+  id          String    @id @default(cuid())
+  name        String
+  userId      String
+  thumbnail   String?
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  assets    MediaAsset[]
-  timelines Timeline[]
-  renders   RenderJob[]
+  starred     Boolean   @default(false)
+  deletedAt   DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  prompt      String?
+  style       String?
+  aspectRatio String?
+  aiDuration  String?
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assets      MediaAsset[]
+  timelines   Timeline[]
+  renders     RenderJob[]
+  scenes      Scene[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([userId])
 }
 
+model Scene {
+  id          String   @id @default(cuid())
+  projectId   String
+
+  title       String
+  description String
+  musicMood   String
+  duration    Int
+  order       Int
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@index([projectId])
+}
+
 model MediaAsset {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   projectId String
 
   type      AssetType
@@ -95,10 +133,10 @@ model MediaAsset {
   width     Int?
   height    Int?
 
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   clips     Clip[]
 
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([projectId])
 }
@@ -107,8 +145,10 @@ model Timeline {
   id        String   @id @default(cuid())
   projectId String
   name      String
+  fps       Int      @default(30)
+  duration  Float    @default(0)
 
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   clips     Clip[]
 
   createdAt DateTime @default(now())
@@ -133,31 +173,33 @@ model Clip {
 }
 
 model RenderJob {
-  id        String   @id @default(cuid())
-  projectId String
+  id          String       @id @default(cuid())
+  projectId   String
 
-  status    RenderStatus
-  outputUrl String?
+  status      RenderStatus
+  outputUrl   String?
+  format      String?
+  resolution  String?
+  aspectRatio String?
 
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
+  createdAt   DateTime @default(now())
 
   @@index([projectId])
 }
 
 model Notification {
-  id        String           @id @default(cuid())
-  userId    String
-  type      NotificationType
-  message   String
-  read      Boolean          @default(false)
-  
-  renderId  String?
+  id       String           @id @default(cuid())
+  userId   String
+  type     NotificationType
+  message  String
+  read     Boolean          @default(false)
+  renderId String?
 
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime         @default(now())
+  createdAt DateTime        @default(now())
 
   @@index([userId])
 }
