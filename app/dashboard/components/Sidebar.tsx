@@ -98,6 +98,7 @@ export default function Sidebar() {
                     height={26}
                     className="shrink-0"
                     priority
+                    suppressHydrationWarning
                 />
                 <span
                     className="ml-3 font-normal whitespace-nowrap"
