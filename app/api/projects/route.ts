@@ -10,10 +10,7 @@ export async function GET() {
     }
 
     const projects = await prisma.project.findMany({
-        where: {
-            userId:    session.user.id,
-            deletedAt: null,
-        },
+        where:   { userId: session.user.id, deletedAt: null },
         orderBy: { updatedAt: 'desc' },
         select: {
             id:          true,
@@ -38,16 +35,39 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { name } = await req.json()
+    const body = await req.json()
+    const { name, style, aspectRatio, prompt, scenes } = body
 
     if (!name?.trim()) {
         return NextResponse.json({ error: 'Name is required' }, { status: 400 })
     }
 
+    const scenesData = Array.isArray(scenes) && scenes.length > 0
+        ? {
+            create: scenes.map((s: {
+                title:       string
+                description: string
+                musicMood:   string
+                duration:    number
+                order:       number
+            }) => ({
+                title:       s.title,
+                description: s.description,
+                musicMood:   s.musicMood,
+                duration:    s.duration,
+                order:       s.order,
+            }))
+          }
+        : undefined
+
     const project = await prisma.project.create({
         data: {
-            name:   name.trim(),
-            userId: session.user.id,
+            name:        name.trim(),
+            userId:      session.user.id,
+            style:       style       ?? null,
+            aspectRatio: aspectRatio ?? null,
+            prompt:      prompt      ?? null,
+            ...(scenesData ? { scenes: scenesData } : {}),
         },
         select: {
             id:          true,
