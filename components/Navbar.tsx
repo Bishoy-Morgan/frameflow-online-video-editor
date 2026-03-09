@@ -247,7 +247,7 @@ const Navbar = () => {
                             <Button
                                 variant="primary"
                                 size="sm"
-                                onClick={() => router.push('/auth/signin')}
+                                onClick={() => router.push('/auth/signup')}
                             >
                                 Get Started
                             </Button>
