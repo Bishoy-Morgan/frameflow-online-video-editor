@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Serif_Display, Quicksand } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next"
+import SessionProvider from "@/components/SessionProvider";
 
 const dmSerifDisplay = DM_Serif_Display({
   subsets: ["latin"],
@@ -49,7 +50,9 @@ export default function RootLayout({
         className={`${dmSerifDisplay.variable} ${quicksand.variable} antialiased`}
         suppressHydrationWarning
       >
-        {children}
+        <SessionProvider>
+          {children}
+        </SessionProvider>
         <Analytics />
       </body>
     </html>
