@@ -589,7 +589,7 @@ export default function ProjectDetailPage() {
                             <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Start editing to add scenes and assets</p>
                         </div>
                         <button
-                            onClick={() => router.push(`/dashboard/projects/${id}/editor`)}
+                            onClick={() => window.open(`/editor/${id}`, '_blank')}
                             className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold"
                             style={{ backgroundColor: 'var(--turquoise)', color: '#fff', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px var(--turquoise-22)' }}
                             onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }}

@@ -51,7 +51,6 @@ const EXAMPLE_PROMPTS = [
     'A dreamy travel montage through Tokyo streets at golden hour',
 ]
 
-// Map dashboard template labels to API-compatible data
 const TEMPLATE_CONFIGS: Record<string, { style: string; aspectRatio: string; scenes: { title: string; description: string; musicMood: string; duration: number; order: number }[] }> = {
     'Product Reveal': {
         style: 'Minimal', aspectRatio: '16:9',
@@ -73,26 +72,26 @@ const TEMPLATE_CONFIGS: Record<string, { style: string; aspectRatio: string; sce
     'Brand Story': {
         style: 'Elegant', aspectRatio: '16:9',
         scenes: [
-            { title: 'Brand Manifesto',   description: "Opening statement of your company's mission.",     musicMood: 'Cinematic', duration: 8,  order: 0 },
-            { title: 'Team & Culture',    description: 'Authentic team moments that humanize the brand.',  musicMood: 'Uplifting', duration: 10, order: 1 },
-            { title: 'Vision Statement',  description: 'Forward-looking close — where you\'re going.',    musicMood: 'Cinematic', duration: 9,  order: 2 },
+            { title: 'Brand Manifesto',  description: "Opening statement of your company's mission.",    musicMood: 'Cinematic', duration: 8,  order: 0 },
+            { title: 'Team & Culture',   description: 'Authentic team moments that humanize the brand.', musicMood: 'Uplifting', duration: 10, order: 1 },
+            { title: 'Vision Statement', description: "Forward-looking close — where you're going.",     musicMood: 'Cinematic', duration: 9,  order: 2 },
         ],
     },
     'Tutorial': {
         style: 'Bold', aspectRatio: '16:9',
         scenes: [
-            { title: "What You'll Learn", description: 'State the outcome upfront.',                       musicMood: 'Calm',      duration: 4, order: 0 },
-            { title: 'Your Intro',        description: 'Brief host introduction to build trust.',          musicMood: 'Uplifting', duration: 3, order: 1 },
-            { title: 'Agenda',            description: 'Quick visual breakdown of the steps.',             musicMood: 'Calm',      duration: 3, order: 2 },
+            { title: "What You'll Learn", description: 'State the outcome upfront.',              musicMood: 'Calm',      duration: 4, order: 0 },
+            { title: 'Your Intro',        description: 'Brief host introduction to build trust.', musicMood: 'Uplifting', duration: 3, order: 1 },
+            { title: 'Agenda',            description: 'Quick visual breakdown of the steps.',    musicMood: 'Calm',      duration: 3, order: 2 },
         ],
     },
 }
 
 const DASHBOARD_TEMPLATES = [
-    { label: 'Product Reveal', icon: Clapperboard, desc: 'Clean unboxing or launch',   accent: false },
-    { label: 'Viral Reel',     icon: Zap,          desc: 'Hook in 3s, keep watching',  accent: true  },
-    { label: 'Brand Story',    icon: BookOpen,     desc: 'Who you are, why you exist',  accent: false },
-    { label: 'Tutorial',       icon: Film,         desc: 'Step-by-step demo',           accent: false },
+    { label: 'Product Reveal', icon: Clapperboard, desc: 'Clean unboxing or launch',  accent: false },
+    { label: 'Viral Reel',     icon: Zap,          desc: 'Hook in 3s, keep watching', accent: true  },
+    { label: 'Brand Story',    icon: BookOpen,     desc: 'Who you are, why you exist', accent: false },
+    { label: 'Tutorial',       icon: Film,         desc: 'Step-by-step demo',          accent: false },
 ]
 
 // ─── Typewriter ───────────────────────────────────────────────────────────────
@@ -105,10 +104,10 @@ function useTypewriter(texts: string[], speed = 36, pause = 2400) {
     useEffect(() => {
         const current = texts[textIdx]
         let t: ReturnType<typeof setTimeout>
-        if (!deleting && charIdx < current.length)       t = setTimeout(() => setCharIdx(i => i + 1), speed)
+        if (!deleting && charIdx < current.length)        t = setTimeout(() => setCharIdx(i => i + 1), speed)
         else if (!deleting && charIdx === current.length) t = setTimeout(() => setDeleting(true), pause)
-        else if (deleting && charIdx > 0)                t = setTimeout(() => setCharIdx(i => i - 1), speed / 2.2)
-        else                                             t = setTimeout(() => { setDeleting(false); setTextIdx(i => (i + 1) % texts.length) }, 300)
+        else if (deleting && charIdx > 0)                 t = setTimeout(() => setCharIdx(i => i - 1), speed / 2.2)
+        else                                              t = setTimeout(() => { setDeleting(false); setTextIdx(i => (i + 1) % texts.length) }, 300)
         return () => clearTimeout(t)
     }, [charIdx, deleting, textIdx, texts, speed, pause])
 
@@ -123,9 +122,9 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
             onClick={onClick}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150"
             style={{
-                backgroundColor: active ? 'var(--turquoise-8)'          : 'var(--bg)',
-                border:          active ? '1px solid var(--turquoise-42)': '1px solid var(--border-subtle)',
-                color:           active ? 'var(--turquoise)'             : 'var(--text-tertiary)',
+                backgroundColor: active ? 'var(--turquoise-8)'           : 'var(--bg)',
+                border:          active ? '1px solid var(--turquoise-42)' : '1px solid var(--border-subtle)',
+                color:           active ? 'var(--turquoise)'              : 'var(--text-tertiary)',
             }}
             onMouseEnter={e => { if (!active) { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text)' } }}
             onMouseLeave={e => { if (!active) { e.currentTarget.style.borderColor = 'var(--border-subtle)';  e.currentTarget.style.color = 'var(--text-tertiary)' } }}
@@ -158,50 +157,95 @@ function SkeletonStat() {
     )
 }
 
-// AI Hero
+// ─── AIHero ───────────────────────────────────────────────────────────────────
+// FIXED: was window.open('/generate?...', '_blank') — opened non-existent page
+// NOW:   POST /api/ai/generate → creates project in DB → router.push to detail page
 
 function AIHero() {
+    const router = useRouter()
+
     const [prompt,     setPrompt]     = useState('')
     const [style,      setStyle]      = useState<Style>('Cinematic')
     const [ratio,      setRatio]      = useState<AspectRatio>('9:16')
     const [duration,   setDuration]   = useState<Duration>('30s')
     const [generating, setGenerating] = useState(false)
     const [focused,    setFocused]    = useState(false)
+    const [error,      setError]      = useState('')
 
     const placeholder = useTypewriter(EXAMPLE_PROMPTS)
 
-    const handleGenerate = () => {
-        if (!prompt.trim()) return
-        const params = new URLSearchParams({ prompt, style, aspectRatio: ratio, duration })
-        window.open(`/generate?${params.toString()}`, '_blank')
+    const handleGenerate = async () => {
+        const text = prompt.trim()
+        if (!text || generating) return
+
+        setGenerating(true)
+        setError('')
+
+        try {
+            const res = await fetch('/api/ai/generate', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({
+                    prompt: text,
+                    style,
+                    aspectRatio: ratio,
+                    duration,
+                }),
+            })
+
+            if (res.status === 401) {
+                router.push('/auth/signin?callbackUrl=/dashboard')
+                return
+            }
+
+            if (!res.ok) {
+                const data = await res.json()
+                setError(data.error ?? 'Generation failed. Please try again.')
+                return
+            }
+
+            const project = await res.json()
+            // Go to project detail page so user sees the generated scenes
+            router.push(`/dashboard/projects/${project.id}`)
+
+        } catch {
+            setError('Connection error. Please try again.')
+        } finally {
+            setGenerating(false)
+        }
     }
 
     return (
         <div
             className="relative rounded-2xl overflow-hidden"
             style={{
-                background: 'linear-gradient(160deg, var(--surface-raised) 0%, var(--bg) 100%)',
-                border: `1px solid ${focused ? 'var(--turquoise-42)' : 'var(--border-default)'}`,
-                boxShadow: focused ? '0 0 0 3px var(--turquoise-8), 0 16px 48px rgba(0,0,0,0.06)' : '0 4px 24px rgba(0,0,0,0.04)',
-                transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
+                background:  'linear-gradient(160deg, var(--surface-raised) 0%, var(--bg) 100%)',
+                border:      `1px solid ${focused ? 'var(--turquoise-42)' : 'var(--border-default)'}`,
+                boxShadow:   focused ? '0 0 0 3px var(--turquoise-8), 0 16px 48px rgba(0,0,0,0.06)' : '0 4px 24px rgba(0,0,0,0.04)',
+                transition:  'border-color 0.25s ease, box-shadow 0.25s ease',
             }}
         >
             <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-40"
                 style={{ background: 'radial-gradient(ellipse 90% 100% at 50% 0%, var(--turquoise-10) 0%, transparent 100%)' }} />
             <div aria-hidden className="pointer-events-none absolute inset-0"
                 style={{
-                    backgroundImage: 'radial-gradient(circle, var(--turquoise-22) 1px, transparent 1px)',
-                    backgroundSize: '28px 28px', opacity: 0.35,
-                    maskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%)',
-                    WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%)',
+                    backgroundImage:  'radial-gradient(circle, var(--turquoise-22) 1px, transparent 1px)',
+                    backgroundSize:   '28px 28px',
+                    opacity:          0.35,
+                    maskImage:        'radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%)',
+                    WebkitMaskImage:  'radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%)',
                 }} />
 
             <div className="relative flex flex-col gap-6 px-8 pt-8 pb-7">
                 <div className="flex flex-col items-center text-center gap-3">
-                    <h1 className="font-bold leading-tight"
-                        style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', color: 'var(--text)', fontFamily: 'var(--font-dm-serif-display), serif', letterSpacing: '-0.01em' }}>
+                    <h1
+                        className="font-bold leading-tight"
+                        style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', color: 'var(--text)', fontFamily: 'var(--font-dm-serif-display), serif', letterSpacing: '-0.01em' }}
+                    >
                         What video do you want{' '}
-                        <span style={{ color: 'var(--turquoise)', textShadow: '0 0 32px var(--turquoise-42)' }}>to create?</span>
+                        <span style={{ color: 'var(--turquoise)', textShadow: '0 0 32px var(--turquoise-42)' }}>
+                            to create?
+                        </span>
                     </h1>
                     <p className="text-sm max-w-md" style={{ color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
                         Describe your idea in plain words — AI will generate a ready-to-edit video project in seconds.
@@ -209,21 +253,29 @@ function AIHero() {
                 </div>
 
                 <div className="max-w-2xl w-full mx-auto">
-                    <div className="relative rounded-xl overflow-hidden" style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border-default)' }}>
+                    <div
+                        className="relative rounded-xl overflow-hidden"
+                        style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border-default)' }}
+                    >
                         <textarea
                             value={prompt}
-                            onChange={e => setPrompt(e.target.value.slice(0, 500))}
+                            onChange={e => { setPrompt(e.target.value.slice(0, 500)); setError('') }}
                             onFocus={() => setFocused(true)}
                             onBlur={() => setFocused(false)}
+                            onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleGenerate() }}
                             rows={3}
                             className="w-full resize-none px-5 pt-4 pb-14 text-sm outline-none"
                             style={{ backgroundColor: 'transparent', color: 'var(--text)', lineHeight: '1.7' }}
                             placeholder={placeholder + (focused ? '' : '|')}
                         />
-                        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2.5"
-                            style={{ backgroundColor: 'var(--surface-raised)', borderTop: '1px solid var(--border-subtle)' }}>
+                        <div
+                            className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2.5"
+                            style={{ backgroundColor: 'var(--surface-raised)', borderTop: '1px solid var(--border-subtle)' }}
+                        >
                             <span className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
-                                {prompt.length > 0 ? `${prompt.length} / 500` : 'Be as descriptive as possible for best results'}
+                                {prompt.length > 0
+                                    ? `${prompt.length} / 500 · ⌘Enter to generate`
+                                    : 'Be as descriptive as possible for best results'}
                             </span>
                             <button
                                 onClick={handleGenerate}
@@ -231,20 +283,25 @@ function AIHero() {
                                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200"
                                 style={{
                                     backgroundColor: prompt.trim() && !generating ? 'var(--turquoise)' : 'var(--surface-raised)',
-                                    color:           prompt.trim() && !generating ? '#fff' : 'var(--text-tertiary)',
-                                    border:         `1px solid ${prompt.trim() && !generating ? 'transparent' : 'var(--border-default)'}`,
-                                    cursor:          prompt.trim() && !generating ? 'pointer' : 'not-allowed',
+                                    color:           prompt.trim() && !generating ? '#fff'              : 'var(--text-tertiary)',
+                                    border:          `1px solid ${prompt.trim() && !generating ? 'transparent' : 'var(--border-default)'}`,
+                                    cursor:          prompt.trim() && !generating ? 'pointer'           : 'not-allowed',
                                     boxShadow:       prompt.trim() && !generating ? '0 4px 12px var(--turquoise-22)' : 'none',
                                 }}
                                 onMouseEnter={e => { if (prompt.trim() && !generating) e.currentTarget.style.opacity = '0.88' }}
                                 onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
                             >
                                 {generating
-                                    ? <><span className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />Generating…</>
-                                    : <><Wand2 size={12} strokeWidth={2.5} />Generate</>}
+                                    ? <><Loader2 size={12} className="animate-spin" />Generating…</>
+                                    : <><Wand2   size={12} strokeWidth={2.5}        />Generate</>}
                             </button>
                         </div>
                     </div>
+
+                    {/* Error message */}
+                    {error && (
+                        <p className="text-xs text-red-400 mt-2 px-1">{error}</p>
+                    )}
                 </div>
 
                 <div className="flex flex-wrap justify-center gap-8">
@@ -285,13 +342,12 @@ function AIHero() {
 export default function DashboardPage() {
     const router = useRouter()
 
-    const [projects,       setProjects]       = useState<Project[]>([])
-    const [stats,          setStats]          = useState<Stats | null>(null)
-    const [projectsLoading, setProjectsLoading] = useState(true)
-    const [statsLoading,   setStatsLoading]   = useState(true)
+    const [projects,         setProjects]         = useState<Project[]>([])
+    const [stats,            setStats]            = useState<Stats | null>(null)
+    const [projectsLoading,  setProjectsLoading]  = useState(true)
+    const [statsLoading,     setStatsLoading]     = useState(true)
     const [creatingTemplate, setCreatingTemplate] = useState<string | null>(null)
 
-    // Fetch 4 most recent projects
     useEffect(() => {
         fetch('/api/projects')
             .then(r => r.json())
@@ -308,7 +364,6 @@ export default function DashboardPage() {
             .finally(() => setProjectsLoading(false))
     }, [])
 
-    // Fetch stats — total, starred, trash
     useEffect(() => {
         fetch('/api/projects/stats')
             .then(r => r.json())
@@ -390,9 +445,9 @@ export default function DashboardPage() {
                                 className="flex flex-col items-start gap-3 p-4 rounded-xl text-left transition-all duration-200 group"
                                 style={{
                                     backgroundColor: accent ? 'var(--turquoise-8)' : 'var(--surface-raised)',
-                                    border: `1px solid ${accent ? 'var(--turquoise-22)' : 'var(--border-default)'}`,
-                                    cursor: creatingTemplate === label ? 'wait' : 'pointer',
-                                    opacity: creatingTemplate !== null && creatingTemplate !== label ? 0.5 : 1,
+                                    border:          `1px solid ${accent ? 'var(--turquoise-22)' : 'var(--border-default)'}`,
+                                    cursor:          creatingTemplate === label ? 'wait' : 'pointer',
+                                    opacity:         creatingTemplate !== null && creatingTemplate !== label ? 0.5 : 1,
                                 }}
                                 onMouseEnter={e => {
                                     if (!creatingTemplate) {
@@ -407,12 +462,14 @@ export default function DashboardPage() {
                                     e.currentTarget.style.boxShadow   = 'none'
                                 }}
                             >
-                                <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+                                <div
+                                    className="w-8 h-8 rounded-lg flex items-center justify-center"
                                     style={{
                                         backgroundColor: accent ? 'var(--turquoise-16)' : 'var(--bg)',
-                                        border: `1px solid ${accent ? 'var(--turquoise-32)' : 'var(--border-default)'}`,
-                                        color: accent ? 'var(--turquoise)' : 'var(--text-tertiary)',
-                                    }}>
+                                        border:          `1px solid ${accent ? 'var(--turquoise-32)' : 'var(--border-default)'}`,
+                                        color:           accent ? 'var(--turquoise)' : 'var(--text-tertiary)',
+                                    }}
+                                >
                                     {creatingTemplate === label
                                         ? <Loader2 size={14} className="animate-spin" style={{ color: accent ? 'var(--turquoise)' : 'var(--text-tertiary)' }} />
                                         : <Icon size={15} strokeWidth={1.75} />}
@@ -437,10 +494,13 @@ export default function DashboardPage() {
                                 Recent Projects
                             </span>
                         </div>
-                        <Link href="/dashboard/projects" className="text-xs font-bold transition-colors duration-150"
+                        <Link
+                            href="/dashboard/projects"
+                            className="text-xs font-bold transition-colors duration-150"
                             style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}
                             onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
-                            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}>
+                            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}
+                        >
                             View all →
                         </Link>
                     </div>
@@ -450,10 +510,14 @@ export default function DashboardPage() {
                             {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
                         </div>
                     ) : projects.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-14 gap-4 rounded-2xl"
-                            style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}>
-                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                                style={{ backgroundColor: 'var(--turquoise-8)', border: '1px solid var(--turquoise-22)' }}>
+                        <div
+                            className="flex flex-col items-center justify-center py-14 gap-4 rounded-2xl"
+                            style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}
+                        >
+                            <div
+                                className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                                style={{ backgroundColor: 'var(--turquoise-8)', border: '1px solid var(--turquoise-22)' }}
+                            >
                                 <FolderOpen size={22} style={{ color: 'var(--turquoise)' }} />
                             </div>
                             <div className="flex flex-col items-center gap-1 text-center">
@@ -476,8 +540,8 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex flex-wrap gap-3">
                         {[
-                            { label: 'New Project',    sub: 'Start from scratch', icon: FolderPlus, accent: true,  onClick: handleNewProject },
-                            { label: 'All Projects',   sub: 'View your library',  icon: FolderOpen, accent: false, onClick: () => router.push('/dashboard/projects') },
+                            { label: 'New Project',  sub: 'Start from scratch', icon: FolderPlus, accent: true,  onClick: handleNewProject },
+                            { label: 'All Projects', sub: 'View your library',  icon: FolderOpen, accent: false, onClick: () => router.push('/dashboard/projects') },
                         ].map(({ label, sub, icon: Icon, accent, onClick }) => (
                             <button
                                 key={label}
@@ -485,8 +549,8 @@ export default function DashboardPage() {
                                 className="flex items-center gap-4 px-5 py-4 rounded-xl cursor-pointer transition-all duration-200 focus:outline-none"
                                 style={{
                                     backgroundColor: accent ? 'var(--turquoise-8)' : 'var(--surface-raised)',
-                                    border: `1px solid ${accent ? 'var(--turquoise-22)' : 'var(--border-default)'}`,
-                                    minWidth: 200,
+                                    border:          `1px solid ${accent ? 'var(--turquoise-22)' : 'var(--border-default)'}`,
+                                    minWidth:        200,
                                 }}
                                 onMouseEnter={e => {
                                     e.currentTarget.style.borderColor = accent ? 'var(--turquoise-42)' : 'var(--border-strong)'
@@ -499,12 +563,14 @@ export default function DashboardPage() {
                                     e.currentTarget.style.boxShadow   = 'none'
                                 }}
                             >
-                                <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                                <div
+                                    className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                                     style={{
                                         backgroundColor: accent ? 'var(--turquoise-16)' : 'var(--bg)',
-                                        border: `1px solid ${accent ? 'var(--turquoise-32)' : 'var(--border-default)'}`,
-                                        color: accent ? 'var(--turquoise)' : 'var(--text-tertiary)',
-                                    }}>
+                                        border:          `1px solid ${accent ? 'var(--turquoise-32)' : 'var(--border-default)'}`,
+                                        color:           accent ? 'var(--turquoise)' : 'var(--text-tertiary)',
+                                    }}
+                                >
                                     <Icon size={16} strokeWidth={1.75} />
                                 </div>
                                 <div className="flex flex-col items-start gap-0.5">
@@ -528,10 +594,10 @@ export default function DashboardPage() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            <StatsCard label="Total Projects" value={stats?.total   ?? 0} sub="All time"           icon={FolderOpen} accent />
-                            <StatsCard label="Starred"        value={stats?.starred ?? 0} sub="Pinned projects"    icon={Star}              />
-                            <StatsCard label="In Trash"       value={stats?.trash   ?? 0} sub="Soft deleted"       icon={Trash2}            />
-                            <StatsCard label="Storage Used"   value="—"                   sub="Coming soon"        icon={Upload}            />
+                            <StatsCard label="Total Projects" value={stats?.total   ?? 0} sub="All time"        icon={FolderOpen} accent />
+                            <StatsCard label="Starred"        value={stats?.starred ?? 0} sub="Pinned projects" icon={Star}              />
+                            <StatsCard label="In Trash"       value={stats?.trash   ?? 0} sub="Soft deleted"    icon={Trash2}            />
+                            <StatsCard label="Storage Used"   value="—"                   sub="Coming soon"     icon={Upload}            />
                         </div>
                     )}
                 </div>
@@ -548,10 +614,10 @@ function formatRelative(dateStr: string): string {
     const mins  = Math.floor(diff / 60000)
     const hours = Math.floor(diff / 3600000)
     const days  = Math.floor(diff / 86400000)
-    if (mins  < 1)  return 'Just now'
-    if (mins  < 60) return `${mins}m ago`
-    if (hours < 24) return `${hours}h ago`
+    if (mins  < 1)   return 'Just now'
+    if (mins  < 60)  return `${mins}m ago`
+    if (hours < 24)  return `${hours}h ago`
     if (days  === 1) return 'Yesterday'
-    if (days  < 7)  return `${days} days ago`
+    if (days  < 7)   return `${days} days ago`
     return new Date(dateStr).toLocaleDateString()
 }

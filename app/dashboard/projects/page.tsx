@@ -1,94 +1,453 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useRef } from 'react'
-import Link from 'next/link'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
-    Search, Star, Trash2, MoreHorizontal,
-    Plus, Clock, Wand2, FolderOpen,
-    Play, X, Loader2, RefreshCw, AlertTriangle,
+    Search, Grid3X3, List, SlidersHorizontal,
+    Star, Trash2, FolderPlus, FolderOpen,
+    MoreVertical, Pencil, Copy, ExternalLink,
+    ChevronDown, X, Loader2, Film,
+    SortAsc, SortDesc, Clock, AlignLeft,
 } from 'lucide-react'
 import DashboardHeader from '../components/DashboardHeader'
+import { useRouter } from 'next/navigation'
 
-type Project = {
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface Scene {
     id:          string
-    name:        string
-    starred:     boolean
-    deletedAt:   string | null
-    prompt:      string | null
-    style:       string | null
-    aspectRatio: string | null
-    thumbnail:   string | null
-    createdAt:   string
-    updatedAt:   string
+    title:       string
+    description: string
+    musicMood:   string
+    duration:    number
+    order:       number
 }
 
-type Filter = 'all' | 'starred' | 'ai'
+interface Project {
+    id:          string
+    name:        string
+    style:       string | null
+    aspectRatio: string | null
+    createdAt:   string
+    updatedAt:   string
+    starred:     boolean
+    deletedAt:   string | null
+    thumbnail:   string | null
+    scenes:      Scene[]
+    _count?: { scenes: number }
+}
 
-function timeAgo(dateStr: string) {
+type SortField = 'updatedAt' | 'createdAt' | 'name'
+type SortDir   = 'asc' | 'desc'
+type Filter    = 'all' | 'starred' | 'trash'
+type ViewMode  = 'grid' | 'list'
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function formatRelative(dateStr: string): string {
     const diff  = Date.now() - new Date(dateStr).getTime()
     const mins  = Math.floor(diff / 60000)
     const hours = Math.floor(diff / 3600000)
     const days  = Math.floor(diff / 86400000)
-    if (mins < 1)   return 'Just now'
-    if (mins < 60)  return `${mins}m ago`
-    if (hours < 24) return `${hours}h ago`
-    if (days < 7)   return `${days}d ago`
-    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    if (mins  < 1)   return 'Just now'
+    if (mins  < 60)  return `${mins}m ago`
+    if (hours < 24)  return `${hours}h ago`
+    if (days  === 1) return 'Yesterday'
+    if (days  < 7)   return `${days}d ago`
+    return new Date(dateStr).toLocaleDateString()
 }
 
-function ConfirmDialog({ project, onConfirm, onCancel, loading }: {
-    project:   Project
-    onConfirm: () => void
-    onCancel:  () => void
-    loading:   boolean
-}) {
+function totalDuration(scenes: Scene[]): string {
+    const secs = scenes.reduce((a, s) => a + s.duration, 0)
+    if (secs < 60) return `${secs}s`
+    return `${Math.floor(secs / 60)}m ${secs % 60}s`
+}
+
+// ─── Thumbnail placeholder ────────────────────────────────────────────────────
+
+function ProjectThumbnail({ project, size = 'md' }: { project: Project; size?: 'sm' | 'md' }) {
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
-            onClick={onCancel}
+            className="relative w-full h-full flex items-center justify-center overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, var(--turquoise-10) 0%, var(--turquoise-8) 100%)' }}
         >
+            {/* Dot grid */}
             <div
-                className="flex flex-col gap-5 p-6 rounded-2xl w-full max-w-sm"
+                className="absolute inset-0"
                 style={{
-                    backgroundColor: 'var(--bg)',
-                    border: '1px solid var(--border-default)',
-                    boxShadow: '0 24px 64px rgba(0,0,0,0.2)',
+                    backgroundImage: 'radial-gradient(circle, var(--turquoise-22) 1px, transparent 1px)',
+                    backgroundSize:  size === 'sm' ? '14px 14px' : '22px 22px',
+                    opacity:         0.5,
                 }}
-                onClick={e => e.stopPropagation()}
+            />
+            {/* Glow */}
+            <div
+                className="absolute rounded-full blur-2xl"
+                style={{
+                    width:           size === 'sm' ? 48 : 80,
+                    height:          size === 'sm' ? 48 : 80,
+                    backgroundColor: 'var(--turquoise-22)',
+                }}
+            />
+            {/* Icon */}
+            <Film
+                size={size === 'sm' ? 16 : 24}
+                style={{ color: 'var(--turquoise)', opacity: 0.8, position: 'relative', zIndex: 1 }}
+                strokeWidth={1.5}
+            />
+            {/* Aspect ratio badge */}
+            <div
+                className="absolute bottom-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded"
+                style={{ backgroundColor: 'var(--turquoise-8)', color: 'var(--turquoise)', border: '1px solid var(--turquoise-22)' }}
             >
-                <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center"
-                    style={{ backgroundColor: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}
+                {project.aspectRatio ?? '16:9'}
+            </div>
+        </div>
+    )
+}
+
+// ─── Context Menu ─────────────────────────────────────────────────────────────
+
+function ContextMenu({
+    project,
+    onRename,
+    onDuplicate,
+    onToggleStar,
+    onTrash,
+    onRestore,
+    onClose,
+    anchorRef,
+}: {
+    project:      Project
+    onRename:     () => void
+    onDuplicate:  () => void
+    onToggleStar: () => void
+    onTrash:      () => void
+    onRestore:    () => void
+    onClose:      () => void
+    anchorRef:    React.RefObject<HTMLButtonElement | null>
+}) {
+    const menuRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (!menuRef.current?.contains(e.target as Node) && !anchorRef.current?.contains(e.target as Node))
+                onClose()
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [onClose, anchorRef])
+
+    const items = project.deletedAt
+        ? [{ label: 'Restore',   icon: FolderOpen, action: onRestore, danger: false }]
+        : [
+            { label: 'Rename',   icon: Pencil,     action: onRename,     danger: false },
+            { label: 'Duplicate',icon: Copy,       action: onDuplicate,  danger: false },
+            { label: project.starred ? 'Unstar' : 'Star', icon: Star, action: onToggleStar, danger: false },
+            { label: 'Move to Trash', icon: Trash2, action: onTrash,    danger: true  },
+          ]
+
+    return (
+        <div
+            ref={menuRef}
+            className="absolute right-0 top-8 z-50 rounded-xl overflow-hidden py-1 min-w-[160px]"
+            style={{
+                backgroundColor: 'var(--surface-raised)',
+                border:          '1px solid var(--border-default)',
+                boxShadow:       '0 12px 40px rgba(0,0,0,0.18)',
+            }}
+        >
+            {items.map(({ label, icon: Icon, action, danger }) => (
+                <button
+                    key={label}
+                    onClick={(e) => { e.stopPropagation(); action(); onClose() }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-medium transition-colors duration-100 text-left"
+                    style={{ color: danger ? '#ef4444' : 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer' }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = danger ? 'rgba(239,68,68,0.06)' : 'var(--bg)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                    <AlertTriangle size={20} style={{ color: '#ef4444' }} strokeWidth={1.75} />
+                    <Icon size={13} strokeWidth={2} />
+                    {label}
+                </button>
+            ))}
+        </div>
+    )
+}
+
+// ─── Project Card (Grid) ──────────────────────────────────────────────────────
+
+function ProjectCard({
+    project,
+    onOpen,
+    onRename,
+    onDuplicate,
+    onToggleStar,
+    onTrash,
+    onRestore,
+}: {
+    project:      Project
+    onOpen:       () => void
+    onRename:     () => void
+    onDuplicate:  () => void
+    onToggleStar: () => void
+    onTrash:      () => void
+    onRestore:    () => void
+}) {
+    const [menuOpen, setMenuOpen] = useState(false)
+    const [hovered,  setHovered]  = useState(false)
+    const menuBtnRef = useRef<HTMLButtonElement>(null)
+
+    return (
+        <div
+            className="group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200"
+            style={{
+                border:     `1px solid ${hovered ? 'var(--border-strong)' : 'var(--border-default)'}`,
+                boxShadow:  hovered ? '0 8px 32px rgba(0,0,0,0.10)' : '0 2px 8px rgba(0,0,0,0.04)',
+                transform:  hovered ? 'translateY(-2px)' : 'translateY(0)',
+                opacity:    project.deletedAt ? 0.65 : 1,
+            }}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            onClick={onOpen}
+        >
+            {/* Thumbnail */}
+            <div className="aspect-video w-full relative" style={{ backgroundColor: 'var(--surface-raised)' }}>
+                <ProjectThumbnail project={project} />
+
+                {/* Star badge */}
+                {project.starred && (
+                    <div
+                        className="absolute top-2 left-2 w-6 h-6 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+                    >
+                        <Star size={11} fill="#fbbf24" color="#fbbf24" />
+                    </div>
+                )}
+
+                {/* Hover overlay */}
+                <div
+                    className="absolute inset-0 flex items-center justify-center transition-all duration-200"
+                    style={{
+                        backgroundColor: hovered ? 'rgba(0,0,0,0.55)' : 'rgba(0,0,0,0)',
+                        opacity:         hovered ? 1 : 0,
+                        backdropFilter:  hovered ? 'blur(2px)' : 'none',
+                    }}
+                >
+                    <div
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white transition-transform duration-200"
+                        style={{
+                            backgroundColor: 'var(--turquoise)',
+                            boxShadow:       '0 0 0 2px rgba(255,255,255,0.15), 0 8px 24px rgba(0,0,0,0.4)',
+                            transform:       hovered ? 'scale(1)' : 'scale(0.92)',
+                            border:          '1px solid rgba(255,255,255,0.2)',
+                        }}
+                    >
+                        <ExternalLink size={12} strokeWidth={2.5} />
+                        {project.deletedAt ? 'View' : 'Open Editor'}
+                    </div>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                    <p className="text-sm font-bold" style={{ color: 'var(--text)' }}>Move to Trash?</p>
-                    <p className="text-xs leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
-                        <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>&quot;{project.name}&quot;</span> will be moved to trash. You can restore it within 30 days.
+            </div>
+
+            {/* Info bar */}
+            <div
+                className="px-3 py-3 flex items-center gap-2"
+                style={{ backgroundColor: 'var(--bg)', borderTop: '1px solid var(--border-subtle)' }}
+            >
+                <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold truncate" style={{ color: 'var(--text)' }}>
+                        {project.name}
+                    </p>
+                    <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
+                        {formatRelative(project.updatedAt)} · {project.scenes?.length ?? 0} scenes
+                        {project.scenes?.length > 0 && ` · ${totalDuration(project.scenes)}`}
                     </p>
                 </div>
-                <div className="flex items-center gap-2 justify-end">
+
+                {/* Menu button */}
+                <div className="relative" onClick={e => e.stopPropagation()}>
                     <button
-                        onClick={onCancel}
-                        className="px-4 py-2 rounded-xl text-xs font-semibold transition-colors"
-                        style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', color: 'var(--text-tertiary)', cursor: 'pointer' }}
-                        onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)' }}
-                        onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-tertiary)' }}
+                        ref={menuBtnRef}
+                        onClick={() => setMenuOpen(v => !v)}
+                        className="w-6 h-6 rounded-md flex items-center justify-center transition-colors duration-100"
+                        style={{ color: 'var(--text-tertiary)' }}
+                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--surface-raised)'; e.currentTarget.style.color = 'var(--text)' }}
+                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)' }}
+                    >
+                        <MoreVertical size={13} strokeWidth={2} />
+                    </button>
+                    {menuOpen && (
+                        <ContextMenu
+                            project={project}
+                            onRename={onRename}
+                            onDuplicate={onDuplicate}
+                            onToggleStar={onToggleStar}
+                            onTrash={onTrash}
+                            onRestore={onRestore}
+                            onClose={() => setMenuOpen(false)}
+                            anchorRef={menuBtnRef}
+                        />
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// ─── Project Row (List) ───────────────────────────────────────────────────────
+
+function ProjectRow({
+    project,
+    onOpen,
+    onRename,
+    onDuplicate,
+    onToggleStar,
+    onTrash,
+    onRestore,
+}: {
+    project:      Project
+    onOpen:       () => void
+    onRename:     () => void
+    onDuplicate:  () => void
+    onToggleStar: () => void
+    onTrash:      () => void
+    onRestore:    () => void
+}) {
+    const [menuOpen, setMenuOpen] = useState(false)
+    const [hovered,  setHovered]  = useState(false)
+    const menuBtnRef = useRef<HTMLButtonElement>(null)
+
+    return (
+        <div
+            className="flex items-center gap-4 px-4 py-3 rounded-xl cursor-pointer transition-all duration-150"
+            style={{
+                backgroundColor: hovered ? 'var(--surface-raised)' : 'transparent',
+                border:          `1px solid ${hovered ? 'var(--border-default)' : 'transparent'}`,
+                opacity:         project.deletedAt ? 0.65 : 1,
+            }}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            onClick={onOpen}
+        >
+            {/* Mini thumbnail */}
+            <div className="w-16 h-10 rounded-lg overflow-hidden shrink-0" style={{ backgroundColor: 'var(--surface-raised)' }}>
+                <ProjectThumbnail project={project} size="sm" />
+            </div>
+
+            {/* Name + meta */}
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold truncate" style={{ color: 'var(--text)' }}>
+                        {project.name}
+                    </p>
+                    {project.starred && <Star size={11} fill="#fbbf24" color="#fbbf24" />}
+                    {project.deletedAt && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}>
+                            TRASH
+                        </span>
+                    )}
+                </div>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
+                    {project.scenes?.length ?? 0} scenes
+                    {project.scenes?.length > 0 && ` · ${totalDuration(project.scenes)}`}
+                    {project.style && ` · ${project.style}`}
+                </p>
+            </div>
+
+            {/* Aspect ratio */}
+            <span className="text-[11px] font-bold shrink-0 hidden sm:block" style={{ color: 'var(--text-tertiary)', width: 40 }}>
+                {project.aspectRatio ?? '—'}
+            </span>
+
+            {/* Updated */}
+            <span className="text-[11px] shrink-0 hidden md:block" style={{ color: 'var(--text-tertiary)', width: 80 }}>
+                {formatRelative(project.updatedAt)}
+            </span>
+
+            {/* Created */}
+            <span className="text-[11px] shrink-0 hidden lg:block" style={{ color: 'var(--text-tertiary)', width: 80 }}>
+                {new Date(project.createdAt).toLocaleDateString()}
+            </span>
+
+            {/* Actions */}
+            <div className="relative shrink-0" onClick={e => e.stopPropagation()}>
+                <button
+                    ref={menuBtnRef}
+                    onClick={() => setMenuOpen(v => !v)}
+                    className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors duration-100"
+                    style={{ color: 'var(--text-tertiary)' }}
+                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--bg)'; e.currentTarget.style.color = 'var(--text)' }}
+                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)' }}
+                >
+                    <MoreVertical size={14} strokeWidth={2} />
+                </button>
+                {menuOpen && (
+                    <ContextMenu
+                        project={project}
+                        onRename={onRename}
+                        onDuplicate={onDuplicate}
+                        onToggleStar={onToggleStar}
+                        onTrash={onTrash}
+                        onRestore={onRestore}
+                        onClose={() => setMenuOpen(false)}
+                        anchorRef={menuBtnRef}
+                    />
+                )}
+            </div>
+        </div>
+    )
+}
+
+// ─── Rename Modal ─────────────────────────────────────────────────────────────
+
+function RenameModal({ project, onSave, onClose }: { project: Project; onSave: (name: string) => void; onClose: () => void }) {
+    const [name, setName] = useState(project.name)
+    const inputRef = useRef<HTMLInputElement>(null)
+
+    useEffect(() => { inputRef.current?.focus(); inputRef.current?.select() }, [])
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+            onClick={onClose}
+        >
+            <div
+                className="rounded-2xl p-6 w-full max-w-sm flex flex-col gap-4"
+                style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', boxShadow: '0 24px 64px rgba(0,0,0,0.24)' }}
+                onClick={e => e.stopPropagation()}
+            >
+                <div>
+                    <h3 className="text-sm font-bold" style={{ color: 'var(--text)' }}>Rename project</h3>
+                    <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>Enter a new name for this project.</p>
+                </div>
+                <input
+                    ref={inputRef}
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') onSave(name); if (e.key === 'Escape') onClose() }}
+                    className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
+                    style={{
+                        backgroundColor: 'var(--bg)',
+                        border:          '1px solid var(--border-default)',
+                        color:           'var(--text)',
+                    }}
+                    onFocus={e => e.currentTarget.style.borderColor = 'var(--turquoise-42)'}
+                    onBlur={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
+                />
+                <div className="flex gap-2 justify-end">
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 rounded-lg text-xs font-semibold"
+                        style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
                     >
                         Cancel
                     </button>
                     <button
-                        onClick={onConfirm}
-                        disabled={loading}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold"
-                        style={{ backgroundColor: '#ef4444', color: '#fff', cursor: 'pointer', border: 'none' }}
-                        onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }}
-                        onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
+                        onClick={() => onSave(name)}
+                        disabled={!name.trim()}
+                        className="px-4 py-2 rounded-lg text-xs font-semibold text-white"
+                        style={{ backgroundColor: 'var(--turquoise)', opacity: name.trim() ? 1 : 0.5 }}
                     >
-                        {loading ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} strokeWidth={2} />}
-                        Move to Trash
+                        Save
                     </button>
                 </div>
             </div>
@@ -96,200 +455,79 @@ function ConfirmDialog({ project, onConfirm, onCancel, loading }: {
     )
 }
 
-function ProjectCard({ project, onStar, onDeleteRequest }: {
-    project:         Project
-    onStar:          (id: string, starred: boolean) => void
-    onDeleteRequest: (project: Project) => void
+// ─── Sort Dropdown ────────────────────────────────────────────────────────────
+
+function SortDropdown({
+    field, dir, onChange, onClose,
+}: {
+    field:    SortField
+    dir:      SortDir
+    onChange: (f: SortField, d: SortDir) => void
+    onClose:  () => void
 }) {
-    const [menuOpen, setMenuOpen] = useState(false)
-    const [starring, setStarring] = useState(false)
-    const menuRef                 = useRef<HTMLDivElement>(null)
-
+    const ref = useRef<HTMLDivElement>(null)
     useEffect(() => {
-        const handler = (e: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
-        }
-        document.addEventListener('mousedown', handler)
-        return () => document.removeEventListener('mousedown', handler)
-    }, [])
+        const h = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) onClose() }
+        document.addEventListener('mousedown', h)
+        return () => document.removeEventListener('mousedown', h)
+    }, [onClose])
 
-    const handleStar = async (e: React.MouseEvent) => {
-        e.preventDefault(); e.stopPropagation()
-        setStarring(true)
-        await onStar(project.id, project.starred)
-        setStarring(false)
-    }
+    const options: { label: string; field: SortField; icon: React.ElementType }[] = [
+        { label: 'Last modified', field: 'updatedAt', icon: Clock    },
+        { label: 'Date created',  field: 'createdAt', icon: Clock    },
+        { label: 'Name',          field: 'name',      icon: AlignLeft },
+    ]
 
     return (
         <div
-            className="group flex flex-col rounded-xl overflow-hidden transition-all duration-200"
-            style={{ boxShadow: '0 0 0 1px var(--border-default)' }}
-            onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.1), 0 0 0 1px var(--turquoise-22)'
-            }}
-            onMouseLeave={e => {
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 0 0 1px var(--border-default)'
-            }}
+            ref={ref}
+            className="absolute right-0 top-10 z-50 rounded-xl overflow-hidden py-1 min-w-[180px]"
+            style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', boxShadow: '0 12px 40px rgba(0,0,0,0.18)' }}
         >
-            <Link href={`/dashboard/projects/${project.id}`} style={{ textDecoration: 'none' }}>
-                <div className="relative w-full aspect-video overflow-hidden" style={{ backgroundColor: 'var(--surface-raised)' }}>
-                    {project.thumbnail ? (
-                        <img src={project.thumbnail} alt={project.name} className="w-full h-full object-cover" />
-                    ) : (
-                        <div
-                            className="w-full h-full flex items-center justify-center"
-                            style={{ background: 'linear-gradient(135deg, var(--turquoise-10) 0%, var(--turquoise-22) 100%)' }}
-                        >
-                            <div
-                                className="w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
-                                style={{ backgroundColor: 'var(--turquoise-22)', border: '1px solid var(--turquoise-40)' }}
-                            >
-                                <Play size={16} strokeWidth={0} fill="var(--turquoise)" style={{ marginLeft: 2 }} />
-                            </div>
-                        </div>
-                    )}
-                    <div
-                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center"
-                        style={{ backgroundColor: 'rgba(2,2,2,0.3)' }}
+            {options.map(({ label, field: f, icon: Icon }) => (
+                <div key={f} className="flex items-center gap-2">
+                    <button
+                        onClick={() => { onChange(f, f === field ? (dir === 'asc' ? 'desc' : 'asc') : 'desc'); onClose() }}
+                        className="flex-1 flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-left transition-colors"
+                        style={{ color: f === field ? 'var(--turquoise)' : 'var(--text-secondary)' }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--bg)'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
-                        <span className="text-[0.7rem] font-bold tracking-widest uppercase text-white">Open</span>
-                    </div>
-                    {project.prompt && (
-                        <div
-                            className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold"
-                            style={{ backgroundColor: 'rgba(2,2,2,0.6)', backdropFilter: 'blur(4px)', color: 'var(--turquoise)', border: '1px solid var(--turquoise-22)' }}
-                        >
-                            <Wand2 size={9} strokeWidth={2.5} /> AI
-                        </div>
-                    )}
-                    <div className="absolute top-2 right-2 flex items-center gap-1">
-                        <button
-                            onClick={handleStar}
-                            disabled={starring}
-                            className="w-6 h-6 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 focus:outline-none"
-                            style={{
-                                backgroundColor: project.starred ? 'rgba(251,191,36,0.2)' : 'rgba(2,2,2,0.5)',
-                                backdropFilter: 'blur(4px)', border: 'none',
-                                color: project.starred ? '#fbbf24' : '#fefefe',
-                                cursor: 'pointer',
-                            }}
-                        >
-                            {starring ? <Loader2 size={11} className="animate-spin" /> : <Star size={11} strokeWidth={2} fill={project.starred ? '#fbbf24' : 'none'} />}
-                        </button>
-                        <div ref={menuRef} className="relative">
-                            <button
-                                onClick={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(o => !o) }}
-                                className="w-6 h-6 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 focus:outline-none"
-                                style={{ backgroundColor: 'rgba(2,2,2,0.5)', backdropFilter: 'blur(4px)', border: 'none', color: '#fefefe', cursor: 'pointer' }}
-                            >
-                                <MoreHorizontal size={13} />
-                            </button>
-                            {menuOpen && (
-                                <div
-                                    className="absolute right-0 top-full mt-1 w-44 rounded-xl overflow-hidden z-50"
-                                    style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border-default)', boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}
-                                >
-                                    <button
-                                        onClick={handleStar}
-                                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold text-left"
-                                        style={{ color: 'var(--text-tertiary)', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}
-                                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--surface-raised)'; e.currentTarget.style.color = 'var(--text)' }}
-                                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)' }}
-                                    >
-                                        <Star size={13} strokeWidth={1.75} fill={project.starred ? 'currentColor' : 'none'} />
-                                        {project.starred ? 'Unstar' : 'Star'}
-                                    </button>
-                                    <div style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                                        <button
-                                            onClick={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onDeleteRequest(project) }}
-                                            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold text-left"
-                                            style={{ color: 'var(--text-tertiary)', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}
-                                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.06)'; e.currentTarget.style.color = '#ef4444' }}
-                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)' }}
-                                        >
-                                            <Trash2 size={13} strokeWidth={1.75} /> Move to Trash
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                        <Icon size={12} />
+                        {label}
+                        {f === field && (dir === 'asc' ? <SortAsc size={11} className="ml-auto" /> : <SortDesc size={11} className="ml-auto" />)}
+                    </button>
                 </div>
-            </Link>
-            <div className="flex flex-col gap-1 px-4 py-3" style={{ backgroundColor: 'var(--bg)', borderTop: '1px solid var(--border-subtle)' }}>
-                <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-bold truncate" style={{ color: 'var(--text-secondary)' }}>{project.name}</span>
-                    {project.starred && <Star size={11} strokeWidth={0} fill="#fbbf24" className="shrink-0" />}
-                </div>
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                        <Clock size={11} strokeWidth={1.75} style={{ color: 'var(--text-tertiary)' }} />
-                        <span className="text-[0.68rem] font-medium" style={{ color: 'var(--text-tertiary)' }}>{timeAgo(project.updatedAt)}</span>
-                    </div>
-                    {project.aspectRatio && (
-                        <span
-                            className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
-                            style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', color: 'var(--text-tertiary)' }}
-                        >
-                            {project.aspectRatio}
-                        </span>
-                    )}
-                </div>
-            </div>
+            ))}
         </div>
     )
 }
 
-function EmptyState({ filter, onNew }: { filter: Filter; onNew: () => void }) {
-    const messages = {
-        all:     { icon: FolderOpen, title: 'No projects yet',     sub: 'Create your first project or generate one with AI' },
-        starred: { icon: Star,       title: 'No starred projects',  sub: 'Star projects you want to find quickly'            },
-        ai:      { icon: Wand2,      title: 'No AI projects yet',   sub: 'Use the AI generator on the dashboard to get started' },
-    }
-    const { icon: Icon, title, sub } = messages[filter]
-    return (
-        <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}>
-                <Icon size={22} style={{ color: 'var(--text-tertiary)', opacity: 0.5 }} strokeWidth={1.5} />
-            </div>
-            <div className="flex flex-col items-center gap-1 text-center">
-                <p className="text-sm font-bold" style={{ color: 'var(--text)' }}>{title}</p>
-                <p className="text-xs max-w-xs" style={{ color: 'var(--text-tertiary)' }}>{sub}</p>
-            </div>
-            {filter === 'all' && (
-                <button
-                    onClick={onNew}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold mt-2"
-                    style={{ backgroundColor: 'var(--turquoise)', color: '#fff', boxShadow: '0 4px 14px var(--turquoise-22)', border: 'none', cursor: 'pointer' }}
-                    onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }}
-                    onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
-                >
-                    <Plus size={13} strokeWidth={2.5} /> New Project
-                </button>
-            )}
-        </div>
-    )
-}
+// ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function ProjectsPage() {
+    const router = useRouter()
+
     const [projects,     setProjects]     = useState<Project[]>([])
     const [loading,      setLoading]      = useState(true)
     const [search,       setSearch]       = useState('')
+    const [viewMode,     setViewMode]     = useState<ViewMode>('grid')
     const [filter,       setFilter]       = useState<Filter>('all')
+    const [sortField,    setSortField]    = useState<SortField>('updatedAt')
+    const [sortDir,      setSortDir]      = useState<SortDir>('desc')
+    const [sortOpen,     setSortOpen]     = useState(false)
+    const [renaming,     setRenaming]     = useState<Project | null>(null)
     const [creating,     setCreating]     = useState(false)
-    const [newName,      setNewName]      = useState('')
-    const [showNew,      setShowNew]      = useState(false)
-    const [deleteTarget, setDeleteTarget] = useState<Project | null>(null)
-    const [deleting,     setDeleting]     = useState(false)
 
+    // Fetch all projects (including trashed for trash tab)
     const fetchProjects = useCallback(async () => {
         setLoading(true)
         try {
-            const res  = await fetch('/api/projects')
+            const res  = await fetch('/api/projects?includeDeleted=true')
             const data = await res.json()
             setProjects(Array.isArray(data) ? data : [])
+        } catch (err) {
+            console.error(err)
         } finally {
             setLoading(false)
         }
@@ -297,217 +535,389 @@ export default function ProjectsPage() {
 
     useEffect(() => { fetchProjects() }, [fetchProjects])
 
-    const handleCreate = async () => {
-        if (!newName.trim()) return
+    // ── Derived list ──────────────────────────────────────────────────────────
+
+    const displayed = useMemo(() => {
+        let list = [...projects]
+
+        // Filter
+        if (filter === 'starred') list = list.filter(p => p.starred && !p.deletedAt)
+        else if (filter === 'trash') list = list.filter(p => !!p.deletedAt)
+        else list = list.filter(p => !p.deletedAt)
+
+        // Search
+        if (search.trim()) {
+            const q = search.toLowerCase()
+            list = list.filter(p =>
+                p.name.toLowerCase().includes(q) ||
+                p.style?.toLowerCase().includes(q) ||
+                p.scenes?.some(s => s.title.toLowerCase().includes(q))
+            )
+        }
+
+        // Sort
+        list.sort((a, b) => {
+            let av: string | number = a[sortField]
+            let bv: string | number = b[sortField]
+            if (sortField !== 'name') { av = new Date(av).getTime(); bv = new Date(bv).getTime() }
+            if (av < bv) return sortDir === 'asc' ? -1 :  1
+            if (av > bv) return sortDir === 'asc' ?  1 : -1
+            return 0
+        })
+
+        return list
+    }, [projects, filter, search, sortField, sortDir])
+
+    // ── Actions ───────────────────────────────────────────────────────────────
+
+    const handleOpen = (project: Project) => {
+        if (project.deletedAt) return
+        window.open(`/editor/${project.id}`, '_blank')
+    }
+
+    const handleNewProject = async () => {
         setCreating(true)
         try {
-            const res     = await fetch('/api/projects', {
+            const res = await fetch('/api/projects', {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ name: newName.trim() }),
+                body:    JSON.stringify({ name: 'Untitled Project', style: 'Modern', aspectRatio: '16:9' }),
             })
             const project = await res.json()
-            setProjects(prev => [project, ...prev])
-            setNewName('')
-            setShowNew(false)
-        } finally {
-            setCreating(false)
-        }
+            window.open(`/editor/${project.id}`, '_blank')
+        } catch (err) { console.error(err) } finally { setCreating(false) }
     }
 
-    const handleStar = async (id: string, currentlyStarred: boolean) => {
-        await fetch(`/api/projects/${id}`, {
+    const handleRename = async (project: Project, name: string) => {
+        setRenaming(null)
+        if (!name.trim() || name === project.name) return
+        setProjects(ps => ps.map(p => p.id === project.id ? { ...p, name } : p))
+        await fetch(`/api/projects/${project.id}`, {
             method:  'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ action: currentlyStarred ? 'unstar' : 'star' }),
+            body:    JSON.stringify({ name }),
         })
-        setProjects(prev => prev.map(p => p.id === id ? { ...p, starred: !currentlyStarred } : p))
     }
 
-    const handleDeleteConfirm = async () => {
-        if (!deleteTarget) return
-        setDeleting(true)
-        try {
-            await fetch(`/api/projects/${deleteTarget.id}`, { method: 'DELETE' })
-            setProjects(prev => prev.filter(p => p.id !== deleteTarget.id))
-            setDeleteTarget(null)
-        } finally {
-            setDeleting(false)
-        }
+    const handleDuplicate = async (project: Project) => {
+        const res = await fetch('/api/projects', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({
+                name:        `${project.name} (copy)`,
+                style:       project.style,
+                aspectRatio: project.aspectRatio,
+                scenes:      project.scenes?.map(({ title, description, musicMood, duration, order }) =>
+                    ({ title, description, musicMood, duration, order })),
+            }),
+        })
+        const dup = await res.json()
+        setProjects(ps => [dup, ...ps])
     }
 
-    const filtered = projects
-        .filter(p => filter === 'starred' ? p.starred : filter === 'ai' ? !!p.prompt : true)
-        .filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
+    const handleToggleStar = async (project: Project) => {
+        const starred = !project.starred
+        setProjects(ps => ps.map(p => p.id === project.id ? { ...p, starred } : p))
+        await fetch(`/api/projects/${project.id}`, {
+            method:  'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ starred }),
+        })
+    }
 
-    const filterTabs: { key: Filter; label: string; count: number }[] = [
-        { key: 'all',     label: 'All',          count: projects.length },
-        { key: 'starred', label: 'Starred',       count: projects.filter(p => p.starred).length },
-        { key: 'ai',      label: 'AI Generated',  count: projects.filter(p => !!p.prompt).length },
+    const handleTrash = async (project: Project) => {
+        setProjects(ps => ps.map(p => p.id === project.id ? { ...p, deletedAt: new Date().toISOString() } : p))
+        await fetch(`/api/projects/${project.id}`, {
+            method:  'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ action: 'trash' }),
+        })
+    }
+
+    const handleRestore = async (project: Project) => {
+        setProjects(ps => ps.map(p => p.id === project.id ? { ...p, deletedAt: null } : p))
+        await fetch(`/api/projects/${project.id}`, {
+            method:  'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ action: 'restore' }),
+        })
+    }
+
+    // ── Tab counts ────────────────────────────────────────────────────────────
+
+    const counts = useMemo(() => ({
+        all:     projects.filter(p => !p.deletedAt).length,
+        starred: projects.filter(p => p.starred && !p.deletedAt).length,
+        trash:   projects.filter(p => !!p.deletedAt).length,
+    }), [projects])
+
+    // ── Render ────────────────────────────────────────────────────────────────
+
+    const FILTERS: { key: Filter; label: string; icon: React.ElementType }[] = [
+        { key: 'all',     label: 'All',     icon: FolderOpen },
+        { key: 'starred', label: 'Starred', icon: Star       },
+        { key: 'trash',   label: 'Trash',   icon: Trash2     },
     ]
 
     return (
         <div className="relative flex flex-col flex-1 min-h-0 overflow-auto">
-
-            {deleteTarget && (
-                <ConfirmDialog
-                    project={deleteTarget}
-                    onConfirm={handleDeleteConfirm}
-                    onCancel={() => setDeleteTarget(null)}
-                    loading={deleting}
-                />
-            )}
-
-            <DashboardHeader title="Projects" subtitle="All your video projects" />
+            <DashboardHeader title="Projects" subtitle="Your video library" />
 
             <main className="flex-1 p-8 flex flex-col gap-6">
 
-                {/* Toolbar */}
-                <div className="flex items-center justify-between gap-4 flex-wrap">
-                    <div className="flex items-center gap-3 flex-wrap">
+                {/* ── Top bar ── */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+                    {/* Filter tabs */}
+                    <div className="flex items-center gap-1 p-1 rounded-xl" style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-subtle)' }}>
+                        {FILTERS.map(({ key, label, icon: Icon }) => (
+                            <button
+                                key={key}
+                                onClick={() => setFilter(key)}
+                                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-150"
+                                style={{
+                                    backgroundColor: filter === key ? 'var(--bg)'               : 'transparent',
+                                    color:           filter === key ? 'var(--text)'              : 'var(--text-tertiary)',
+                                    border:          filter === key ? '1px solid var(--border-default)' : '1px solid transparent',
+                                    boxShadow:       filter === key ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
+                                }}
+                            >
+                                <Icon size={12} strokeWidth={2} />
+                                {label}
+                                <span
+                                    className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                                    style={{
+                                        backgroundColor: filter === key ? 'var(--turquoise-8)' : 'var(--surface-raised)',
+                                        color:           filter === key ? 'var(--turquoise)'   : 'var(--text-tertiary)',
+                                    }}
+                                >
+                                    {counts[key]}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Right side controls */}
+                    <div className="flex items-center gap-2">
+
+                        {/* Search */}
                         <div
-                            className="flex items-center gap-2.5 px-3 py-2 rounded-xl"
-                            style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', width: '220px' }}
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
+                            style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', minWidth: 200 }}
                         >
                             <Search size={13} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
                             <input
-                                type="text"
-                                placeholder="Search projects…"
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
-                                className="text-xs outline-none w-full bg-transparent"
+                                placeholder="Search projects…"
+                                className="bg-transparent outline-none flex-1 text-xs"
                                 style={{ color: 'var(--text)' }}
                             />
                             {search && (
-                                <button onClick={() => setSearch('')} style={{ color: 'var(--text-tertiary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-                                    <X size={11} />
+                                <button onClick={() => setSearch('')}>
+                                    <X size={12} style={{ color: 'var(--text-tertiary)' }} />
                                 </button>
                             )}
                         </div>
-                        <div
-                            className="flex items-center gap-1 p-1 rounded-xl"
-                            style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}
-                        >
-                            {filterTabs.map(({ key, label, count }) => (
+
+                        {/* Sort */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setSortOpen(v => !v)}
+                                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150"
+                                style={{
+                                    backgroundColor: sortOpen ? 'var(--bg)' : 'var(--surface-raised)',
+                                    border:          '1px solid var(--border-default)',
+                                    color:           'var(--text-secondary)',
+                                }}
+                            >
+                                <SlidersHorizontal size={12} strokeWidth={2} />
+                                Sort
+                                <ChevronDown size={11} style={{ transform: sortOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                            </button>
+                            {sortOpen && (
+                                <SortDropdown
+                                    field={sortField}
+                                    dir={sortDir}
+                                    onChange={(f, d) => { setSortField(f); setSortDir(d) }}
+                                    onClose={() => setSortOpen(false)}
+                                />
+                            )}
+                        </div>
+
+                        {/* View toggle */}
+                        <div className="flex items-center rounded-lg overflow-hidden" style={{ border: '1px solid var(--border-default)' }}>
+                            {([['grid', Grid3X3], ['list', List]] as const).map(([mode, Icon]) => (
                                 <button
-                                    key={key}
-                                    onClick={() => setFilter(key)}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150"
+                                    key={mode}
+                                    onClick={() => setViewMode(mode)}
+                                    className="w-8 h-8 flex items-center justify-center transition-colors duration-150"
                                     style={{
-                                        backgroundColor: filter === key ? 'var(--bg)' : 'transparent',
-                                        border: filter === key ? '1px solid var(--border-default)' : '1px solid transparent',
-                                        color: filter === key ? 'var(--text)' : 'var(--text-tertiary)',
-                                        boxShadow: filter === key ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
-                                        cursor: 'pointer',
+                                        backgroundColor: viewMode === mode ? 'var(--turquoise-8)' : 'var(--surface-raised)',
+                                        color:           viewMode === mode ? 'var(--turquoise)'   : 'var(--text-tertiary)',
                                     }}
                                 >
-                                    {label}
-                                    {count > 0 && (
-                                        <span
-                                            className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                                            style={{
-                                                backgroundColor: filter === key ? 'var(--turquoise-8)' : 'var(--surface-raised)',
-                                                color: filter === key ? 'var(--turquoise)' : 'var(--text-tertiary)',
-                                                border: filter === key ? '1px solid var(--turquoise-22)' : '1px solid var(--border-subtle)',
-                                            }}
-                                        >
-                                            {count}
-                                        </span>
-                                    )}
+                                    <Icon size={13} strokeWidth={2} />
                                 </button>
                             ))}
                         </div>
-                    </div>
-                    <div className="flex items-center gap-2">
+
+                        {/* New project */}
                         <button
-                            onClick={fetchProjects}
-                            className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors"
-                            style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', color: 'var(--text-tertiary)', cursor: 'pointer' }}
-                            onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--border-strong)' }}
-                            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.borderColor = 'var(--border-default)' }}
-                            title="Refresh"
+                            onClick={handleNewProject}
+                            disabled={creating}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all duration-150"
+                            style={{ backgroundColor: 'var(--turquoise)', boxShadow: '0 4px 12px var(--turquoise-22)' }}
+                            onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
+                            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                         >
-                            <RefreshCw size={13} strokeWidth={2} />
-                        </button>
-                        <button
-                            onClick={() => setShowNew(true)}
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold"
-                            style={{ backgroundColor: 'var(--turquoise)', color: '#fff', boxShadow: '0 4px 14px var(--turquoise-22)', border: 'none', cursor: 'pointer' }}
-                            onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }}
-                            onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
-                        >
-                            <Plus size={13} strokeWidth={2.5} /> New Project
+                            {creating
+                                ? <Loader2 size={12} className="animate-spin" />
+                                : <FolderPlus size={12} strokeWidth={2.5} />}
+                            New Project
                         </button>
                     </div>
                 </div>
 
-                {/* New project form */}
-                {showNew && (
+                {/* ── List header (list mode only) ── */}
+                {viewMode === 'list' && displayed.length > 0 && (
                     <div
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl"
-                        style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--turquoise-22)', boxShadow: '0 0 0 3px var(--turquoise-8)' }}
+                        className="flex items-center gap-4 px-4 py-2"
+                        style={{ borderBottom: '1px solid var(--border-subtle)' }}
                     >
-                        <input
-                            autoFocus
-                            type="text"
-                            placeholder="Project name…"
-                            value={newName}
-                            onChange={e => setNewName(e.target.value)}
-                            onKeyDown={e => { if (e.key === 'Enter') handleCreate(); if (e.key === 'Escape') { setShowNew(false); setNewName('') } }}
-                            className="flex-1 text-sm outline-none bg-transparent"
-                            style={{ color: 'var(--text)' }}
-                        />
-                        <button
-                            onClick={handleCreate}
-                            disabled={!newName.trim() || creating}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold"
-                            style={{
-                                backgroundColor: newName.trim() ? 'var(--turquoise)' : 'var(--border-default)',
-                                color: newName.trim() ? '#fff' : 'var(--text-tertiary)',
-                                cursor: newName.trim() ? 'pointer' : 'not-allowed',
-                                border: 'none',
-                            }}
-                        >
-                            {creating ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
-                            Create
-                        </button>
-                        <button
-                            onClick={() => { setShowNew(false); setNewName('') }}
-                            className="w-7 h-7 flex items-center justify-center rounded-lg"
-                            style={{ color: 'var(--text-tertiary)', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}
-                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--bg)'; e.currentTarget.style.color = 'var(--text)' }}
-                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)' }}
-                        >
-                            <X size={13} />
-                        </button>
+                        <div className="w-16 shrink-0" />
+                        <span className="flex-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>Name</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest shrink-0 hidden sm:block" style={{ color: 'var(--text-tertiary)', width: 40 }}>Format</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest shrink-0 hidden md:block" style={{ color: 'var(--text-tertiary)', width: 80 }}>Modified</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest shrink-0 hidden lg:block" style={{ color: 'var(--text-tertiary)', width: 80 }}>Created</span>
+                        <div className="w-7 shrink-0" />
                     </div>
                 )}
 
-                {/* Grid */}
+                {/* ── Content ── */}
                 {loading ? (
-                    <div className="flex items-center justify-center py-24">
-                        <Loader2 size={24} className="animate-spin" style={{ color: 'var(--text-tertiary)' }} />
+                    <div className={viewMode === 'grid'
+                        ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4'
+                        : 'flex flex-col gap-1'
+                    }>
+                        {Array.from({ length: 8 }).map((_, i) => (
+                            viewMode === 'grid' ? (
+                                <div key={i} className="rounded-xl overflow-hidden animate-pulse" style={{ border: '1px solid var(--border-default)' }}>
+                                    <div className="aspect-video" style={{ backgroundColor: 'var(--surface-raised)' }} />
+                                    <div className="px-3 py-3 flex flex-col gap-2" style={{ backgroundColor: 'var(--bg)' }}>
+                                        <div className="h-3 w-3/4 rounded" style={{ backgroundColor: 'var(--surface-raised)' }} />
+                                        <div className="h-2 w-1/2 rounded" style={{ backgroundColor: 'var(--surface-raised)' }} />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div key={i} className="flex items-center gap-4 px-4 py-3 rounded-xl animate-pulse">
+                                    <div className="w-16 h-10 rounded-lg" style={{ backgroundColor: 'var(--surface-raised)' }} />
+                                    <div className="flex-1 flex flex-col gap-1.5">
+                                        <div className="h-3 w-48 rounded" style={{ backgroundColor: 'var(--surface-raised)' }} />
+                                        <div className="h-2 w-24 rounded" style={{ backgroundColor: 'var(--surface-raised)' }} />
+                                    </div>
+                                </div>
+                            )
+                        ))}
                     </div>
-                ) : filtered.length === 0 ? (
-                    <EmptyState filter={filter} onNew={() => setShowNew(true)} />
-                ) : (
-                    <>
-                        <p className="text-xs font-semibold" style={{ color: 'var(--text-tertiary)' }}>
-                            {filtered.length} {filtered.length === 1 ? 'project' : 'projects'}{search && ` matching "${search}"`}
-                        </p>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {filtered.map(p => (
-                                <ProjectCard
-                                    key={p.id}
-                                    project={p}
-                                    onStar={handleStar}
-                                    onDeleteRequest={setDeleteTarget}
-                                />
-                            ))}
+
+                ) : displayed.length === 0 ? (
+                    <div
+                        className="flex flex-col items-center justify-center py-20 gap-4 rounded-2xl"
+                        style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}
+                    >
+                        <div
+                            className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                            style={{ backgroundColor: 'var(--turquoise-8)', border: '1px solid var(--turquoise-22)' }}
+                        >
+                            {filter === 'trash'
+                                ? <Trash2   size={24} style={{ color: 'var(--turquoise)' }} />
+                                : filter === 'starred'
+                                ? <Star     size={24} style={{ color: 'var(--turquoise)' }} />
+                                : <FolderOpen size={24} style={{ color: 'var(--turquoise)' }} />}
                         </div>
-                    </>
+                        <div className="flex flex-col items-center gap-1 text-center">
+                            <span className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>
+                                {search
+                                    ? 'No projects match your search'
+                                    : filter === 'trash'
+                                    ? 'Trash is empty'
+                                    : filter === 'starred'
+                                    ? 'No starred projects'
+                                    : 'No projects yet'}
+                            </span>
+                            <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                                {search
+                                    ? 'Try a different search term'
+                                    : filter === 'all'
+                                    ? 'Create your first project to get started'
+                                    : filter === 'starred'
+                                    ? 'Star projects to pin them here'
+                                    : 'Deleted projects will appear here'}
+                            </span>
+                        </div>
+                        {filter === 'all' && !search && (
+                            <button
+                                onClick={handleNewProject}
+                                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold text-white mt-2"
+                                style={{ backgroundColor: 'var(--turquoise)', boxShadow: '0 4px 12px var(--turquoise-22)' }}
+                            >
+                                <FolderPlus size={13} strokeWidth={2.5} />
+                                New Project
+                            </button>
+                        )}
+                    </div>
+
+                ) : viewMode === 'grid' ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {displayed.map(p => (
+                            <ProjectCard
+                                key={p.id}
+                                project={p}
+                                onOpen={() => handleOpen(p)}
+                                onRename={() => setRenaming(p)}
+                                onDuplicate={() => handleDuplicate(p)}
+                                onToggleStar={() => handleToggleStar(p)}
+                                onTrash={() => handleTrash(p)}
+                                onRestore={() => handleRestore(p)}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="flex flex-col gap-1">
+                        {displayed.map(p => (
+                            <ProjectRow
+                                key={p.id}
+                                project={p}
+                                onOpen={() => handleOpen(p)}
+                                onRename={() => setRenaming(p)}
+                                onDuplicate={() => handleDuplicate(p)}
+                                onToggleStar={() => handleToggleStar(p)}
+                                onTrash={() => handleTrash(p)}
+                                onRestore={() => handleRestore(p)}
+                            />
+                        ))}
+                    </div>
                 )}
+
+                {/* Project count footer */}
+                {!loading && displayed.length > 0 && (
+                    <p className="text-[11px] text-center" style={{ color: 'var(--text-tertiary)' }}>
+                        {displayed.length} {displayed.length === 1 ? 'project' : 'projects'}
+                        {search && ` matching "${search}"`}
+                    </p>
+                )}
+
             </main>
+
+            {/* Rename modal */}
+            {renaming && (
+                <RenameModal
+                    project={renaming}
+                    onSave={name => handleRename(renaming, name)}
+                    onClose={() => setRenaming(null)}
+                />
+            )}
         </div>
     )
 }
