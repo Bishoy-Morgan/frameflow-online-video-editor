@@ -32,11 +32,12 @@ interface LeftToolsPanelProps {
 export default function LeftToolsPanel({ activeTool, onToolClick }: LeftToolsPanelProps) {
   return (
     <div
-      className="flex flex-col items-center py-3 gap-1 shrink-0"
+      className="flex flex-col items-center py-3 gap-1.5 shrink-0"
       style={{
-        width:           '52px',
+        width:           '68px',       // wider: 52 → 68
         backgroundColor: 'var(--bg)',
         borderRight:     '1px solid var(--border-default)',
+        overflowY:       'auto',
       }}
     >
       {TOOLS.map(({ id, icon: Icon, label }) => {
@@ -46,8 +47,10 @@ export default function LeftToolsPanel({ activeTool, onToolClick }: LeftToolsPan
             key={id}
             onClick={() => onToolClick(id)}
             title={label}
-            className="relative flex flex-col items-center justify-center gap-1 w-10 h-10 rounded-xl transition-all duration-150 group"
+            className="relative flex flex-col items-center justify-center gap-1.5 rounded-xl transition-all duration-150 group"
             style={{
+              width:           '52px',   // button: 40 → 52
+              height:          '52px',   // button: 40 → 52
               backgroundColor: active ? 'var(--turquoise-8)' : 'transparent',
               border:          active ? '1px solid var(--turquoise-22)' : '1px solid transparent',
               cursor:          'pointer',
@@ -66,20 +69,24 @@ export default function LeftToolsPanel({ activeTool, onToolClick }: LeftToolsPan
             }}
           >
             <Icon
-              size={15}
+              size={20}                  // icon: 15 → 20
               strokeWidth={active ? 2 : 1.75}
               style={{ color: active ? 'var(--turquoise)' : 'var(--text-tertiary)' }}
             />
             <span
-              className="text-[8px] font-bold leading-none"
-              style={{ color: active ? 'var(--turquoise)' : 'var(--text-tertiary)', opacity: active ? 1 : 0.7 }}
+              className="font-bold leading-none"
+              style={{
+                fontSize: '10px',        // label: 8px → 10px
+                color:    active ? 'var(--turquoise)' : 'var(--text-tertiary)',
+                opacity:  active ? 1 : 0.7,
+              }}
             >
               {label}
             </span>
 
             {/* Tooltip */}
             <div
-              className="absolute left-full ml-2 px-2 py-1 rounded-md text-[11px] font-semibold whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50"
+              className="absolute left-full ml-2 px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50"
               style={{
                 backgroundColor: 'var(--bg)',
                 border:          '1px solid var(--border-default)',
