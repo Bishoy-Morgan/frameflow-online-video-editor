@@ -116,6 +116,9 @@ model Scene {
   duration    Int
   order       Int
 
+  videoUrl    String?  
+  pexelsId    String? 
+
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   createdAt   DateTime @default(now())

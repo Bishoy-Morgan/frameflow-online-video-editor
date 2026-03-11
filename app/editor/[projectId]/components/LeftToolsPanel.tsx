@@ -32,7 +32,7 @@ interface LeftToolsPanelProps {
 export default function LeftToolsPanel({ activeTool, onToolClick }: LeftToolsPanelProps) {
   return (
     <div
-      className="flex flex-col items-center py-3 gap-1.5 shrink-0"
+      className="flex flex-col items-center py-3 gap-1.5 shrink-0 overflow-x-hidden"
       style={{
         width:           '68px',       // wider: 52 → 68
         backgroundColor: 'var(--bg)',

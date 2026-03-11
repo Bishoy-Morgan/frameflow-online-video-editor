@@ -1,24 +1,38 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import {
-    FolderPlus, Upload, FolderOpen,
-    ArrowRight, Wand2, Film, Star, Trash2,
-    Monitor, Smartphone, Square,
-    Clapperboard, Zap, Megaphone, BookOpen,
-    Loader2,
+    Wand2, FolderPlus, FolderOpen, Star, Trash2, Upload,
+    Monitor, Smartphone, Square, Film, Zap, Megaphone,
+    Loader2, ArrowRight, Clock, Check, RefreshCw,
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import DashboardHeader from './components/DashboardHeader'
 import DashboardCard, { Project } from './components/DashboardCard'
 import StatsCard from './components/StatsCard'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 // Types
 
 type AspectRatio = '9:16' | '16:9' | '1:1'
 type Duration    = '15s'  | '30s'  | '60s'
 type Style       = 'Cinematic' | 'Viral' | 'Minimal' | 'Bold'
+
+interface Scene {
+    id:          string
+    title:       string
+    description: string
+    musicMood:   string
+    duration:    number
+    order:       number
+    videoUrl?:   string | null
+    pexelsId?:   string | null
+}
+
+interface GeneratedProject {
+    id:     string
+    name:   string
+    scenes: Scene[]
+}
 
 interface Stats {
     total:   number
@@ -44,59 +58,27 @@ const RATIOS: { label: AspectRatio; icon: React.ElementType; hint: string }[] = 
 const DURATIONS: Duration[] = ['15s', '30s', '60s']
 
 const EXAMPLE_PROMPTS = [
-    'A cinematic product reveal for a luxury watch brand with slow motion and dramatic lighting',
-    'A fast-paced viral reel showing a morning routine with trending transitions',
-    'A minimal brand story for a sustainable fashion label, quiet and emotional',
-    'An energetic promo for a fitness app launch with bold text and beats',
-    'A dreamy travel montage through Tokyo streets at golden hour',
+    'A cinematic product reveal for a luxury watch brand…',
+    'Fast-paced viral reel of a morning routine…',
+    'Minimal brand story for a sustainable fashion label…',
+    'Energetic promo for a fitness app launch…',
+    'Dreamy travel montage through Tokyo at golden hour…',
 ]
 
-const TEMPLATE_CONFIGS: Record<string, { style: string; aspectRatio: string; scenes: { title: string; description: string; musicMood: string; duration: number; order: number }[] }> = {
-    'Product Reveal': {
-        style: 'Minimal', aspectRatio: '16:9',
-        scenes: [
-            { title: 'Problem Statement', description: 'Open with the pain point your product solves.',      musicMood: 'Dramatic',  duration: 6,  order: 0 },
-            { title: 'Product Reveal',    description: 'Slow reveal of the product with clean background.', musicMood: 'Cinematic', duration: 8,  order: 1 },
-            { title: 'Key Features',      description: 'Three quick feature callouts with icons.',          musicMood: 'Uplifting', duration: 10, order: 2 },
-            { title: 'Call to Action',    description: 'End with a clear CTA.',                             musicMood: 'Uplifting', duration: 6,  order: 3 },
-        ],
-    },
-    'Viral Reel': {
-        style: 'Bold', aspectRatio: '9:16',
-        scenes: [
-            { title: 'Hook (0-3s)',    description: 'Bold text or surprising visual to stop the scroll.', musicMood: 'Energetic', duration: 3, order: 0 },
-            { title: 'Value Delivery', description: 'Quick, punchy content delivery.',                    musicMood: 'Energetic', duration: 8, order: 1 },
-            { title: 'Engagement CTA', description: 'End with a question or prompt to drive comments.',   musicMood: 'Uplifting', duration: 4, order: 2 },
-        ],
-    },
-    'Brand Story': {
-        style: 'Elegant', aspectRatio: '16:9',
-        scenes: [
-            { title: 'Brand Manifesto',  description: "Opening statement of your company's mission.",    musicMood: 'Cinematic', duration: 8,  order: 0 },
-            { title: 'Team & Culture',   description: 'Authentic team moments that humanize the brand.', musicMood: 'Uplifting', duration: 10, order: 1 },
-            { title: 'Vision Statement', description: "Forward-looking close — where you're going.",     musicMood: 'Cinematic', duration: 9,  order: 2 },
-        ],
-    },
-    'Tutorial': {
-        style: 'Bold', aspectRatio: '16:9',
-        scenes: [
-            { title: "What You'll Learn", description: 'State the outcome upfront.',              musicMood: 'Calm',      duration: 4, order: 0 },
-            { title: 'Your Intro',        description: 'Brief host introduction to build trust.', musicMood: 'Uplifting', duration: 3, order: 1 },
-            { title: 'Agenda',            description: 'Quick visual breakdown of the steps.',    musicMood: 'Calm',      duration: 3, order: 2 },
-        ],
-    },
+const MOOD_COLORS: Record<string, string> = {
+    Uplifting:   '#34d399',
+    Dramatic:    '#f87171',
+    Calm:        '#60a5fa',
+    Energetic:   '#fbbf24',
+    Melancholic: '#a78bfa',
+    Mysterious:  '#818cf8',
+    Cinematic:   '#00FFC8',
+    Playful:     '#fb923c',
 }
 
-const DASHBOARD_TEMPLATES = [
-    { label: 'Product Reveal', icon: Clapperboard, desc: 'Clean unboxing or launch',  accent: false },
-    { label: 'Viral Reel',     icon: Zap,          desc: 'Hook in 3s, keep watching', accent: true  },
-    { label: 'Brand Story',    icon: BookOpen,     desc: 'Who you are, why you exist', accent: false },
-    { label: 'Tutorial',       icon: Film,         desc: 'Step-by-step demo',          accent: false },
-]
+// Typewriter
 
-// ─── Typewriter ───────────────────────────────────────────────────────────────
-
-function useTypewriter(texts: string[], speed = 36, pause = 2400) {
+function useTypewriter(texts: string[], speed = 40, pause = 2600) {
     const [textIdx,  setTextIdx]  = useState(0)
     const [charIdx,  setCharIdx]  = useState(0)
     const [deleting, setDeleting] = useState(false)
@@ -106,7 +88,7 @@ function useTypewriter(texts: string[], speed = 36, pause = 2400) {
         let t: ReturnType<typeof setTimeout>
         if (!deleting && charIdx < current.length)        t = setTimeout(() => setCharIdx(i => i + 1), speed)
         else if (!deleting && charIdx === current.length) t = setTimeout(() => setDeleting(true), pause)
-        else if (deleting && charIdx > 0)                 t = setTimeout(() => setCharIdx(i => i - 1), speed / 2.2)
+        else if (deleting && charIdx > 0)                 t = setTimeout(() => setCharIdx(i => i - 1), speed / 2.5)
         else                                              t = setTimeout(() => { setDeleting(false); setTextIdx(i => (i + 1) % texts.length) }, 300)
         return () => clearTimeout(t)
     }, [charIdx, deleting, textIdx, texts, speed, pause])
@@ -114,7 +96,7 @@ function useTypewriter(texts: string[], speed = 36, pause = 2400) {
     return texts[textIdx].slice(0, charIdx)
 }
 
-// ─── Pill ─────────────────────────────────────────────────────────────────────
+// Pill
 
 function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
     return (
@@ -122,7 +104,7 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
             onClick={onClick}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150"
             style={{
-                backgroundColor: active ? 'var(--turquoise-8)'           : 'var(--bg)',
+                backgroundColor: active ? 'var(--turquoise-8)'            : 'var(--bg)',
                 border:          active ? '1px solid var(--turquoise-42)' : '1px solid var(--border-subtle)',
                 color:           active ? 'var(--turquoise)'              : 'var(--text-tertiary)',
             }}
@@ -134,7 +116,20 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
     )
 }
 
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
+// Section Label ────────────────────────────────────────────────────────────
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="flex items-center gap-3">
+            <div className="w-5 h-px" style={{ backgroundColor: 'var(--turquoise)' }} />
+            <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase" style={{ color: 'var(--turquoise)' }}>
+                {children}
+            </span>
+        </div>
+    )
+}
+
+// Skeletons ───
 
 function SkeletonCard() {
     return (
@@ -157,21 +152,148 @@ function SkeletonStat() {
     )
 }
 
-// ─── AIHero ───────────────────────────────────────────────────────────────────
-// FIXED: was window.open('/generate?...', '_blank') — opened non-existent page
-// NOW:   POST /api/ai/generate → creates project in DB → router.push to detail page
+// Scene Card ──
 
-function AIHero() {
+function SceneCard({ scene, index, selected, onToggle }: {
+    scene:    Scene
+    index:    number
+    selected: boolean
+    onToggle: () => void
+}) {
+    const moodColor  = MOOD_COLORS[scene.musicMood] ?? 'var(--turquoise)'
+    const videoRef   = React.useRef<HTMLVideoElement>(null)
+    const playingRef = React.useRef(false)
+
+    const handleMouseEnter = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (!selected) e.currentTarget.style.borderColor = 'var(--border-strong)'
+        const video = videoRef.current
+        if (!video) return
+        try {
+            playingRef.current = true
+            await video.play()
+        } catch {
+            // Interrupted — ignore
+        }
+    }
+
+    const handleMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (!selected) e.currentTarget.style.borderColor = 'var(--border-default)'
+        const video = videoRef.current
+        if (!video) return
+        playingRef.current = false
+        video.pause()
+        video.currentTime = 0
+    }
+
+    return (
+        <button
+            onClick={onToggle}
+            className="relative flex flex-col rounded-xl overflow-hidden text-left w-full transition-all duration-200 group"
+            style={{
+                backgroundColor: selected ? 'var(--turquoise-8)'            : 'var(--surface-raised)',
+                border:          selected ? '1px solid var(--turquoise-42)' : '1px solid var(--border-default)',
+                boxShadow:       selected ? '0 0 0 3px var(--turquoise-8)'  : 'none',
+            }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
+            {/* Selection badge */}
+            <div
+                className="absolute top-2.5 right-2.5 z-10 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200"
+                style={{
+                    backgroundColor: selected ? 'var(--turquoise)' : 'rgba(0,0,0,0.5)',
+                    border:          selected ? 'none'             : '1px solid rgba(255,255,255,0.3)',
+                    backdropFilter:  'blur(4px)',
+                }}
+            >
+                {selected && <Check size={11} strokeWidth={3} color="#020202" />}
+            </div>
+
+            {/* Video preview */}
+            <div className="relative w-full aspect-video overflow-hidden" style={{ backgroundColor: 'var(--surface-sunken)' }}>
+                {scene.videoUrl ? (
+                    <>
+                        <video
+                            ref={videoRef}
+                            src={scene.videoUrl}
+                            muted
+                            loop
+                            playsInline
+                            preload="metadata"
+                            className="w-full h-full object-cover"
+                        />
+                        {/* Overlay with scene info */}
+                        <div
+                            className="absolute inset-0 flex flex-col justify-end p-3"
+                            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }}
+                        >
+                            <div className="flex items-center justify-between">
+                                <span
+                                    className="text-[10px] font-black tracking-widest uppercase px-2 py-0.5 rounded-md"
+                                    style={{ backgroundColor: 'var(--turquoise-22)', color: 'var(--turquoise)' }}
+                                >
+                                    Scene {index + 1}
+                                </span>
+                                <span className="flex items-center gap-1 text-[11px] font-medium text-white">
+                                    <Clock size={10} />
+                                    {scene.duration}s
+                                </span>
+                            </div>
+                        </div>
+                        {/* Play hint */}
+                        <div
+                            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        >
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center"
+                                style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
+                                <Film size={14} color="white" />
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    // Fallback when no video found
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-2"
+                        style={{ background: 'linear-gradient(135deg, var(--turquoise-8) 0%, var(--surface-raised) 100%)' }}>
+                        <Film size={20} style={{ color: 'var(--turquoise-65)' }} />
+                        <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>No preview</span>
+                    </div>
+                )}
+            </div>
+
+            {/* Info footer */}
+            <div className="flex flex-col gap-2 p-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                <p className="text-xs font-bold leading-snug pr-2" style={{ color: 'var(--text-secondary)' }}>
+                    {scene.title}
+                </p>
+                <div
+                    className="flex items-center gap-1.5 w-fit px-2 py-1 rounded-md text-[10px] font-bold"
+                    style={{ backgroundColor: `${moodColor}14`, color: moodColor }}
+                >
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: moodColor }} />
+                    {scene.musicMood}
+                </div>
+            </div>
+        </button>
+    )
+}
+
+// AI Hero
+
+function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
     const router = useRouter()
 
-    const [prompt,     setPrompt]     = useState('')
-    const [style,      setStyle]      = useState<Style>('Cinematic')
-    const [ratio,      setRatio]      = useState<AspectRatio>('9:16')
-    const [duration,   setDuration]   = useState<Duration>('30s')
-    const [generating, setGenerating] = useState(false)
-    const [focused,    setFocused]    = useState(false)
-    const [error,      setError]      = useState('')
+    const [prompt,           setPrompt]           = useState('')
+    const [style,            setStyle]            = useState<Style>('Cinematic')
+    const [ratio,            setRatio]            = useState<AspectRatio>('9:16')
+    const [duration,         setDuration]         = useState<Duration>('30s')
+    const [generating,       setGenerating]       = useState(false)
+    const [opening,          setOpening]          = useState(false)
+    const [focused,          setFocused]          = useState(false)
+    const [error,            setError]            = useState('')
+    const [generatedProject, setGeneratedProject] = useState<GeneratedProject | null>(null)
+    const [selectedScenes,   setSelectedScenes]   = useState<Set<number>>(new Set())
 
+    const scenesRef   = useRef<HTMLDivElement>(null)
     const placeholder = useTypewriter(EXAMPLE_PROMPTS)
 
     const handleGenerate = async () => {
@@ -180,23 +302,17 @@ function AIHero() {
 
         setGenerating(true)
         setError('')
+        setGeneratedProject(null)
+        setSelectedScenes(new Set())
 
         try {
             const res = await fetch('/api/ai/generate', {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({
-                    prompt: text,
-                    style,
-                    aspectRatio: ratio,
-                    duration,
-                }),
+                body:    JSON.stringify({ prompt: text, style, aspectRatio: ratio, duration }),
             })
 
-            if (res.status === 401) {
-                router.push('/auth/signin?callbackUrl=/dashboard')
-                return
-            }
+            if (res.status === 401) { router.push('/auth/signin?callbackUrl=/dashboard'); return }
 
             if (!res.ok) {
                 const data = await res.json()
@@ -204,9 +320,10 @@ function AIHero() {
                 return
             }
 
-            const project = await res.json()
-            // Go to project detail page so user sees the generated scenes
-            router.push(`/dashboard/projects/${project.id}`)
+            const project: GeneratedProject = await res.json()
+            setGeneratedProject(project)
+            setSelectedScenes(new Set())
+            setTimeout(() => scenesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100)
 
         } catch {
             setError('Connection error. Please try again.')
@@ -215,32 +332,61 @@ function AIHero() {
         }
     }
 
+    const handleOpenEditor = () => {
+        if (!generatedProject || selectedScenes.size === 0 || opening) return
+        const selectedIds = generatedProject.scenes
+            .filter((_, i) => selectedScenes.has(i))
+            .map(s => s.id)
+            .join(",")
+        window.open(`/editor/${generatedProject.id}?scenes=${selectedIds}`, "_blank")
+        // Reset AI hero — generation flow is complete
+        setPrompt("")
+        setGeneratedProject(null)
+        setSelectedScenes(new Set())
+        setError("")
+        onProjectCreated()
+    }
+
+    const toggleScene = (i: number) =>
+        setSelectedScenes(prev => {
+            const next = new Set(prev)
+            next.has(i) ? next.delete(i) : next.add(i)
+            return next
+        })
+
+    const totalDuration = generatedProject
+        ? generatedProject.scenes.filter((_, i) => selectedScenes.has(i)).reduce((sum, s) => sum + s.duration, 0)
+        : 0
+
     return (
         <div
             className="relative rounded-2xl overflow-hidden"
             style={{
-                background:  'linear-gradient(160deg, var(--surface-raised) 0%, var(--bg) 100%)',
-                border:      `1px solid ${focused ? 'var(--turquoise-42)' : 'var(--border-default)'}`,
-                boxShadow:   focused ? '0 0 0 3px var(--turquoise-8), 0 16px 48px rgba(0,0,0,0.06)' : '0 4px 24px rgba(0,0,0,0.04)',
-                transition:  'border-color 0.25s ease, box-shadow 0.25s ease',
+                background: 'linear-gradient(160deg, var(--surface-raised) 0%, var(--bg) 100%)',
+                border:     `1px solid ${focused ? 'var(--turquoise-42)' : 'var(--border-default)'}`,
+                boxShadow:  focused ? '0 0 0 3px var(--turquoise-8), 0 16px 48px rgba(0,0,0,0.06)' : '0 4px 24px rgba(0,0,0,0.04)',
+                transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
             }}
         >
+            {/* Background effects */}
             <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-40"
                 style={{ background: 'radial-gradient(ellipse 90% 100% at 50% 0%, var(--turquoise-10) 0%, transparent 100%)' }} />
             <div aria-hidden className="pointer-events-none absolute inset-0"
                 style={{
-                    backgroundImage:  'radial-gradient(circle, var(--turquoise-22) 1px, transparent 1px)',
-                    backgroundSize:   '28px 28px',
-                    opacity:          0.35,
-                    maskImage:        'radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%)',
-                    WebkitMaskImage:  'radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%)',
+                    backgroundImage: 'radial-gradient(circle, var(--turquoise-22) 1px, transparent 1px)',
+                    backgroundSize:  '28px 28px',
+                    opacity:         0.35,
+                    maskImage:       'radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%)',
+                    WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%)',
                 }} />
 
             <div className="relative flex flex-col gap-6 px-8 pt-8 pb-7">
-                <div className="flex flex-col items-center text-center gap-3">
+
+                {/* Heading */}
+                <div className="flex flex-col items-center text-center gap-2">
                     <h1
                         className="font-bold leading-tight"
-                        style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', color: 'var(--text)', fontFamily: 'var(--font-dm-serif-display), serif', letterSpacing: '-0.01em' }}
+                        style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', color: 'var(--text)', fontFamily: 'var(--font-dm-serif-display), serif', letterSpacing: '-0.01em' }}
                     >
                         What video do you want{' '}
                         <span style={{ color: 'var(--turquoise)', textShadow: '0 0 32px var(--turquoise-42)' }}>
@@ -248,15 +394,14 @@ function AIHero() {
                         </span>
                     </h1>
                     <p className="text-sm max-w-md" style={{ color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
-                        Describe your idea in plain words — AI will generate a ready-to-edit video project in seconds.
+                        Describe your idea — AI generates a scene breakdown you can pick from and edit.
                     </p>
                 </div>
 
+                {/* Textarea */}
                 <div className="max-w-2xl w-full mx-auto">
-                    <div
-                        className="relative rounded-xl overflow-hidden"
-                        style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border-default)' }}
-                    >
+                    <div className="relative rounded-xl overflow-hidden"
+                        style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border-default)' }}>
                         <textarea
                             value={prompt}
                             onChange={e => { setPrompt(e.target.value.slice(0, 500)); setError('') }}
@@ -266,16 +411,14 @@ function AIHero() {
                             rows={3}
                             className="w-full resize-none px-5 pt-4 pb-14 text-sm outline-none"
                             style={{ backgroundColor: 'transparent', color: 'var(--text)', lineHeight: '1.7' }}
-                            placeholder={placeholder + (focused ? '' : '|')}
+                            placeholder={placeholder + '|'}
                         />
                         <div
                             className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2.5"
                             style={{ backgroundColor: 'var(--surface-raised)', borderTop: '1px solid var(--border-subtle)' }}
                         >
                             <span className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
-                                {prompt.length > 0
-                                    ? `${prompt.length} / 500 · ⌘Enter to generate`
-                                    : 'Be as descriptive as possible for best results'}
+                                {prompt.length > 0 ? `${prompt.length} / 500 · ⌘Enter to generate` : 'Be descriptive for best results'}
                             </span>
                             <button
                                 onClick={handleGenerate}
@@ -283,13 +426,11 @@ function AIHero() {
                                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200"
                                 style={{
                                     backgroundColor: prompt.trim() && !generating ? 'var(--turquoise)' : 'var(--surface-raised)',
-                                    color:           prompt.trim() && !generating ? '#fff'              : 'var(--text-tertiary)',
+                                    color:           prompt.trim() && !generating ? '#020202'          : 'var(--text-tertiary)',
                                     border:          `1px solid ${prompt.trim() && !generating ? 'transparent' : 'var(--border-default)'}`,
-                                    cursor:          prompt.trim() && !generating ? 'pointer'           : 'not-allowed',
+                                    cursor:          prompt.trim() && !generating ? 'pointer'          : 'not-allowed',
                                     boxShadow:       prompt.trim() && !generating ? '0 4px 12px var(--turquoise-22)' : 'none',
                                 }}
-                                onMouseEnter={e => { if (prompt.trim() && !generating) e.currentTarget.style.opacity = '0.88' }}
-                                onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
                             >
                                 {generating
                                     ? <><Loader2 size={12} className="animate-spin" />Generating…</>
@@ -297,13 +438,10 @@ function AIHero() {
                             </button>
                         </div>
                     </div>
-
-                    {/* Error message */}
-                    {error && (
-                        <p className="text-xs text-red-400 mt-2 px-1">{error}</p>
-                    )}
+                    {error && <p className="text-xs text-red-400 mt-2 px-1">{error}</p>}
                 </div>
 
+                {/* Options */}
                 <div className="flex flex-wrap justify-center gap-8">
                     <div className="flex flex-col gap-2 items-center">
                         <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>Style</span>
@@ -332,39 +470,103 @@ function AIHero() {
                         </div>
                     </div>
                 </div>
+
+                {/* Generated Scenes */}
+                {generatedProject && (
+                    <div ref={scenesRef} className="flex flex-col gap-4 pt-2">
+                        <div className="flex items-center justify-between">
+                            <div className="flex flex-col gap-0.5">
+                                <p className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>
+                                    {generatedProject.name}
+                                </p>
+                                <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                                    {selectedScenes.size === 0
+                                    ? 'Click clips to select them for your video'
+                                    : `${selectedScenes.size} of ${generatedProject.scenes.length} clips selected · ${totalDuration}s total`}
+                                </p>
+                            </div>
+                            <button
+                                onClick={handleGenerate}
+                                disabled={generating}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150"
+                                style={{
+                                    backgroundColor: 'var(--surface-raised)',
+                                    border:          '1px solid var(--border-default)',
+                                    color:           'var(--text-tertiary)',
+                                    cursor:          generating ? 'wait' : 'pointer',
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.color = 'var(--text)' }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text-tertiary)' }}
+                            >
+                                <RefreshCw size={11} />Regenerate
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {generatedProject.scenes.map((scene, i) => (
+                                <SceneCard
+                                    key={i}
+                                    scene={scene}
+                                    index={i}
+                                    selected={selectedScenes.has(i)}
+                                    onToggle={() => toggleScene(i)}
+                                />
+                            ))}
+                        </div>
+
+                        <div className="flex justify-end pt-1">
+                            <button
+                                onClick={handleOpenEditor}
+                                disabled={selectedScenes.size === 0 || opening}
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200"
+                                style={{
+                                    backgroundColor: selectedScenes.size > 0 ? 'var(--turquoise)' : 'var(--surface-raised)',
+                                    color:           selectedScenes.size > 0 ? '#020202'          : 'var(--text-tertiary)',
+                                    border:          `1px solid ${selectedScenes.size > 0 ? 'transparent' : 'var(--border-default)'}`,
+                                    cursor:          selectedScenes.size > 0 ? 'pointer' : 'not-allowed',
+                                    boxShadow:       selectedScenes.size > 0 ? '0 4px 16px var(--turquoise-32)' : 'none',
+                                }}
+                            >
+                                {opening
+                                    ? <><Loader2 size={14} className="animate-spin" />Opening…</>
+                                    : <>Open in Editor<ArrowRight size={14} strokeWidth={2.5} /></>}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     )
 }
 
-// ─── Dashboard Page ───────────────────────────────────────────────────────────
+// Dashboard Page
 
 export default function DashboardPage() {
     const router = useRouter()
 
-    const [projects,         setProjects]         = useState<Project[]>([])
-    const [stats,            setStats]            = useState<Stats | null>(null)
-    const [projectsLoading,  setProjectsLoading]  = useState(true)
-    const [statsLoading,     setStatsLoading]     = useState(true)
-    const [creatingTemplate, setCreatingTemplate] = useState<string | null>(null)
+    const [projects,        setProjects]        = useState<Project[]>([])
+    const [stats,           setStats]           = useState<Stats | null>(null)
+    const [projectsLoading, setProjectsLoading] = useState(true)
+    const [statsLoading,    setStatsLoading]    = useState(true)
+    const [creatingProject, setCreatingProject] = useState(false)
 
-    useEffect(() => {
+    const fetchProjects = useCallback(() => {
+        setProjectsLoading(true)
         fetch('/api/projects')
             .then(r => r.json())
             .then((data: Array<{ id: string; name: string; updatedAt: string; thumbnail?: string }>) => {
-                const recent = data.slice(0, 4).map(p => ({
+                setProjects(data.slice(0, 4).map(p => ({
                     id:         p.id,
                     name:       p.name,
                     lastEdited: formatRelative(p.updatedAt),
                     thumbnail:  p.thumbnail,
-                }))
-                setProjects(recent)
+                })))
             })
             .catch(console.error)
             .finally(() => setProjectsLoading(false))
     }, [])
 
-    useEffect(() => {
+    const fetchStats = useCallback(() => {
         fetch('/api/projects/stats')
             .then(r => r.json())
             .then(setStats)
@@ -372,137 +574,80 @@ export default function DashboardPage() {
             .finally(() => setStatsLoading(false))
     }, [])
 
-    const handleUseTemplate = useCallback(async (label: string) => {
-        const config = TEMPLATE_CONFIGS[label]
-        if (!config) return
-        setCreatingTemplate(label)
-        try {
-            const res = await fetch('/api/projects', {
-                method:  'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ name: label, style: config.style, aspectRatio: config.aspectRatio, scenes: config.scenes }),
-            })
-            if (res.status === 401) { router.push('/auth/signin?callbackUrl=/dashboard'); return }
-            if (!res.ok) throw new Error('Failed')
-            const project = await res.json()
-            router.push(`/dashboard/projects/${project.id}`)
-        } catch (err) {
-            console.error(err)
-        } finally {
-            setCreatingTemplate(null)
-        }
-    }, [router])
+    useEffect(() => { fetchProjects() }, [fetchProjects])
+    useEffect(() => { fetchStats() },    [fetchStats])
+
+    const handleProjectCreated = useCallback(() => {
+        fetchProjects()
+        fetchStats()
+    }, [fetchProjects, fetchStats])
 
     const handleNewProject = useCallback(async () => {
+        if (creatingProject) return
+        setCreatingProject(true)
         try {
             const res = await fetch('/api/projects', {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify({ name: 'Untitled Project', style: 'Modern', aspectRatio: '16:9' }),
             })
+            if (res.status === 401) { router.push('/auth/signin?callbackUrl=/dashboard'); return }
             if (!res.ok) throw new Error('Failed')
             const project = await res.json()
-            router.push(`/dashboard/projects/${project.id}`)
+            window.open(`/editor/${project.id}`, '_blank')
+            handleProjectCreated()
         } catch (err) {
             console.error(err)
+        } finally {
+            setCreatingProject(false)
         }
-    }, [router])
+    }, [creatingProject, router, handleProjectCreated])
 
     return (
         <div className="relative flex flex-col flex-1 min-h-0 overflow-auto">
+
+            {/* Header — untouched, uses real user data from UserContext */}
             <DashboardHeader title="Overview" subtitle="Welcome back" />
 
-            <main className="flex-1 p-8 flex flex-col gap-10">
+            <main className="flex-1 px-8 py-8 flex flex-col gap-10">
 
                 {/* 1 ── AI Hero */}
-                <AIHero />
+                <AIHero onProjectCreated={handleProjectCreated} />
 
-                {/* 2 ── Templates */}
+                {/* 2 ── Recent Projects */}
                 <div>
                     <div className="flex items-center justify-between mb-5">
-                        <div className="flex items-center gap-3">
-                            <div className="w-5 h-px bg-turquoise" />
-                            <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase text-turquoise">
-                                Start from a Template
-                            </span>
-                        </div>
-                        <Link
-                            href="/templates"
-                            className="text-xs font-bold transition-colors duration-150"
-                            style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}
-                            onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
-                            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}
-                        >
-                            Browse all →
-                        </Link>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {DASHBOARD_TEMPLATES.map(({ label, icon: Icon, desc, accent }) => (
+                        <SectionLabel>Recent Projects</SectionLabel>
+                        <div className="flex items-center gap-2">
                             <button
-                                key={label}
-                                onClick={() => handleUseTemplate(label)}
-                                disabled={creatingTemplate === label}
-                                className="flex flex-col items-start gap-3 p-4 rounded-xl text-left transition-all duration-200 group"
-                                style={{
-                                    backgroundColor: accent ? 'var(--turquoise-8)' : 'var(--surface-raised)',
-                                    border:          `1px solid ${accent ? 'var(--turquoise-22)' : 'var(--border-default)'}`,
-                                    cursor:          creatingTemplate === label ? 'wait' : 'pointer',
-                                    opacity:         creatingTemplate !== null && creatingTemplate !== label ? 0.5 : 1,
-                                }}
-                                onMouseEnter={e => {
-                                    if (!creatingTemplate) {
-                                        e.currentTarget.style.borderColor = accent ? 'var(--turquoise-42)' : 'var(--border-strong)'
-                                        e.currentTarget.style.transform   = 'translateY(-1px)'
-                                        e.currentTarget.style.boxShadow   = accent ? '0 8px 24px var(--turquoise-10)' : '0 8px 24px rgba(0,0,0,0.06)'
-                                    }
-                                }}
-                                onMouseLeave={e => {
-                                    e.currentTarget.style.borderColor = accent ? 'var(--turquoise-22)' : 'var(--border-default)'
-                                    e.currentTarget.style.transform   = 'translateY(0)'
-                                    e.currentTarget.style.boxShadow   = 'none'
-                                }}
+                                onClick={() => router.push('/dashboard/projects')}
+                                className="text-xs font-semibold transition-colors duration-150"
+                                style={{ color: 'var(--text-tertiary)', background: 'none', border: 'none', cursor: 'pointer' }}
+                                onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
+                                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}
                             >
-                                <div
-                                    className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                    style={{
-                                        backgroundColor: accent ? 'var(--turquoise-16)' : 'var(--bg)',
-                                        border:          `1px solid ${accent ? 'var(--turquoise-32)' : 'var(--border-default)'}`,
-                                        color:           accent ? 'var(--turquoise)' : 'var(--text-tertiary)',
-                                    }}
-                                >
-                                    {creatingTemplate === label
-                                        ? <Loader2 size={14} className="animate-spin" style={{ color: accent ? 'var(--turquoise)' : 'var(--text-tertiary)' }} />
-                                        : <Icon size={15} strokeWidth={1.75} />}
-                                </div>
-                                <div className="flex flex-col gap-0.5">
-                                    <span className="text-xs font-bold" style={{ color: accent ? 'var(--turquoise)' : 'var(--text-secondary)' }}>{label}</span>
-                                    <span className="text-[11px] font-medium leading-snug" style={{ color: 'var(--text-tertiary)' }}>{desc}</span>
-                                </div>
-                                <ArrowRight size={12} className="mt-auto self-end opacity-0 group-hover:opacity-100 transition-opacity"
-                                    style={{ color: accent ? 'var(--turquoise)' : 'var(--text-tertiary)' }} />
+                                View all →
                             </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* 3 ── Recent Projects */}
-                <div>
-                    <div className="flex items-center justify-between mb-5">
-                        <div className="flex items-center gap-3">
-                            <div className="w-5 h-px bg-turquoise" />
-                            <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase text-turquoise">
-                                Recent Projects
-                            </span>
+                            <button
+                                onClick={handleNewProject}
+                                disabled={creatingProject}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
+                                style={{
+                                    backgroundColor: 'var(--turquoise)',
+                                    color:           '#020202',
+                                    border:          'none',
+                                    cursor:          creatingProject ? 'wait' : 'pointer',
+                                    boxShadow:       '0 2px 8px var(--turquoise-22)',
+                                    opacity:         creatingProject ? 0.7 : 1,
+                                }}
+                                onMouseEnter={e => { if (!creatingProject) e.currentTarget.style.opacity = '0.88' }}
+                                onMouseLeave={e => { e.currentTarget.style.opacity = creatingProject ? '0.7' : '1' }}
+                            >
+                                {creatingProject
+                                    ? <><Loader2 size={11} className="animate-spin" />Creating…</>
+                                    : <><FolderPlus size={11} strokeWidth={2.5}     />New Project</>}
+                            </button>
                         </div>
-                        <Link
-                            href="/dashboard/projects"
-                            className="text-xs font-bold transition-colors duration-150"
-                            style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}
-                            onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
-                            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}
-                        >
-                            View all →
-                        </Link>
                     </div>
 
                     {projectsLoading ? (
@@ -514,16 +659,21 @@ export default function DashboardPage() {
                             className="flex flex-col items-center justify-center py-14 gap-4 rounded-2xl"
                             style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}
                         >
-                            <div
-                                className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                                style={{ backgroundColor: 'var(--turquoise-8)', border: '1px solid var(--turquoise-22)' }}
-                            >
+                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                                style={{ backgroundColor: 'var(--turquoise-8)', border: '1px solid var(--turquoise-22)' }}>
                                 <FolderOpen size={22} style={{ color: 'var(--turquoise)' }} />
                             </div>
                             <div className="flex flex-col items-center gap-1 text-center">
                                 <span className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>No projects yet</span>
-                                <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Use a template above or generate with AI to get started</span>
+                                <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Generate with AI above or start a new blank project</span>
                             </div>
+                            <button
+                                onClick={handleNewProject}
+                                className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200"
+                                style={{ backgroundColor: 'var(--turquoise)', color: '#020202', border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px var(--turquoise-22)' }}
+                            >
+                                <FolderPlus size={13} strokeWidth={2.5} />Start a project
+                            </button>
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -532,61 +682,10 @@ export default function DashboardPage() {
                     )}
                 </div>
 
-                {/* 4 ── Quick Actions */}
+                {/* 3 ── Stats */}
                 <div>
-                    <div className="flex items-center gap-3 mb-5">
-                        <div className="w-5 h-px bg-turquoise" />
-                        <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase text-turquoise">Quick Actions</span>
-                    </div>
-                    <div className="flex flex-wrap gap-3">
-                        {[
-                            { label: 'New Project',  sub: 'Start from scratch', icon: FolderPlus, accent: true,  onClick: handleNewProject },
-                            { label: 'All Projects', sub: 'View your library',  icon: FolderOpen, accent: false, onClick: () => router.push('/dashboard/projects') },
-                        ].map(({ label, sub, icon: Icon, accent, onClick }) => (
-                            <button
-                                key={label}
-                                onClick={onClick}
-                                className="flex items-center gap-4 px-5 py-4 rounded-xl cursor-pointer transition-all duration-200 focus:outline-none"
-                                style={{
-                                    backgroundColor: accent ? 'var(--turquoise-8)' : 'var(--surface-raised)',
-                                    border:          `1px solid ${accent ? 'var(--turquoise-22)' : 'var(--border-default)'}`,
-                                    minWidth:        200,
-                                }}
-                                onMouseEnter={e => {
-                                    e.currentTarget.style.borderColor = accent ? 'var(--turquoise-42)' : 'var(--border-strong)'
-                                    e.currentTarget.style.transform   = 'translateY(-1px)'
-                                    e.currentTarget.style.boxShadow   = accent ? '0 8px 24px var(--turquoise-10)' : '0 8px 24px rgba(0,0,0,0.06)'
-                                }}
-                                onMouseLeave={e => {
-                                    e.currentTarget.style.borderColor = accent ? 'var(--turquoise-22)' : 'var(--border-default)'
-                                    e.currentTarget.style.transform   = 'translateY(0)'
-                                    e.currentTarget.style.boxShadow   = 'none'
-                                }}
-                            >
-                                <div
-                                    className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                                    style={{
-                                        backgroundColor: accent ? 'var(--turquoise-16)' : 'var(--bg)',
-                                        border:          `1px solid ${accent ? 'var(--turquoise-32)' : 'var(--border-default)'}`,
-                                        color:           accent ? 'var(--turquoise)' : 'var(--text-tertiary)',
-                                    }}
-                                >
-                                    <Icon size={16} strokeWidth={1.75} />
-                                </div>
-                                <div className="flex flex-col items-start gap-0.5">
-                                    <span className="text-sm font-bold" style={{ color: accent ? 'var(--turquoise)' : 'var(--text-secondary)' }}>{label}</span>
-                                    <span className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>{sub}</span>
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* 5 ── Stats */}
-                <div>
-                    <div className="flex items-center gap-3 mb-5">
-                        <div className="w-5 h-px bg-turquoise" />
-                        <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase text-turquoise">Your Activity</span>
+                    <div className="mb-5">
+                        <SectionLabel>Your Activity</SectionLabel>
                     </div>
                     {statsLoading ? (
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -607,7 +706,7 @@ export default function DashboardPage() {
     )
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// Helpers
 
 function formatRelative(dateStr: string): string {
     const diff  = Date.now() - new Date(dateStr).getTime()

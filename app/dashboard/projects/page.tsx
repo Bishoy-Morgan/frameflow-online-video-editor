@@ -9,9 +9,8 @@ import {
     SortAsc, SortDesc, Clock, AlignLeft,
 } from 'lucide-react'
 import DashboardHeader from '../components/DashboardHeader'
-import { useRouter } from 'next/navigation'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// Types
 
 interface Scene {
     id:          string
@@ -41,7 +40,7 @@ type SortDir   = 'asc' | 'desc'
 type Filter    = 'all' | 'starred' | 'trash'
 type ViewMode  = 'grid' | 'list'
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// Helpers
 
 function formatRelative(dateStr: string): string {
     const diff  = Date.now() - new Date(dateStr).getTime()
@@ -62,7 +61,7 @@ function totalDuration(scenes: Scene[]): string {
     return `${Math.floor(secs / 60)}m ${secs % 60}s`
 }
 
-// ─── Thumbnail placeholder ────────────────────────────────────────────────────
+// Thumbnail placeholder
 
 function ProjectThumbnail({ project, size = 'md' }: { project: Project; size?: 'sm' | 'md' }) {
     return (
@@ -105,7 +104,7 @@ function ProjectThumbnail({ project, size = 'md' }: { project: Project; size?: '
     )
 }
 
-// ─── Context Menu ─────────────────────────────────────────────────────────────
+// Context Menu
 
 function ContextMenu({
     project,
@@ -144,12 +143,12 @@ function ContextMenu({
             { label: 'Duplicate',icon: Copy,       action: onDuplicate,  danger: false },
             { label: project.starred ? 'Unstar' : 'Star', icon: Star, action: onToggleStar, danger: false },
             { label: 'Move to Trash', icon: Trash2, action: onTrash,    danger: true  },
-          ]
+        ]
 
     return (
         <div
             ref={menuRef}
-            className="absolute right-0 top-8 z-50 rounded-xl overflow-hidden py-1 min-w-[160px]"
+            className="fixed right-0 top-12 z-50 rounded-xl overflow-hidden py-1 min-w-40"
             style={{
                 backgroundColor: 'var(--surface-raised)',
                 border:          '1px solid var(--border-default)',
@@ -173,7 +172,7 @@ function ContextMenu({
     )
 }
 
-// ─── Project Card (Grid) ──────────────────────────────────────────────────────
+// Project Card (Grid)
 
 function ProjectCard({
     project,
@@ -292,7 +291,7 @@ function ProjectCard({
     )
 }
 
-// ─── Project Row (List) ───────────────────────────────────────────────────────
+// Project Row (List)
 
 function ProjectRow({
     project,
@@ -396,7 +395,7 @@ function ProjectRow({
     )
 }
 
-// ─── Rename Modal ─────────────────────────────────────────────────────────────
+// Rename Modal
 
 function RenameModal({ project, onSave, onClose }: { project: Project; onSave: (name: string) => void; onClose: () => void }) {
     const [name, setName] = useState(project.name)
@@ -481,7 +480,7 @@ function SortDropdown({
     return (
         <div
             ref={ref}
-            className="absolute right-0 top-10 z-50 rounded-xl overflow-hidden py-1 min-w-[180px]"
+            className="absolute right-0 top-10 z-50 rounded-xl overflow-hidden py-1 min-w-45"
             style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', boxShadow: '0 12px 40px rgba(0,0,0,0.18)' }}
         >
             {options.map(({ label, field: f, icon: Icon }) => (
@@ -503,11 +502,9 @@ function SortDropdown({
     )
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// Main Page
 
 export default function ProjectsPage() {
-    const router = useRouter()
-
     const [projects,     setProjects]     = useState<Project[]>([])
     const [loading,      setLoading]      = useState(true)
     const [search,       setSearch]       = useState('')
@@ -535,7 +532,7 @@ export default function ProjectsPage() {
 
     useEffect(() => { fetchProjects() }, [fetchProjects])
 
-    // ── Derived list ──────────────────────────────────────────────────────────
+    // Derived list
 
     const displayed = useMemo(() => {
         let list = [...projects]
@@ -568,7 +565,7 @@ export default function ProjectsPage() {
         return list
     }, [projects, filter, search, sortField, sortDir])
 
-    // ── Actions ───────────────────────────────────────────────────────────────
+    // Actions
 
     const handleOpen = (project: Project) => {
         if (project.deletedAt) return
@@ -643,7 +640,7 @@ export default function ProjectsPage() {
         })
     }
 
-    // ── Tab counts ────────────────────────────────────────────────────────────
+    // Tab counts
 
     const counts = useMemo(() => ({
         all:     projects.filter(p => !p.deletedAt).length,
@@ -651,7 +648,7 @@ export default function ProjectsPage() {
         trash:   projects.filter(p => !!p.deletedAt).length,
     }), [projects])
 
-    // ── Render ────────────────────────────────────────────────────────────────
+    // Render
 
     const FILTERS: { key: Filter; label: string; icon: React.ElementType }[] = [
         { key: 'all',     label: 'All',     icon: FolderOpen },

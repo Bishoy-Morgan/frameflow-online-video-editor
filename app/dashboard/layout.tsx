@@ -24,8 +24,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
             role:      true,
             password:  true,
             createdAt: true,
+            // ✅ Only count non-deleted projects
             _count: {
-                select: { projects: true }
+                select: {
+                    projects: {
+                        where: { deletedAt: null },
+                    },
+                },
             },
             projects: {
                 orderBy: { updatedAt: 'desc' },

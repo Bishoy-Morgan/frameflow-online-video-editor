@@ -3,8 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-const GEMINI_API_URL =
-    'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent'
+const GROQ_API_URL   = 'https://api.groq.com/openai/v1/chat/completions'
+const PEXELS_API_URL = 'https://api.pexels.com/videos/search'
 
 type Scene = {
     title:       string
@@ -20,10 +20,57 @@ type GenerateBody = {
     duration:    string
 }
 
-function buildSystemPrompt(body: GenerateBody): string {
+// ── Pexels ────────────────────────────────────────────────────────────────────
+
+async function fetchPexelsVideo(
+    query: string,
+    aspectRatio: string
+): Promise<{ videoUrl: string; pexelsId: string } | null> {
+    const apiKey = process.env.PEXELS_API_KEY
+    if (!apiKey) return null
+
+    const orientation =
+        aspectRatio === '9:16' ? 'portrait' :
+        aspectRatio === '1:1'  ? 'square'   : 'landscape'
+
+    try {
+        const res = await fetch(
+            `${PEXELS_API_URL}?query=${encodeURIComponent(query)}&per_page=5&orientation=${orientation}`,
+            { headers: { Authorization: apiKey } }
+        )
+
+        if (!res.ok) {
+            console.error('Pexels error:', await res.text())
+            return null
+        }
+
+        const data = await res.json()
+        const video = data.videos?.[0]
+        if (!video) return null
+
+        const files: { quality: string; link: string }[] = video.video_files ?? []
+        const preferred =
+            files.find(f => f.quality === 'hd') ??
+            files.find(f => f.quality === 'sd') ??
+            files[0]
+
+        if (!preferred) return null
+
+        return {
+            videoUrl: preferred.link,
+            pexelsId: String(video.id),
+        }
+    } catch (err) {
+        console.error('Pexels fetch error:', err)
+        return null
+    }
+}
+
+// ── Prompt ────────────────────────────────────────────────────────────────────
+
+function buildPrompt(body: GenerateBody): string {
     const totalSeconds = parseInt(body.duration)
-    return `
-You are a professional video director and creative AI assistant.
+    return `You are a professional video director and creative AI assistant.
 The user wants to create a short video with these parameters:
 - Prompt: "${body.prompt}"
 - Visual style: ${body.style}
@@ -50,9 +97,10 @@ Respond ONLY with a valid JSON object in this exact format, no markdown, no expl
       "duration": 0
     }
   ]
+}`
 }
-`.trim()
-}
+
+// ── Route ─────────────────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions)
@@ -66,89 +114,86 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
     }
 
-    const apiKey = process.env.GEMINI_API_KEY
-    if (!apiKey) {
-        return NextResponse.json({ error: 'Gemini API key not configured' }, { status: 500 })
+    const groqKey = process.env.GROQ_API_KEY
+    if (!groqKey) {
+        return NextResponse.json({ error: 'Groq API key not configured' }, { status: 500 })
     }
 
-    console.log('API Key present:', !!apiKey)
-    console.log('API Key prefix:', apiKey?.slice(0, 8))
-
-    let geminiData: { projectName: string; scenes: Scene[] }
+    // ── Step 1: Generate scene briefs with Groq ──
+    let groqData: { projectName: string; scenes: Scene[] }
 
     try {
-        const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+        const res = await fetch(GROQ_API_URL, {
+            method:  'POST',
+            headers: {
+                'Content-Type':  'application/json',
+                'Authorization': `Bearer ${groqKey}`,
+            },
             body: JSON.stringify({
-                contents: [
-                    {
-                        parts: [{ text: buildSystemPrompt(body) }],
-                    },
-                ],
-                generationConfig: {
-                    temperature:     0.7,
-                    maxOutputTokens: 2048,
-                },
+                model:       'llama-3.3-70b-versatile',
+                temperature: 0.7,
+                max_tokens:  2048,
+                messages: [{ role: 'user', content: buildPrompt(body) }],
             }),
         })
 
         if (!res.ok) {
             const err = await res.text()
-            console.error('Gemini error:', err)
-            return NextResponse.json({ error: 'Gemini API error' }, { status: 502 })
+            console.error('Groq error:', err)
+            return NextResponse.json({ error: 'Groq API error', details: err }, { status: 502 })
         }
 
         const raw  = await res.json()
-        const text = raw?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+        const text = raw?.choices?.[0]?.message?.content ?? ''
 
-        console.log('Gemini raw text:', text)
-
-        // Extract JSON object from response robustly
         const jsonMatch = text.match(/\{[\s\S]*\}/)
         if (!jsonMatch) {
-            console.error('No JSON found in Gemini response:', text)
-            return NextResponse.json({ error: 'Failed to parse Gemini response' }, { status: 500 })
+            console.error('No JSON in Groq response:', text)
+            return NextResponse.json({ error: 'Failed to parse Groq response' }, { status: 500 })
         }
 
-        // Remove trailing commas before parsing (common Gemini issue)
         const cleaned = jsonMatch[0]
             .replace(/,\s*}/g, '}')
             .replace(/,\s*]/g, ']')
             .trim()
 
-        console.log('Cleaned JSON:', cleaned)
-
-        geminiData = JSON.parse(cleaned)
+        groqData = JSON.parse(cleaned)
 
     } catch (err) {
-        console.error('Gemini parse error:', err)
-        return NextResponse.json({ error: 'Failed to parse Gemini response' }, { status: 500 })
+        console.error('Groq parse error:', err)
+        return NextResponse.json({ error: 'Failed to parse Groq response' }, { status: 500 })
     }
 
-    // ── Create project + scenes in DB ──
+    // ── Step 2: Fetch a matching Pexels video for each scene in parallel ──
+    const pexelsResults = await Promise.all(
+        groqData.scenes.map(scene =>
+            fetchPexelsVideo(`${scene.title} ${body.style}`, body.aspectRatio)
+        )
+    )
+
+    // ── Step 3: Save project + scenes to DB ──
     const project = await prisma.project.create({
         data: {
-            name:        geminiData.projectName ?? body.prompt.slice(0, 60),
+            name:        groqData.projectName ?? body.prompt.slice(0, 60),
             userId:      session.user.id,
             prompt:      body.prompt,
             style:       body.style,
             aspectRatio: body.aspectRatio,
             aiDuration:  body.duration,
             scenes: {
-                create: geminiData.scenes.map((s, i) => ({
+                create: groqData.scenes.map((s, i) => ({
                     title:       s.title,
                     description: s.description,
                     musicMood:   s.musicMood,
                     duration:    s.duration,
                     order:       i,
+                    videoUrl:    pexelsResults[i]?.videoUrl ?? null,
+                    pexelsId:    pexelsResults[i]?.pexelsId ?? null,
                 })),
             },
         },
         include: {
-            scenes: {
-                orderBy: { order: 'asc' },
-            },
+            scenes: { orderBy: { order: 'asc' } },
         },
     })
 

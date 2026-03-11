@@ -1,10 +1,10 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import clsx from "clsx";
 import { ReactNode, ComponentPropsWithoutRef, useState } from "react";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// Types 
 
 type Variant = "primary" | "secondary" | "ghost";
 type Size    = "sm" | "md" | "lg";
@@ -18,7 +18,7 @@ interface ButtonProps extends ComponentPropsWithoutRef<typeof motion.button> {
     iconPosition?: "left" | "right";
 }
 
-// ─── Size map ─────────────────────────────────────────────────────────────────
+// Size map 
 
 const sizes: Record<Size, string> = {
     sm: "px-4 py-2 text-sm   gap-1.5",
@@ -26,7 +26,7 @@ const sizes: Record<Size, string> = {
     lg: "px-8 py-4 text-lg   gap-2.5",
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// Component
 
 export default function Button({
     variant  = "primary",
@@ -71,9 +71,9 @@ export default function Button({
                 onHoverStart={() => setHovered(true)}
                 onHoverEnd={() => setHovered(false)}
                 className={clsx(
-                    "relative inline-flex items-center justify-center font-semibold",
+                    "relative flex flex-row items-center justify-center font-semibold",
                     "rounded-lg cursor-pointer focus:outline-none transition-opacity duration-200",
-                    "focus-visible:ring-2 focus-visible:ring-[var(--turquoise)] focus-visible:ring-offset-2",
+                    "focus-visible:ring-2 focus-visible:ring-(--turquoise) focus-visible:ring-offset-2",
                     sizes[size],
                     containerStyles.ghost,
                     className,
@@ -107,9 +107,9 @@ export default function Button({
             onHoverStart={() => setHovered(true)}
             onHoverEnd={() => setHovered(false)}
             className={clsx(
-                "relative inline-flex items-center justify-center font-semibold",
+                "relative flex flex-row items-center justify-center font-semibold",
                 "rounded-lg overflow-hidden cursor-pointer focus:outline-none",
-                "focus-visible:ring-2 focus-visible:ring-[var(--turquoise)] focus-visible:ring-offset-2",
+                "focus-visible:ring-2 focus-visible:ring-(--turquoise) focus-visible:ring-offset-2",
                 sizes[size],
                 containerStyles[variant],
                 className,
