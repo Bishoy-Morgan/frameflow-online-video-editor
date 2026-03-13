@@ -3,7 +3,7 @@
 import React, { useState, useTransition } from 'react'
 import Image from 'next/image'
 import DashboardHeader from '../components/DashboardHeader'
-import { useUser } from '../components/UserContext'
+import { useUser } from '../../../components/providers/UserContext'
 import Button from '@/components/ui/Button'
 import { Eye, EyeOff, CheckCircle, AlertCircle, Camera } from 'lucide-react'
 

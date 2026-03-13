@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { useTheme } from '@/hooks/useTheme'
-import { useUser } from './UserContext'
+import { useUser } from '../../../components/providers/UserContext'
 import NotificationBell from './NotificationBell'
 import {
     Sun, Moon, Bell, ChevronDown,

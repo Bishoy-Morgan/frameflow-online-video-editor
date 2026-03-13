@@ -3,6 +3,10 @@ import { DM_Serif_Display, Quicksand } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next"
 import SessionProvider from "@/components/SessionProvider";
+import UserProvider from "@/components/providers/UserProvider";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 const dmSerifDisplay = DM_Serif_Display({
   subsets: ["latin"],
@@ -22,15 +26,43 @@ export const metadata: Metadata = {
     "Frameflow is an online video editor that lets you edit videos directly in your browser. Create social media reels, promo videos, and marketing content with fast tools, ready-made templates, and smooth performance—no downloads required.",
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions)
+
+  const user = session?.user?.email
+    ? await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: {
+          id:        true,
+          name:      true,
+          email:     true,
+          image:     true,
+          role:      true,
+          password:  true,
+          createdAt: true,
+          _count: {
+            select: {
+              projects: {
+                where: { deletedAt: null },
+              },
+            },
+          },
+          projects: {
+            orderBy: { updatedAt: 'desc' },
+            take: 1,
+            select: { updatedAt: true },
+          },
+        },
+      })
+    : null
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Prevent flash of wrong theme */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -51,7 +83,13 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <SessionProvider>
-          {children}
+          {user ? (
+            <UserProvider user={user}>
+              {children}
+            </UserProvider>
+          ) : (
+            children
+          )}
         </SessionProvider>
         <Analytics />
       </body>

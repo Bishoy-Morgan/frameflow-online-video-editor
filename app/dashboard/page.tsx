@@ -116,7 +116,7 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
     )
 }
 
-// Section Label ────────────────────────────────────────────────────────────
+// Section Label
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
     return (
@@ -129,7 +129,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     )
 }
 
-// Skeletons ───
+// Skeletons
 
 function SkeletonCard() {
     return (
@@ -152,7 +152,7 @@ function SkeletonStat() {
     )
 }
 
-// Scene Card ──
+// Scene Card
 
 function SceneCard({ scene, index, selected, onToggle }: {
     scene:    Scene
@@ -554,12 +554,13 @@ export default function DashboardPage() {
         setProjectsLoading(true)
         fetch('/api/projects')
             .then(r => r.json())
-            .then((data: Array<{ id: string; name: string; updatedAt: string; thumbnail?: string }>) => {
+            .then((data: Array<{ id: string; name: string; updatedAt: string; thumbnail?: string; starred?: boolean }>) => {
                 setProjects(data.slice(0, 4).map(p => ({
                     id:         p.id,
                     name:       p.name,
                     lastEdited: formatRelative(p.updatedAt),
                     thumbnail:  p.thumbnail,
+                    starred:    p.starred,
                 })))
             })
             .catch(console.error)
@@ -677,7 +678,7 @@ export default function DashboardPage() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {projects.map(p => <DashboardCard key={p.id} project={p} />)}
+                            {projects.map(p => <DashboardCard key={p.id} project={p} onUpdate={fetchProjects} />)}
                         </div>
                     )}
                 </div>

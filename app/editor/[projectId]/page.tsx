@@ -9,14 +9,14 @@ import EditorTopBar                           from './components/EditorTopBar'
 import PreviewCanvas, { PreviewCanvasHandle } from './components/PreviewCanvas'
 import SceneTimeline                          from './components/SceneTimeline'
 import LeftToolsPanel, { type ToolId }        from './components/LeftToolsPanel'
-import GeminiSidebar                          from './components/GeminiSidebar'
+import AISidebar                              from './components/AISidebar'
 
 interface Scene {
     id:          string
     title:       string
     description: string
     musicMood:   string
-    duration:    number
+    duration:    number   // Float — sub-second precision
     order:       number
     videoUrl?:   string | null
     pexelsId?:   string | null
@@ -41,105 +41,158 @@ const RATIO_OPTIONS: { label: AspectRatio; icon: React.ElementType; hint: string
     { label: '1:1',  icon: Square,     hint: 'Feed / Square'  },
 ]
 
+function buildStartTimes(scenes: Scene[]): Map<string, number> {
+    const sorted = [...scenes].sort((a, b) => a.order - b.order)
+    const map    = new Map<string, number>()
+    let   offset = 0
+    for (const s of sorted) {
+        map.set(s.id, offset)
+        offset += s.duration
+    }
+    return map
+}
+
 export default function EditorPage() {
     const params       = useParams()
     const searchParams = useSearchParams()
     const projectId    = params.projectId as string
 
-    // ── Data ─────────────────────────────────────────────────────────────────
-    const [project, setProject] = useState<Project | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [error,   setError]   = useState('')
-
-    // ── Video state ───────────────────────────────────────────────────────────
-    const canvasRef                              = useRef<PreviewCanvasHandle>(null)
-    const [videoUrl,      setVideoUrl]      = useState<string | null>(null)
-    const [videoDuration, setVideoDuration] = useState(0)
-    const [currentTime,   setCurrentTime]   = useState(0)
-
-    // ── Aspect ratio ──────────────────────────────────────────────────────────
+    const [project,     setProject]     = useState<Project | null>(null)
+    const [loading,     setLoading]     = useState(true)
+    const [error,       setError]       = useState('')
     const [aspectRatio, setAspectRatio] = useState<AspectRatio>('16:9')
     const [ratioOpen,   setRatioOpen]   = useState(false)
-
-    // ── Editor UI state ───────────────────────────────────────────────────────
     const [activeTool,  setActiveTool]  = useState<ToolId | null>(null)
-    const [activeScene, setActiveScene] = useState<string | null>(null)
     const [aiOpen,      setAiOpen]      = useState(true)
+    const [saving,      setSaving]      = useState(false)
+    const [saved,       setSaved]       = useState(false)
+    const [playing,     setPlaying]     = useState(false)
 
-    // ── Save state ────────────────────────────────────────────────────────────
-    const [saving, setSaving] = useState(false)
-    const [saved,  setSaved]  = useState(false)
+    const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const canvasRef     = useRef<PreviewCanvasHandle>(null)
+
+    const [globalTime,      setGlobalTime]      = useState(0)
+    const [activeSceneId,   setActiveSceneId]   = useState<string | null>(null)
+    const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(null)
+
+    const startTimesRef = useRef<Map<string, number>>(new Map())
+
+    const getSortedScenes = useCallback((scenes: Scene[]) =>
+        [...scenes].sort((a, b) => a.order - b.order)
+    , [])
+
+    const getTotalDuration = useCallback((scenes: Scene[]) =>
+        scenes.reduce((s, c) => s + c.duration, 0)
+    , [])
+
+    // Derived: duration of the currently active scene — this is the out point
+    const activeClipDuration = project?.scenes.find(s => s.id === activeSceneId)?.duration ?? 0
 
     // ── Fetch project ─────────────────────────────────────────────────────────
     useEffect(() => {
         if (!projectId) return
-
-        // Read selected scene IDs from URL param (?scenes=id1,id2,id3)
-        const scenesParam    = searchParams.get('scenes')
+        const scenesParam     = searchParams.get('scenes')
         const allowedSceneIds = scenesParam ? new Set(scenesParam.split(',')) : null
 
         fetch(`/api/projects/${projectId}`)
             .then(r => r.json())
             .then(data => {
                 if (data.error) { setError(data.error); return }
-
-                // Filter to only selected scenes if param is present
                 const allScenes: Scene[] = data.scenes ?? []
-                const filteredScenes = allowedSceneIds
+                const filtered = allowedSceneIds
                     ? allScenes.filter(s => allowedSceneIds.has(s.id))
                     : allScenes
+                const proj = { ...data, scenes: filtered }
+                setProject(proj)
 
-                const filtered = { ...data, scenes: filteredScenes }
-                setProject(filtered)
-
-                // Set aspect ratio from project
-                if (data.aspectRatio && ['16:9', '9:16', '1:1'].includes(data.aspectRatio)) {
+                if (data.aspectRatio && ['16:9','9:16','1:1'].includes(data.aspectRatio))
                     setAspectRatio(data.aspectRatio as AspectRatio)
-                }
 
-                // Auto-load first scene's video
-                const sorted = [...filteredScenes].sort((a, b) => a.order - b.order)
+                startTimesRef.current = buildStartTimes(filtered)
+
+                const sorted = getSortedScenes(filtered)
                 if (sorted.length > 0) {
-                    setActiveScene(sorted[0].id)
-                    if (sorted[0].videoUrl) setVideoUrl(sorted[0].videoUrl)
+                    setActiveSceneId(sorted[0].id)
+                    setCurrentVideoUrl(sorted[0].videoUrl ?? null)
                 }
             })
             .catch(() => setError('Failed to load project'))
             .finally(() => setLoading(false))
-    }, [projectId, searchParams])
+    }, [projectId, searchParams, getSortedScenes])
 
-    // ── Video loaded ──────────────────────────────────────────────────────────
-    const handleVideoLoad = useCallback((url: string, duration: number) => {
-        setVideoUrl(url)
-        if (duration > 0) setVideoDuration(duration)
+    useEffect(() => {
+        if (!project) return
+        startTimesRef.current = buildStartTimes(project.scenes)
+    }, [project])
+
+    // ── Time update from canvas RAF ───────────────────────────────────────────
+    const handleTimeUpdate = useCallback((clipTime: number) => {
+        if (!activeSceneId) return
+        const sceneStart = startTimesRef.current.get(activeSceneId) ?? 0
+        setGlobalTime(sceneStart + clipTime)
+    }, [activeSceneId])
+
+    // ── Clip ended — advance to next scene ────────────────────────────────────
+    const handleClipEnded = useCallback(() => {
+        if (!project) return
+        const sorted = getSortedScenes(project.scenes)
+        const idx    = sorted.findIndex(s => s.id === activeSceneId)
+        const next   = sorted[idx + 1]
+        if (next) {
+            setActiveSceneId(next.id)
+            setCurrentVideoUrl(next.videoUrl ?? null)
+        } else {
+            // End of project
+            setPlaying(false)
+            const last = sorted[sorted.length - 1]
+            if (last) setGlobalTime(startTimesRef.current.get(last.id)! + last.duration)
+        }
+    }, [project, activeSceneId, getSortedScenes])
+
+    // ── Scene click (seek) ────────────────────────────────────────────────────
+    const handleSceneClick = useCallback((scene: Scene, seekTime: number) => {
+        const sceneStart  = startTimesRef.current.get(scene.id) ?? 0
+        const localOffset = Math.max(0, seekTime - sceneStart)
+
+        setActiveSceneId(scene.id)
+        setGlobalTime(seekTime)
+
+        if (scene.videoUrl !== currentVideoUrl) {
+            // Changing scene — new videoUrl triggers auto-load in PreviewCanvas
+            setCurrentVideoUrl(scene.videoUrl ?? null)
+        } else {
+            // Same scene — just seek within it
+            canvasRef.current?.seekTo(localOffset)
+        }
+    }, [currentVideoUrl])
+
+    // ── Transport controls ────────────────────────────────────────────────────
+    const handlePlay = useCallback(() => {
+        canvasRef.current?.play()
+        setPlaying(true)
     }, [])
 
-    // ── Live time update ──────────────────────────────────────────────────────
-    const handleTimeUpdate = useCallback((t: number) => {
-        setCurrentTime(t)
-        if (!project?.scenes.length) return
-        const sorted  = [...project.scenes].sort((a, b) => a.order - b.order)
-        let elapsed   = 0
-        for (const scene of sorted) {
-            if (t >= elapsed && t < elapsed + scene.duration) {
-                setActiveScene(prev => prev !== scene.id ? scene.id : prev)
-                break
-            }
-            elapsed += scene.duration
-        }
-    }, [project?.scenes])
+    const handlePause = useCallback(() => {
+        canvasRef.current?.pause()
+        setPlaying(false)
+    }, [])
 
-    // ── Scene click → swap video ──────────────────────────────────────────────
-    const handleSceneClick = useCallback((scene: Scene, seekTime: number) => {
-        setActiveScene(scene.id)
-        if (scene.videoUrl && scene.videoUrl !== videoUrl) {
-            setVideoUrl(scene.videoUrl)
-            setVideoDuration(0)
-            setTimeout(() => canvasRef.current?.seekTo(0), 100)
-        } else {
-            canvasRef.current?.seekTo(seekTime)
+    const handleStop = useCallback(() => {
+        canvasRef.current?.pause()
+        if (!project) return
+        const sorted = getSortedScenes(project.scenes)
+        if (sorted.length > 0) {
+            setActiveSceneId(sorted[0].id)
+            setCurrentVideoUrl(sorted[0].videoUrl ?? null)
         }
-    }, [videoUrl])
+        setGlobalTime(0)
+        setPlaying(false)
+        setTimeout(() => canvasRef.current?.seekTo(0), 50)
+    }, [project, getSortedScenes])
+
+    const handlePlayStateChange = useCallback((isPlaying: boolean) => {
+        setPlaying(isPlaying)
+    }, [])
 
     // ── Save ──────────────────────────────────────────────────────────────────
     const handleSave = useCallback(async () => {
@@ -156,7 +209,19 @@ export default function EditorPage() {
         } finally { setSaving(false) }
     }, [project, projectId])
 
-    // ── Export ────────────────────────────────────────────────────────────────
+    const persistScenes = useCallback((scenes: Scene[]) => {
+        if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+        autoSaveTimer.current = setTimeout(async () => {
+            try {
+                await fetch(`/api/projects/${projectId}`, {
+                    method:  'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({ action: 'save', scenes }),
+                })
+            } catch (err) { console.error('Auto-save failed:', err) }
+        }, 800)
+    }, [projectId])
+
     const handleExport = useCallback(async () => {
         try {
             await fetch('/api/render', {
@@ -171,37 +236,43 @@ export default function EditorPage() {
     // ── Add scene ─────────────────────────────────────────────────────────────
     const handleAddScene = useCallback(async () => {
         if (!project) return
-        try {
-            const res = await fetch(`/api/projects/${projectId}/scenes`, {
-                method:  'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({
-                    title: 'New Scene', description: '', musicMood: 'Cinematic',
-                    duration: 5, order: project.scenes.length,
-                }),
-            })
-            const scene: Scene = await res.json()
-            setProject(p => p ? { ...p, scenes: [...p.scenes, scene] } : p)
-            setActiveScene(scene.id)
-        } catch (err) { console.error('Add scene failed:', err) }
-    }, [project, projectId])
+        const sorted  = getSortedScenes(project.scenes)
+        const newScene: Scene = {
+            id:          `temp-${Date.now()}`,
+            title:       'New Scene',
+            description: '',
+            musicMood:   'Cinematic',
+            duration:    5,
+            order:       sorted.length,
+            videoUrl:    null,
+            pexelsId:    null,
+        }
+        const updated = [...project.scenes, newScene]
+        setProject(p => p ? { ...p, scenes: updated } : p)
+        setActiveSceneId(newScene.id)
+        persistScenes(updated)
+    }, [project, getSortedScenes, persistScenes])
 
-    // ── AI scenes update ──────────────────────────────────────────────────────
     const handleScenesUpdate = useCallback((scenes: Scene[]) => {
         setProject(p => p ? { ...p, scenes } : p)
-        if (scenes.length > 0) {
-            setActiveScene(scenes[0].id)
-            if (scenes[0].videoUrl) setVideoUrl(scenes[0].videoUrl)
+        persistScenes(scenes)
+        // Only reset active scene if current one no longer exists
+        const stillExists = scenes.some(s => s.id === activeSceneId)
+        if (!stillExists) {
+            const sorted = getSortedScenes(scenes)
+            if (sorted.length > 0) {
+                setActiveSceneId(sorted[0].id)
+                setCurrentVideoUrl(sorted[0].videoUrl ?? null)
+            }
         }
-    }, [])
+    }, [getSortedScenes, persistScenes, activeSceneId])
 
-    // ── Tool sub-panels ───────────────────────────────────────────────────────
     const toolPanels: Partial<Record<ToolId, React.ReactNode>> = {
         trim: (
             <div className="p-4 flex flex-col gap-3">
                 <p className="text-xs font-bold" style={{ color: 'var(--text)' }}>Trim & Cut</p>
                 <p className="text-[11px]" style={{ color: 'var(--text-tertiary)', lineHeight: 1.7 }}>
-                    Click a scene in the timeline to select it, then use in/out handles to trim.
+                    Drag the left or right edge of any clip in the timeline to trim it.
                 </p>
             </div>
         ),
@@ -223,7 +294,6 @@ export default function EditorPage() {
         ),
     }
 
-    // ── Loading / error ───────────────────────────────────────────────────────
     if (loading) return (
         <div className="flex items-center justify-center" style={{ height: '100dvh', backgroundColor: 'var(--bg)' }}>
             <div className="flex flex-col items-center gap-3">
@@ -237,25 +307,21 @@ export default function EditorPage() {
         <div className="flex items-center justify-center" style={{ height: '100dvh', backgroundColor: 'var(--bg)' }}>
             <div className="flex flex-col items-center gap-3">
                 <p className="text-sm font-bold" style={{ color: 'var(--text)' }}>Project not found</p>
-                <Link href="/dashboard/projects" className="text-xs" style={{ color: 'var(--turquoise)' }}>
-                    ← Back to Projects
-                </Link>
+                <Link href="/dashboard" className="text-xs" style={{ color: 'var(--turquoise)' }}>← Back to Dashboard</Link>
             </div>
         </div>
     )
 
-    const totalDuration = project.scenes.reduce((s, c) => s + c.duration, 0)
+    const totalDuration = getTotalDuration(project.scenes)
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100dvh', overflow: 'hidden', backgroundColor: 'var(--bg)' }}>
 
-            {/* Top bar */}
             <div style={{ flexShrink: 0 }}>
                 <EditorTopBar
                     projectId={projectId}
                     projectName={project.name}
-                    saving={saving}
-                    saved={saved}
+                    saving={saving} saved={saved}
                     aiOpen={aiOpen}
                     onToggleAi={() => setAiOpen(v => !v)}
                     onSave={handleSave}
@@ -263,10 +329,8 @@ export default function EditorPage() {
                 />
             </div>
 
-            {/* Middle row */}
             <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
 
-                {/* Left tools */}
                 <div style={{ flexShrink: 0 }}>
                     <LeftToolsPanel
                         activeTool={activeTool}
@@ -274,35 +338,32 @@ export default function EditorPage() {
                     />
                 </div>
 
-                {/* Tool sub-panel */}
                 {activeTool && toolPanels[activeTool] && (
                     <div style={{ width: '200px', flexShrink: 0, overflowY: 'auto', backgroundColor: 'var(--bg)', borderRight: '1px solid var(--border-default)' }}>
                         {toolPanels[activeTool]}
                     </div>
                 )}
 
-                {/* Preview canvas — relative so floating controls can anchor to it */}
+                {/* Preview */}
                 <div
                     className="relative"
                     style={{ flex: '1 1 0', minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: 'var(--surface-raised)' }}
                 >
                     <PreviewCanvas
                         ref={canvasRef}
-                        videoUrl={videoUrl}
+                        videoUrl={currentVideoUrl}
                         aspectRatio={aspectRatio}
-                        onVideoLoad={handleVideoLoad}
+                        clipDuration={activeClipDuration}
                         onTimeUpdate={handleTimeUpdate}
+                        onEnded={handleClipEnded}
+                        onPlayStateChange={handlePlayStateChange}
                     />
 
-                    {/* ── Floating aspect ratio control ── */}
-                    <div
-                        className="absolute bottom-4 right-4 flex flex-col items-end gap-1"
-                        style={{ zIndex: 20 }}
-                    >
-                        {/* Toggle button */}
+                    {/* Aspect ratio picker */}
+                    <div className="absolute bottom-4 right-4 flex flex-col items-end gap-1" style={{ zIndex: 20 }}>
                         <button
                             onClick={() => setRatioOpen(o => !o)}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold"
                             style={{
                                 backgroundColor: ratioOpen ? 'var(--turquoise)' : 'rgba(0,0,0,0.6)',
                                 backdropFilter:  'blur(8px)',
@@ -316,22 +377,13 @@ export default function EditorPage() {
                             )}
                             {aspectRatio}
                         </button>
-
-                        {/* Options panel */}
                         {ratioOpen && (
-                            <div
-                                className="flex flex-col gap-1 p-1.5 rounded-xl"
-                                style={{
-                                    backgroundColor: 'rgba(0,0,0,0.75)',
-                                    backdropFilter:  'blur(12px)',
-                                    border:          '1px solid rgba(255,255,255,0.1)',
-                                }}
-                            >
+                            <div className="flex flex-col gap-1 p-1.5 rounded-xl"
+                                style={{ backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.1)' }}>
                                 {RATIO_OPTIONS.map(({ label, icon: Icon, hint }) => (
-                                    <button
-                                        key={label}
+                                    <button key={label}
                                         onClick={() => { setAspectRatio(label); setRatioOpen(false) }}
-                                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 text-left"
+                                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left"
                                         style={{
                                             backgroundColor: aspectRatio === label ? 'var(--turquoise-16)' : 'transparent',
                                             color:           aspectRatio === label ? 'var(--turquoise)'    : 'rgba(255,255,255,0.8)',
@@ -352,29 +404,33 @@ export default function EditorPage() {
                 </div>
 
                 {/* AI Sidebar */}
-                <div style={{ width: aiOpen ? '300px' : '0px', flexShrink: 0, overflow: 'hidden', transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)', borderLeft: aiOpen ? '1px solid var(--border-default)' : 'none' }}>
+                <div style={{ width: aiOpen ? '300px' : '0px', flexShrink: 0, overflow: 'hidden', transition: 'width 0.25s cubic-bezier(0.4,0,0.2,1)', borderLeft: aiOpen ? '1px solid var(--border-default)' : 'none' }}>
                     <div style={{ width: '300px', height: '100%', overflow: 'hidden' }}>
-                        <GeminiSidebar
+                        <AISidebar
                             projectId={projectId}
                             projectName={project.name}
                             prompt={project.prompt}
                             scenes={project.scenes}
-                            videoUrl={videoUrl}
+                            videoUrl={currentVideoUrl}
                             onScenesUpdate={handleScenesUpdate}
                         />
                     </div>
                 </div>
             </div>
 
-            {/* Timeline */}
             <div style={{ flexShrink: 0 }}>
                 <SceneTimeline
                     scenes={project.scenes}
-                    activeSceneId={activeScene}
-                    currentTime={currentTime}
+                    activeSceneId={activeSceneId}
+                    currentTime={globalTime}
                     totalDuration={totalDuration}
+                    playing={playing}
                     onSceneClick={handleSceneClick}
                     onAddScene={handleAddScene}
+                    onScenesChange={handleScenesUpdate}
+                    onPlay={handlePlay}
+                    onPause={handlePause}
+                    onStop={handleStop}
                 />
             </div>
         </div>
