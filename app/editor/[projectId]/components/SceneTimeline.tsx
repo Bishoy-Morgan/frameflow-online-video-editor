@@ -67,7 +67,7 @@ export default function SceneTimeline({
   const sorted  = [...display].sort((a, b) => a.order - b.order)
   const total   = sorted.reduce((s, c) => s + c.duration, 0) || 1
 
-  // ── Dynamic pxPerSec ──────────────────────────────────────────────────────
+  // Dynamic pxPerSec
   const availableWidth = containerWidth - TRACK_PADDING * 2
   const fitPxPerSec    = availableWidth / total
   const pxPerSec       = Math.min(MAX_PX_PER_SEC, Math.max(MIN_PX_PER_SEC, fitPxPerSec))
@@ -75,7 +75,7 @@ export default function SceneTimeline({
   const trackWidth   = total * pxPerSec
   const playheadLeft = TRACK_PADDING + Math.min(currentTime, total) * pxPerSec
 
-  // ── Measure container ─────────────────────────────────────────────────────
+  // Measure container
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -88,7 +88,7 @@ export default function SceneTimeline({
     return () => ro.disconnect()
   }, [])
 
-  // ── Ruler markers ─────────────────────────────────────────────────────────
+  // Ruler markers
   const rawStep   = 60 / pxPerSec
   const niceSteps = [1, 2, 5, 10, 15, 30, 60, 120]
   const step      = niceSteps.find(s => s >= rawStep) ?? 120
@@ -96,7 +96,7 @@ export default function SceneTimeline({
   const markers: number[] = []
   for (let t = 0; t <= total + step; t += step) markers.push(t)
 
-  // ── Scene positions ───────────────────────────────────────────────────────
+  // Scene positions
   const scenesWithPos = sorted.reduce<
     (Scene & { startTime: number; left: number; width: number })[]
   >((acc, scene) => {
@@ -110,14 +110,14 @@ export default function SceneTimeline({
     }]
   }, [])
 
-  // ── Delete ────────────────────────────────────────────────────────────────
+  // Delete
   const handleDelete = useCallback((e: React.MouseEvent, id: string) => {
     e.stopPropagation()
     const next = scenes.filter(s => s.id !== id)
     onScenesChange?.(next)
   }, [scenes, onScenesChange])
 
-  // ── Trim ──────────────────────────────────────────────────────────────────
+  // Trim
   const handleTrimMouseDown = useCallback((
     e: React.MouseEvent, scene: Scene, edge: 'left' | 'right',
   ) => {
@@ -147,7 +147,7 @@ export default function SceneTimeline({
     document.addEventListener('mouseup',   onUp)
   }, [scenes, pxPerSec, onScenesChange])
 
-  // ── Drag reorder ──────────────────────────────────────────────────────────
+  // Drag reorder
   const handleDragMouseDown = useCallback((e: React.MouseEvent, scene: Scene) => {
     e.stopPropagation()
     e.preventDefault()
@@ -180,7 +180,7 @@ export default function SceneTimeline({
     document.addEventListener('mouseup',   onUp)
   }, [scenes, pxPerSec, onScenesChange])
 
-  // ── Track click to seek ───────────────────────────────────────────────────
+  // Track click to seek
   const handleTrackClick = useCallback((e: React.MouseEvent) => {
     const rect       = scrollRef.current?.getBoundingClientRect()
     if (!rect) return
@@ -199,7 +199,7 @@ export default function SceneTimeline({
       className="flex flex-col shrink-0"
       style={{ height: '200px', backgroundColor: 'var(--bg)', borderTop: '1px solid var(--border-default)' }}
     >
-      {/* ── Header ── */}
+      {/* Header */}
       <div
         className="flex items-center shrink-0 px-4"
         style={{ height: '44px', borderBottom: '1px solid var(--border-subtle)' }}
@@ -276,7 +276,7 @@ export default function SceneTimeline({
         </div>
       </div>
 
-      {/* ── Scrollable track body ── */}
+      {/* Scrollable track body */}
       <div style={{ flex: '1 1 0', minHeight: 0, position: 'relative', overflow: 'hidden' }}>
         <div
           ref={scrollRef}

@@ -10,13 +10,14 @@ import PreviewCanvas, { PreviewCanvasHandle } from './components/PreviewCanvas'
 import SceneTimeline                          from './components/SceneTimeline'
 import LeftToolsPanel, { type ToolId }        from './components/LeftToolsPanel'
 import AISidebar                              from './components/AISidebar'
+import AddSceneModal                          from './components/AddSceneModal'
 
 interface Scene {
     id:          string
     title:       string
     description: string
     musicMood:   string
-    duration:    number   // Float — sub-second precision
+    duration:    number
     order:       number
     videoUrl?:   string | null
     pexelsId?:   string | null
@@ -57,16 +58,17 @@ export default function EditorPage() {
     const searchParams = useSearchParams()
     const projectId    = params.projectId as string
 
-    const [project,     setProject]     = useState<Project | null>(null)
-    const [loading,     setLoading]     = useState(true)
-    const [error,       setError]       = useState('')
-    const [aspectRatio, setAspectRatio] = useState<AspectRatio>('16:9')
-    const [ratioOpen,   setRatioOpen]   = useState(false)
-    const [activeTool,  setActiveTool]  = useState<ToolId | null>(null)
-    const [aiOpen,      setAiOpen]      = useState(true)
-    const [saving,      setSaving]      = useState(false)
-    const [saved,       setSaved]       = useState(false)
-    const [playing,     setPlaying]     = useState(false)
+    const [project,        setProject]        = useState<Project | null>(null)
+    const [loading,        setLoading]        = useState(true)
+    const [error,          setError]          = useState('')
+    const [aspectRatio,    setAspectRatio]    = useState<AspectRatio>('16:9')
+    const [ratioOpen,      setRatioOpen]      = useState(false)
+    const [activeTool,     setActiveTool]     = useState<ToolId | null>(null)
+    const [aiOpen,         setAiOpen]         = useState(true)
+    const [saving,         setSaving]         = useState(false)
+    const [saved,          setSaved]          = useState(false)
+    const [playing,        setPlaying]        = useState(false)
+    const [addSceneOpen,   setAddSceneOpen]   = useState(false)
 
     const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
     const canvasRef     = useRef<PreviewCanvasHandle>(null)
@@ -85,7 +87,6 @@ export default function EditorPage() {
         scenes.reduce((s, c) => s + c.duration, 0)
     , [])
 
-    // Derived: duration of the currently active scene — this is the out point
     const activeClipDuration = project?.scenes.find(s => s.id === activeSceneId)?.duration ?? 0
 
     // ── Fetch project ─────────────────────────────────────────────────────────
@@ -125,14 +126,14 @@ export default function EditorPage() {
         startTimesRef.current = buildStartTimes(project.scenes)
     }, [project])
 
-    // ── Time update from canvas RAF ───────────────────────────────────────────
+    // ── Time update ───────────────────────────────────────────────────────────
     const handleTimeUpdate = useCallback((clipTime: number) => {
         if (!activeSceneId) return
         const sceneStart = startTimesRef.current.get(activeSceneId) ?? 0
         setGlobalTime(sceneStart + clipTime)
     }, [activeSceneId])
 
-    // ── Clip ended — advance to next scene ────────────────────────────────────
+    // ── Clip ended ────────────────────────────────────────────────────────────
     const handleClipEnded = useCallback(() => {
         if (!project) return
         const sorted = getSortedScenes(project.scenes)
@@ -142,31 +143,26 @@ export default function EditorPage() {
             setActiveSceneId(next.id)
             setCurrentVideoUrl(next.videoUrl ?? null)
         } else {
-            // End of project
             setPlaying(false)
             const last = sorted[sorted.length - 1]
             if (last) setGlobalTime(startTimesRef.current.get(last.id)! + last.duration)
         }
     }, [project, activeSceneId, getSortedScenes])
 
-    // ── Scene click (seek) ────────────────────────────────────────────────────
+    // ── Scene click ───────────────────────────────────────────────────────────
     const handleSceneClick = useCallback((scene: Scene, seekTime: number) => {
         const sceneStart  = startTimesRef.current.get(scene.id) ?? 0
         const localOffset = Math.max(0, seekTime - sceneStart)
-
         setActiveSceneId(scene.id)
         setGlobalTime(seekTime)
-
         if (scene.videoUrl !== currentVideoUrl) {
-            // Changing scene — new videoUrl triggers auto-load in PreviewCanvas
             setCurrentVideoUrl(scene.videoUrl ?? null)
         } else {
-            // Same scene — just seek within it
             canvasRef.current?.seekTo(localOffset)
         }
     }, [currentVideoUrl])
 
-    // ── Transport controls ────────────────────────────────────────────────────
+    // ── Transport ─────────────────────────────────────────────────────────────
     const handlePlay = useCallback(() => {
         canvasRef.current?.play()
         setPlaying(true)
@@ -233,30 +229,19 @@ export default function EditorPage() {
         } catch { alert('Export failed. Please try again.') }
     }, [projectId, aspectRatio])
 
-    // ── Add scene ─────────────────────────────────────────────────────────────
-    const handleAddScene = useCallback(async () => {
+    // ── Add scene — modal confirms, then we append ────────────────────────────
+    const handleSceneAdded = useCallback((scene: Scene) => {
         if (!project) return
-        const sorted  = getSortedScenes(project.scenes)
-        const newScene: Scene = {
-            id:          `temp-${Date.now()}`,
-            title:       'New Scene',
-            description: '',
-            musicMood:   'Cinematic',
-            duration:    5,
-            order:       sorted.length,
-            videoUrl:    null,
-            pexelsId:    null,
-        }
-        const updated = [...project.scenes, newScene]
+        const updated = [...project.scenes, scene]
         setProject(p => p ? { ...p, scenes: updated } : p)
-        setActiveSceneId(newScene.id)
+        setActiveSceneId(scene.id)
+        setCurrentVideoUrl(scene.videoUrl ?? null)
         persistScenes(updated)
-    }, [project, getSortedScenes, persistScenes])
+    }, [project, persistScenes])
 
     const handleScenesUpdate = useCallback((scenes: Scene[]) => {
         setProject(p => p ? { ...p, scenes } : p)
         persistScenes(scenes)
-        // Only reset active scene if current one no longer exists
         const stillExists = scenes.some(s => s.id === activeSceneId)
         if (!stillExists) {
             const sorted = getSortedScenes(scenes)
@@ -330,7 +315,6 @@ export default function EditorPage() {
             </div>
 
             <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-
                 <div style={{ flexShrink: 0 }}>
                     <LeftToolsPanel
                         activeTool={activeTool}
@@ -418,6 +402,7 @@ export default function EditorPage() {
                 </div>
             </div>
 
+            {/* Timeline */}
             <div style={{ flexShrink: 0 }}>
                 <SceneTimeline
                     scenes={project.scenes}
@@ -426,13 +411,23 @@ export default function EditorPage() {
                     totalDuration={totalDuration}
                     playing={playing}
                     onSceneClick={handleSceneClick}
-                    onAddScene={handleAddScene}
+                    onAddScene={() => setAddSceneOpen(true)}
                     onScenesChange={handleScenesUpdate}
                     onPlay={handlePlay}
                     onPause={handlePause}
                     onStop={handleStop}
                 />
             </div>
+
+            {/* Add Scene Modal */}
+            {addSceneOpen && (
+                <AddSceneModal
+                    projectId={projectId}
+                    sceneOrder={project.scenes.length}
+                    onAdd={handleSceneAdded}
+                    onClose={() => setAddSceneOpen(false)}
+                />
+            )}
         </div>
     )
 }
