@@ -46,7 +46,7 @@ const MOOD_OPTIONS = [
 const MAX_SIZE_BYTES = 50 * 1024 * 1024
 const ALLOWED_TYPES  = ['video/mp4', 'video/quicktime', 'video/webm']
 
-// ─── Upload Tab ──────────────────────────────────────────────────────────────
+// Upload Tab
 
 function UploadTab({
     projectId,
@@ -251,7 +251,7 @@ function UploadTab({
     )
 }
 
-// ─── Pexels Tab
+//  Pexels Tab
 
 function PexelsVideoCard({
     video,
@@ -357,19 +357,27 @@ function PexelsTab({
     const [title,    setTitle]    = useState('')
     const [mood,     setMood]     = useState('Cinematic')
 
+    const abortRef = useRef<AbortController | null>(null)
+
     const search = useCallback(async (q: string, p: number) => {
         if (!q.trim()) return
+        abortRef.current?.abort()
+        abortRef.current = new AbortController()
         setLoading(true)
         setError('')
         setSelected(null)
         try {
-            const res  = await fetch(`/api/pexels/search?query=${encodeURIComponent(q)}&page=${p}`)
+            const res  = await fetch(`/api/pexels/search?query=${encodeURIComponent(q)}&page=${p}`, { signal: abortRef.current.signal })
             const data = await res.json()
-            if (data.error) { setError(data.error); return }
+            if (!res.ok || data.error) {
+                setError(data.error ?? 'Search failed. Please try again.')
+                return
+            }
             setVideos(data.videos)
             setTotal(data.totalResults)
             setPage(p)
-        } catch {
+        } catch (err) {
+            if (err instanceof DOMException && err.name === 'AbortError') return
             setError('Search failed. Please try again.')
         } finally {
             setLoading(false)
@@ -596,7 +604,7 @@ function PexelsTab({
     )
 }
 
-// ─── Main Modal ──────────────────────────────────────────────────────────────
+// Main Modal
 
 export default function AddSceneModal({
     projectId, sceneOrder, onAdd, onClose,
