@@ -425,15 +425,15 @@ export default function DashboardHeader({ title, subtitle }: DashboardHeaderProp
                         suppressHydrationWarning
                         className="absolute top-0.75 bottom-0.75 w-[1.85rem] rounded-md transition-all duration-300 ease-in-out"
                         style={{
-                            left: isDark ? 'calc(100% - 2.1rem)' : '3px',
+                            left: !mounted ? '3px' : isDark ? 'calc(100% - 2.1rem)' : '3px',
                             backgroundColor: 'var(--bg)',
                             border: '1px solid var(--border-strong)',
                             boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
                         }}
                     />
                     <div className="relative w-full flex items-center justify-between px-2">
-                        <Sun suppressHydrationWarning size={13} style={{ color: 'var(--text)', opacity: mounted ? (isDark ? 0.3 : 1) : 1, transition: 'opacity 0.2s' }} />
-                        <Moon suppressHydrationWarning size={13} style={{ color: 'var(--text)', opacity: mounted ? (isDark ? 1 : 0.3) : 0.3, transition: 'opacity 0.2s' }} />
+                        <Sun suppressHydrationWarning size={13} style={{ color: 'var(--text)', opacity: !mounted ? 1 : isDark ? 0.3 : 1, transition: 'opacity 0.2s' }} />
+                        <Moon suppressHydrationWarning size={13} style={{ color: 'var(--text)', opacity: !mounted ? 0.3 : isDark ? 1   : 0.3, transition: 'opacity 0.2s' }} />
                     </div>
                 </button>
 

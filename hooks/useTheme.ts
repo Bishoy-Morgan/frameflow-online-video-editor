@@ -15,7 +15,11 @@ function getInitialTheme(): Theme {
 
 export function useTheme() {
     const [theme, setTheme] = useState<Theme>(getInitialTheme)
+    const [mounted, setMounted] = useState(false)
 
+    useEffect(() => {
+        setMounted(true)
+    }, [])
     // Sync DOM whenever theme changes
     useEffect(() => {
         document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -41,6 +45,6 @@ export function useTheme() {
         theme,
         isDark: theme === 'dark',
         toggleTheme,
-        mounted: true,
+        mounted,
     }
 }

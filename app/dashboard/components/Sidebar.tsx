@@ -91,9 +91,20 @@ export default function Sidebar() {
             style={{ width: expanded ? '200px' : '60px', transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)', backgroundColor: 'var(--bg)', borderRight: '1px solid var(--border-default)' }}>
 
             {/* Logo */}
-            <Link href="/dashboard" className="flex items-center h-16 px-4 shrink-0 overflow-hidden"
-                style={{ borderBottom: '1px solid var(--border-subtle)', textDecoration: 'none' }}>
-                <Image src={mounted ? (isDark ? whiteLogo : blackLogo) : blackLogo} alt="Frameflow" width={26} height={26} className="shrink-0" priority suppressHydrationWarning />
+            <Link 
+                href="/dashboard" className="flex items-center h-16 px-4 shrink-0 overflow-hidden"
+                style={{ borderBottom: '1px solid var(--border-subtle)', textDecoration: 'none' }}
+            >
+                {mounted ? (
+                    <Image
+                        src={isDark ? whiteLogo : blackLogo}
+                        alt="Frameflow"
+                        width={32} height={32}
+                        priority suppressHydrationWarning
+                    />
+                ) : (
+                    <div style={{ width: 32, height: 32 }} />
+                )}
                 <span className="ml-3 font-normal whitespace-nowrap"
                     style={{ fontFamily: 'var(--font-dm-serif-display), serif', fontSize: '1rem', color: 'var(--text)', opacity: expanded ? 1 : 0, maxWidth: expanded ? '120px' : '0px', overflow: 'hidden', transition: 'opacity 0.2s ease 0.05s, max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                     Frameflow
