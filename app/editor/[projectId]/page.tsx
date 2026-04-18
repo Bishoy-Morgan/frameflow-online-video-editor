@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { Loader2, Monitor, Smartphone, Square } from 'lucide-react'
 import Link from 'next/link'
@@ -89,7 +89,7 @@ export default function EditorPage() {
 
     const activeClipDuration = project?.scenes.find(s => s.id === activeSceneId)?.duration ?? 0
 
-    // ── Fetch project ─────────────────────────────────────────────────────────
+    // Fetch project 
     useEffect(() => {
         if (!projectId) return
         const scenesParam     = searchParams.get('scenes')
@@ -126,14 +126,14 @@ export default function EditorPage() {
         startTimesRef.current = buildStartTimes(project.scenes)
     }, [project])
 
-    // ── Time update ───────────────────────────────────────────────────────────
+    // Time update 
     const handleTimeUpdate = useCallback((clipTime: number) => {
         if (!activeSceneId) return
         const sceneStart = startTimesRef.current.get(activeSceneId) ?? 0
         setGlobalTime(sceneStart + clipTime)
     }, [activeSceneId])
 
-    // ── Clip ended ────────────────────────────────────────────────────────────
+    // Clip ended
     const handleClipEnded = useCallback(() => {
         if (!project) return
         const sorted = getSortedScenes(project.scenes)
@@ -149,7 +149,7 @@ export default function EditorPage() {
         }
     }, [project, activeSceneId, getSortedScenes])
 
-    // ── Scene click ───────────────────────────────────────────────────────────
+    // Scene click
     const handleSceneClick = useCallback((scene: Scene, seekTime: number) => {
         const sceneStart  = startTimesRef.current.get(scene.id) ?? 0
         const localOffset = Math.max(0, seekTime - sceneStart)
@@ -162,7 +162,16 @@ export default function EditorPage() {
         }
     }, [currentVideoUrl])
 
-    // ── Transport ─────────────────────────────────────────────────────────────
+    // next video pre-render
+    const nextVideo = useMemo(() => {
+        if(!project) return
+        const sorted = getSortedScenes(project.scenes)
+        const idx    = sorted.findIndex(s => s.id === activeSceneId)
+        const nextVideoUrl = sorted[idx + 1]?.videoUrl
+        return nextVideoUrl
+    }, [project, activeSceneId, getSortedScenes])
+
+    // Transport
     const handlePlay = useCallback(() => {
         canvasRef.current?.play()
         setPlaying(true)
@@ -190,7 +199,7 @@ export default function EditorPage() {
         setPlaying(isPlaying)
     }, [])
 
-    // ── Save ──────────────────────────────────────────────────────────────────
+    // Save
     const handleSave = useCallback(async () => {
         if (!project) return
         setSaving(true)
@@ -229,7 +238,7 @@ export default function EditorPage() {
         } catch { alert('Export failed. Please try again.') }
     }, [projectId, aspectRatio])
 
-    // ── Add scene — modal confirms, then we append ────────────────────────────
+    // Add scene — modal confirms, then we append
     const handleSceneAdded = useCallback((scene: Scene) => {
         if (!project) return
         const updated = [...project.scenes, scene]
@@ -417,6 +426,9 @@ export default function EditorPage() {
                     onPause={handlePause}
                     onStop={handleStop}
                 />
+                {nextVideo && (
+                    <video preload='auto' src={nextVideo} style={{ display: 'none' }} />
+                )}
             </div>
 
             {/* Add Scene Modal */}
