@@ -31,6 +31,7 @@ model User {
 enum UserRole {
   USER
   ADMIN
+  DEMO
 }
 
 model Account {
@@ -207,6 +208,16 @@ model Notification {
   @@index([userId])
 }
 
+model LoginAttempt {
+  id          String          @id @default(cuid())
+  ip          String
+  email       String
+  createdAt   DateTime        @default(now())
+
+  @@index([email])
+  @@index([ip])
+}
+
 enum NotificationType {
   RENDER_FAILED
   RENDER_COMPLETED
@@ -225,3 +236,4 @@ enum RenderStatus {
   COMPLETED
   FAILED
 }
+

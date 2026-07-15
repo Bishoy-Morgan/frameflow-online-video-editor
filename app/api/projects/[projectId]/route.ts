@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { patchProjectSchema } from '@/lib/schemas'
 
 type Params = { params: Promise<{ projectId: string }> }
 
@@ -38,41 +39,23 @@ export async function PATCH(req: Request, { params }: Params) {
         return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
     const body = await req.json()
-    const { action, scenes, name, starred, deletedAt } = body
+    const result = patchProjectSchema.safeParse(body)
+    if (!result.success) {
+        return NextResponse.json({ error: result.error.flatten() }, { status: 400 })
+    }
+    const { action, scenes, name, starred, deletedAt } = result.data
 
-    // Save scene changes from editor (delete, reorder, trim)
     if (action === 'save' && Array.isArray(scenes)) {
-        // Delete all existing scenes and replace with current state
-        await prisma.scene.deleteMany({ where: { projectId } })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const scenesToCreate = scenes.map(({ id: _id, ...rest }) => ({ ...rest, projectId }))
 
-        if (scenes.length > 0) {
-            await prisma.scene.createMany({
-                data: scenes.map((s: {
-                    id?:         string
-                    title:       string
-                    description: string
-                    musicMood:   string
-                    duration:    number
-                    order:       number
-                    videoUrl?:   string | null
-                    pexelsId?:   string | null
-                }) => ({
-                    projectId,
-                    title:       s.title,
-                    description: s.description,
-                    musicMood:   s.musicMood,
-                    duration:    s.duration,
-                    order:       s.order,
-                    videoUrl:    s.videoUrl   ?? null,
-                    pexelsId:    s.pexelsId   ?? null,
-                })),
-            })
-        }
+        const operations = [
+            prisma.scene.deleteMany({ where: { projectId } }),
+            ...(scenesToCreate.length > 0 ? [prisma.scene.createMany({ data: scenesToCreate })] : []),
+            prisma.project.update({ where: { id: projectId }, data: { updatedAt: new Date() } }),
+        ]
 
-        await prisma.project.update({
-            where: { id: projectId },
-            data:  { updatedAt: new Date() },
-        })
+        await prisma.$transaction(operations)
 
         return NextResponse.json({ saved: true })
     }

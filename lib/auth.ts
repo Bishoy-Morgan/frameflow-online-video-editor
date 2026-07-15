@@ -5,6 +5,11 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import { type NextAuthOptions } from "next-auth";
 
+const DUMMY_HASH = "$2b$10$yirkYGrGfpTD.jPD6Th7y.cRV2PiWDUmuJznKXWxBBPVeWz7wFr.u";
+const EMAIL_ATTEMPT_LIMIT = 5;
+const IP_ATTEMPT_LIMIT = 20;
+const RATE_LIMIT_WINDOW_MINUTES = 15;
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
 
@@ -26,17 +31,51 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
 
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) return null;
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email.toLowerCase() },
         });
 
-        if (!user || !user.password) return null;
+        const loginAttempts = await prisma.loginAttempt.count({
+          where: {
+            email: credentials.email.toLowerCase(),
+            createdAt: {
+              gte: new Date(Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000),
+            },
+          },
+        });
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) return null;
+        if (loginAttempts >= EMAIL_ATTEMPT_LIMIT) {
+            throw new Error(`Too many login attempts. Please try again in ${RATE_LIMIT_WINDOW_MINUTES} minutes.`);
+        }
+
+        const ipAddress = req?.headers?.get("x-forwarded-for") ?? "unknown";
+
+        const ipAttempts = await prisma.loginAttempt.count({
+            where: {
+                ip: ipAddress,
+                createdAt: { gte: new Date(Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000) },
+            },
+        });
+
+        if (ipAttempts >= IP_ATTEMPT_LIMIT) {
+            throw new Error(`Too many login attempts from this network. Please try again in ${RATE_LIMIT_WINDOW_MINUTES} minutes.`);
+        }
+
+        const hashToCompare = user?.password ?? DUMMY_HASH;
+        const isValid = await bcrypt.compare(credentials.password, hashToCompare);
+
+        if (!user || !user.password || !isValid) {
+          await prisma.loginAttempt.create({
+              data: {
+                  email: credentials.email.toLowerCase(),
+                  ip: ipAddress,
+              },
+          });
+          return null;
+        };
 
         return {
           id: user.id,

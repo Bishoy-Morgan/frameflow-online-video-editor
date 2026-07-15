@@ -19,6 +19,5 @@ export const config = {
     matcher: [
         "/dashboard/:path*",
         "/editor/:path*",
-        // add any other protected routes here
     ],
 };
