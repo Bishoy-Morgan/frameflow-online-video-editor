@@ -36,6 +36,9 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    if (session.user.role === 'DEMO')
+        return NextResponse.json({ error: 'Demo users cannot modify projects' }, { status: 403 })
+
     const body = await req.json()
     const result = createProjectSchema.safeParse(body)
     if (!result.success) {

@@ -32,6 +32,9 @@ export async function PATCH(req: Request, { params }: Params) {
     if (!session?.user?.id)
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    if (session.user.role === 'DEMO')
+        return NextResponse.json({ error: 'Demo users cannot modify projects' }, { status: 403 })
+
     const project = await prisma.project.findFirst({
         where: { id: projectId, userId: session.user.id },
     })
@@ -100,6 +103,9 @@ export async function DELETE(_req: Request, { params }: Params) {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id)
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    if (session.user.role === 'DEMO')
+        return NextResponse.json({ error: 'Demo users cannot modify projects' }, { status: 403 })
 
     const project = await prisma.project.findFirst({
         where: { id: projectId, userId: session.user.id },

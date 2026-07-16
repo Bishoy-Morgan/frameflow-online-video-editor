@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma'
 
 const DEMO_PASSWORD_HASH = "$2b$10$SS9ZHREZ/02sRKVdApCPyu3MYesivL.p68DDHev5WX89P70E4/YXG";
 
-async function main() {
+export async function seedDemoAccount() {
     const demoUser = await prisma.user.upsert({
         where: { email: 'demo@frameflow.app'},
         update: { role: 'DEMO', name: 'Demo User', password: DEMO_PASSWORD_HASH },
@@ -52,11 +52,13 @@ async function main() {
     })
 }
 
-main()
-    .catch((e) => {
-        console.error(e)
-        process.exit(1)
-    })
-    .finally(async () => {
-        await prisma.$disconnect()
-    })
+if (require.main === module) {
+    seedDemoAccount()
+        .catch((e) => {
+            console.error(e)
+            process.exit(1)
+        })
+        .finally(async () => {
+            await prisma.$disconnect()
+        })
+}

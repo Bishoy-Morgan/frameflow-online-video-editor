@@ -32,58 +32,58 @@ export const authOptions: NextAuthOptions = {
       },
 
       async authorize(credentials, req) {
-        if (!credentials?.email || !credentials?.password) return null;
+          try {
+              if (!credentials?.email || !credentials?.password) return null
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email.toLowerCase() },
-        });
+              const user = await prisma.user.findUnique({
+                  where: { email: credentials.email.toLowerCase() },
+              })
 
-        const loginAttempts = await prisma.loginAttempt.count({
-          where: {
-            email: credentials.email.toLowerCase(),
-            createdAt: {
-              gte: new Date(Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000),
-            },
-          },
-        });
+              const loginAttempts = await prisma.loginAttempt.count({
+                  where: {
+                      email: credentials.email.toLowerCase(),
+                      createdAt: { gte: new Date(Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000) },
+                  },
+              })
 
-        if (loginAttempts >= EMAIL_ATTEMPT_LIMIT) {
-            throw new Error(`Too many login attempts. Please try again in ${RATE_LIMIT_WINDOW_MINUTES} minutes.`);
-        }
+              if (loginAttempts >= EMAIL_ATTEMPT_LIMIT) {
+                  throw new Error(`Too many login attempts. Please try again in ${RATE_LIMIT_WINDOW_MINUTES} minutes.`)
+              }
 
-        const ipAddress = req?.headers?.get("x-forwarded-for") ?? "unknown";
+              const ipAddress = req?.headers?.['x-forwarded-for'] ?? 'unknown'
 
-        const ipAttempts = await prisma.loginAttempt.count({
-            where: {
-                ip: ipAddress,
-                createdAt: { gte: new Date(Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000) },
-            },
-        });
+              const ipAttempts = await prisma.loginAttempt.count({
+                  where: {
+                      ip: ipAddress,
+                      createdAt: { gte: new Date(Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000) },
+                  },
+              })
 
-        if (ipAttempts >= IP_ATTEMPT_LIMIT) {
-            throw new Error(`Too many login attempts from this network. Please try again in ${RATE_LIMIT_WINDOW_MINUTES} minutes.`);
-        }
+              if (ipAttempts >= IP_ATTEMPT_LIMIT) {
+                  throw new Error(`Too many login attempts from this network. Please try again in ${RATE_LIMIT_WINDOW_MINUTES} minutes.`)
+              }
 
-        const hashToCompare = user?.password ?? DUMMY_HASH;
-        const isValid = await bcrypt.compare(credentials.password, hashToCompare);
+              const hashToCompare = user?.password ?? DUMMY_HASH
+              const isValid = await bcrypt.compare(credentials.password, hashToCompare)
 
-        if (!user || !user.password || !isValid) {
-          await prisma.loginAttempt.create({
-              data: {
-                  email: credentials.email.toLowerCase(),
-                  ip: ipAddress,
-              },
-          });
-          return null;
-        };
+              if (!user || !user.password || !isValid) {
+                  await prisma.loginAttempt.create({
+                      data: { email: credentials.email.toLowerCase(), ip: ipAddress },
+                  })
+                  return null
+              }
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          role: user.role,
-        };
+              return {
+                  id: user.id,
+                  email: user.email,
+                  name: user.name,
+                  image: user.image,
+                  role: user.role,
+              }
+          } catch (err) {
+              console.error('authorize() error:', err)
+              throw err
+          }
       },
     }),
   ],
