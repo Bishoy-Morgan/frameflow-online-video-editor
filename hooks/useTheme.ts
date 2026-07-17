@@ -18,6 +18,7 @@ export function useTheme() {
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional hydration guard, not a synchronization anti-pattern
         setMounted(true)
     }, [])
     // Sync DOM whenever theme changes

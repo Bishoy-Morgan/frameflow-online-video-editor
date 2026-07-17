@@ -33,31 +33,31 @@ export default async function RootLayout({
 }>) {
   const session = await getServerSession(authOptions)
 
-  const user = session?.user?.email
+  const rawUser = session?.user?.email
     ? await prisma.user.findUnique({
         where: { email: session.user.email },
         select: {
-          id:        true,
-          name:      true,
-          email:     true,
-          image:     true,
-          role:      true,
-          password:  true,
+          id: true, name: true, email: true, image: true, role: true,
+          password: true,
           createdAt: true,
-          _count: {
-            select: {
-              projects: {
-                where: { deletedAt: null },
-              },
-            },
-          },
-          projects: {
-            orderBy: { updatedAt: 'desc' },
-            take: 1,
-            select: { updatedAt: true },
-          },
+          _count: { select: { projects: { where: { deletedAt: null } } } },
+          projects: { orderBy: { updatedAt: 'desc' }, take: 1, select: { updatedAt: true } },
         },
       })
+    : null
+
+  const user = rawUser
+    ? {
+        id: rawUser.id,
+        name: rawUser.name,
+        email: rawUser.email,
+        image: rawUser.image,
+        role: rawUser.role,
+        createdAt: rawUser.createdAt,
+        _count: rawUser._count,
+        projects: rawUser.projects,
+        hasPassword: !!rawUser.password,
+      }
     : null
 
   return (

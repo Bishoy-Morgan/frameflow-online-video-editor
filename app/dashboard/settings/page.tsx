@@ -151,7 +151,7 @@ function ProfileSection() {
                 <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-secondary">Email</label>
                     <span className="text-[0.65rem] font-semibold text-tertiary">
-                        Managed by {user.password ? 'your account' : 'Google'}
+                        Managed by {user.hasPassword ? 'your account' : 'Google'}
                     </span>
                 </div>
                 <input
@@ -210,7 +210,7 @@ function PasswordSection() {
     const [isPending, startTransition] = useTransition()
 
     // Google-only users have no password — show info instead
-    const isGoogleOnly = !user.password
+    const isGoogleOnly = !user.hasPassword
 
     if (isGoogleOnly) {
         return (
@@ -255,8 +255,9 @@ function PasswordSection() {
                 }
                 setCurrent(''); setNext(''); setConfirm('')
                 setFeedback({ type: 'success', message: 'Password updated successfully.' })
-            } catch (err: any) {
-                setFeedback({ type: 'error', message: err.message ?? 'Failed to update password.' })
+            } catch (err) {
+                const message = err instanceof Error ? err.message : 'Failed to update password.'
+                setFeedback({ type: 'error', message })
             }
         })
     }

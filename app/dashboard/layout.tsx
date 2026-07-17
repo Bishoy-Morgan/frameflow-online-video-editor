@@ -15,27 +15,32 @@ export default async function DashboardLayout({ children }: { children: React.Re
     }
 
     const fullUser = await prisma.user.findUnique({
-        where: { 
-            id: session.user.id,
-        },
+        where: { id: session.user.id },
         select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-            role: true,
+            id: true, name: true, email: true, image: true, role: true,
+            password: true,
+            createdAt: true,
             _count: { select: { projects: true } },
             projects: { select: { updatedAt: true } },
-            createdAt: true,
         },
     })
 
-    if (!fullUser) {
-        redirect('/auth/signin')
+    if (!fullUser) redirect('/auth/signin')
+
+    const dashboardUser = {
+        id: fullUser.id,
+        name: fullUser.name,
+        email: fullUser.email,
+        image: fullUser.image,
+        role: fullUser.role,
+        createdAt: fullUser.createdAt,
+        _count: fullUser._count,
+        projects: fullUser.projects,
+        hasPassword: !!fullUser.password,
     }
 
     return (
-        <UserProvider user={fullUser}>
+        <UserProvider user={dashboardUser}>
             <div className="relative flex h-svh overflow-hidden surface">
                 <SectionGrid />
                 <Sidebar />
