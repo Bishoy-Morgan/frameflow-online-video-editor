@@ -41,7 +41,7 @@ function Tooltip({ label, children }: { label: string; children: React.ReactNode
 export default function Sidebar() {
     const [expanded, setExpanded] = useState(false)
     const pathname                = usePathname()
-    const { isDark, mounted }     = useTheme()
+    const { isDark }     = useTheme()
     const user                    = useUser()
     const isFree                  = user.role !== 'ADMIN'
 
@@ -95,16 +95,12 @@ export default function Sidebar() {
                 href="/dashboard" className="flex items-center h-16 px-4 shrink-0 overflow-hidden"
                 style={{ borderBottom: '1px solid var(--border-subtle)', textDecoration: 'none' }}
             >
-                {mounted ? (
-                    <Image
-                        src={isDark ? whiteLogo : blackLogo}
-                        alt="Frameflow"
-                        width={32} height={32}
-                        priority suppressHydrationWarning
-                    />
-                ) : (
-                    <div style={{ width: 32, height: 32 }} />
-                )}
+                <Image
+                    src={isDark ? whiteLogo : blackLogo}
+                    alt="Frameflow"
+                    width={32} height={32}
+                    priority
+                />
                 <span className="ml-3 font-normal whitespace-nowrap"
                     style={{ fontFamily: 'var(--font-dm-serif-display), serif', fontSize: '1rem', color: 'var(--text)', opacity: expanded ? 1 : 0, maxWidth: expanded ? '120px' : '0px', overflow: 'hidden', transition: 'opacity 0.2s ease 0.05s, max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                     Frameflow
