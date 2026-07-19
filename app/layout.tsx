@@ -4,9 +4,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/next"
 import SessionProvider from "@/components/SessionProvider";
 import UserProvider from "@/components/providers/UserProvider";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import currentUser from "@/lib/currentUser";
 
 const dmSerifDisplay = DM_Serif_Display({
   subsets: ["latin"],
@@ -31,34 +29,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession(authOptions)
+  const user = await currentUser()
 
-  const rawUser = session?.user?.email
-    ? await prisma.user.findUnique({
-        where: { email: session.user.email },
-        select: {
-          id: true, name: true, email: true, image: true, role: true,
-          password: true,
-          createdAt: true,
-          _count: { select: { projects: { where: { deletedAt: null } } } },
-          projects: { orderBy: { updatedAt: 'desc' }, take: 1, select: { updatedAt: true } },
-        },
-      })
-    : null
-
-  const user = rawUser
-    ? {
-        id: rawUser.id,
-        name: rawUser.name,
-        email: rawUser.email,
-        image: rawUser.image,
-        role: rawUser.role,
-        createdAt: rawUser.createdAt,
-        _count: rawUser._count,
-        projects: rawUser.projects,
-        hasPassword: !!rawUser.password,
-      }
-    : null
+  
 
   return (
     <html lang="en" suppressHydrationWarning>
