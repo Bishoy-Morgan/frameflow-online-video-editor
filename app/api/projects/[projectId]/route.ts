@@ -49,7 +49,6 @@ export async function PATCH(req: Request, { params }: Params) {
     const { action, scenes, name, starred, deletedAt } = result.data
 
     if (action === 'save' && Array.isArray(scenes)) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const scenesToCreate = scenes.map(({ id: _id, ...rest }) => ({ ...rest, projectId }))
 
         const operations = [

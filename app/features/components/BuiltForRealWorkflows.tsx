@@ -5,7 +5,6 @@ import { MonitorPlay, Megaphone, Smartphone } from 'lucide-react'
 import SectionGrid from '@/components/ui/SectionGrid'
 import { SectionLabel, SectionSeparator } from './FeaturesHero'
 
-// ── Use cases ─────────────────────────────────────────────────────────────────
 const useCases = [
     {
         icon: <MonitorPlay size={18} color="var(--turquoise)" strokeWidth={1.5} />,
@@ -30,7 +29,6 @@ const useCases = [
     },
 ]
 
-// ── Capabilities ──────────────────────────────────────────────────────────────
 const capabilities = [
     'Multi-layer timeline',
     'Precise trimming and sequencing',
@@ -38,7 +36,6 @@ const capabilities = [
     'Scalable project structure',
 ]
 
-// ── Timeline mock ─────────────────────────────────────────────────────────────
 const tracks = [
     { label: 'Video',   color: 'var(--turquoise)',    clips: [{ left: '0%',   width: '55%' }, { left: '58%', width: '38%' }] },
     { label: 'Audio',   color: 'var(--turquoise-45)', clips: [{ left: '0%',   width: '90%' }] },
@@ -46,10 +43,10 @@ const tracks = [
     { label: 'Overlay', color: 'var(--turquoise-16)', clips: [{ left: '45%',  width: '25%' }] },
 ]
 
+const playheadPositions = ['12%', '45%', '72%']
+
 const TimelineMock = ({ activeIndex }: { activeIndex: number }) => {
     const playheadRef = useRef<HTMLDivElement>(null)
-
-    const playheadPositions = ['12%', '45%', '72%']
 
     useEffect(() => {
         const el = playheadRef.current
@@ -95,7 +92,7 @@ const TimelineMock = ({ activeIndex }: { activeIndex: number }) => {
                     style={{ left: '12%', backgroundColor: 'var(--turquoise)', boxShadow: '0 0 6px var(--turquoise-45)' }}
                 >
                     <div
-                        className="w-2 h-2 rounded-full -translate-x-[3px] -translate-y-1"
+                        className="w-2 h-2 rounded-full -translate-x-0.75 -translate-y-1"
                         style={{ backgroundColor: 'var(--turquoise)' }}
                     />
                 </div>
@@ -139,7 +136,6 @@ const TimelineMock = ({ activeIndex }: { activeIndex: number }) => {
     )
 }
 
-// ── Use case tab ──────────────────────────────────────────────────────────────
 const UseCaseTab = ({
     useCase,
     isActive,
@@ -189,14 +185,12 @@ const UseCaseTab = ({
     </button>
 )
 
-// ── Section ───────────────────────────────────────────────────────────────────
 const BuiltForRealWorkflows = () => {
     const [active, setActive] = useState(0)
     const headerRef  = useRef<HTMLDivElement>(null)
     const leftRef    = useRef<HTMLDivElement>(null)
     const rightRef   = useRef<HTMLDivElement>(null)
 
-    // Auto-cycle
     useEffect(() => {
         const id = setInterval(() => setActive(a => (a + 1) % useCases.length), 3000)
         return () => clearInterval(id)
@@ -225,20 +219,17 @@ const BuiltForRealWorkflows = () => {
 
             <SectionGrid />
 
-            {/* Glow — top right */}
             <div
                 aria-hidden
-                className="pointer-events-none absolute -top-[10%] -right-[5%] w-[500px] h-[500px] rounded-full bg-turquoise-8"
+                className="pointer-events-none absolute -top-[10%] -right-[5%] w-125 h-125 rounded-full bg-turquoise-8"
                 style={{ filter: 'blur(80px)' }}
             />
 
-            {/* Top separator */}
             <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
 
             <div className="container relative z-10">
 
-                {/* Header */}
-                <div ref={headerRef} className="max-w-[580px] mb-14">
+                <div ref={headerRef} className="max-w-145 mb-14">
                     <SectionLabel>Built for Real Workflows</SectionLabel>
                     <h2 className="font-normal leading-tight mb-3" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
                         Adapts to how you actually work.
@@ -249,7 +240,6 @@ const BuiltForRealWorkflows = () => {
                     </p>
                 </div>
 
-                {/* Body */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
                     {/* Left — use case tabs + capabilities */}
@@ -264,7 +254,6 @@ const BuiltForRealWorkflows = () => {
                             />
                         ))}
 
-                        {/* Capability list */}
                         <div
                             className="mt-2 p-6 rounded-xl flex flex-col gap-3"
                             style={{ border: '1px solid var(--text-10)', backgroundColor: 'var(--text-5)' }}
@@ -287,11 +276,9 @@ const BuiltForRealWorkflows = () => {
 
                     </div>
 
-                    {/* Right — timeline mock */}
                     <div ref={rightRef} className="flex flex-col gap-4">
                         <TimelineMock activeIndex={active} />
 
-                        {/* Callout */}
                         <div
                             className="px-6 py-4 rounded-xl flex items-start gap-3"
                             style={{ border: '1px solid var(--turquoise-20)', backgroundColor: 'var(--turquoise-4)' }}

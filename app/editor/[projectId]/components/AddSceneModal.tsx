@@ -7,6 +7,7 @@ import {
     ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import Image from 'next/image'
 
 interface Scene {
     id:          string
@@ -281,7 +282,7 @@ function PexelsVideoCard({
                 flexShrink:   0,
             }}
         >
-            <img
+            <Image
                 src={video.image}
                 alt={`Pexels ${video.id}`}
                 width={630}
