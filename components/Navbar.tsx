@@ -25,6 +25,7 @@ function UserMenu({ name, email, image }: { name?: string | null; email?: string
     const [open, setOpen] = useState(false)
     const router          = useRouter()
     const ref             = useRef<HTMLDivElement>(null)
+    const [imageFailed, setImageFailed] = useState(false)
 
     const initials    = name
         ? name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
@@ -52,11 +53,17 @@ function UserMenu({ name, email, image }: { name?: string | null; email?: string
                 onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--surface-raised)'; e.currentTarget.style.borderColor = 'var(--border-default)' }}
                 onMouseLeave={e => { if (!open) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'transparent' } }}
             >
-                {/* Avatar */}
-                {image ? (
-                    <Image src={image} alt={displayName} width={28} height={28}
+
+                {image && !imageFailed ? (
+                    <Image 
+                        src={image} 
+                        alt={displayName} 
+                        width={28} 
+                        height={28}
                         className="rounded-lg object-cover shrink-0"
-                        style={{ border: '1px solid var(--border-default)' }} />
+                        style={{ border: '1px solid var(--border-default)' }}
+                        onError={() => setImageFailed(true)}
+                    />
                 ) : (
                     <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
                         style={{ backgroundColor: 'var(--turquoise-10)', border: '1px solid var(--turquoise-22)', color: 'var(--turquoise)' }}>
