@@ -5,41 +5,41 @@ import { useParams, useSearchParams } from 'next/navigation'
 import { Loader2, Monitor, Smartphone, Square } from 'lucide-react'
 import Link from 'next/link'
 
-import EditorTopBar                           from './components/EditorTopBar'
+import EditorTopBar from './components/EditorTopBar'
 import PreviewCanvas, { PreviewCanvasHandle } from './components/PreviewCanvas'
-import SceneTimeline                          from './components/SceneTimeline'
-import LeftToolsPanel, { type ToolId }        from './components/LeftToolsPanel'
-import AISidebar                              from './components/AISidebar'
-import AddSceneModal                          from './components/AddSceneModal'
+import SceneTimeline from './components/SceneTimeline'
+import LeftToolsPanel, { type ToolId } from './components/LeftToolsPanel'
+import AISidebar from './components/AISidebar'
+import AddSceneModal from './components/AddSceneModal'
 
 interface Scene {
-    id:          string
-    title:       string
+    id: string
+    title: string
     description: string
-    musicMood:   string
-    duration:    number
-    order:       number
-    videoUrl?:   string | null
-    pexelsId?:   string | null
+    musicMood: string
+    duration: number
+    order: number
+    videoUrl?: string | null
+    pexelsId?: string | null
 }
 
 interface Project {
-    id:          string
-    name:        string
-    starred:     boolean
-    prompt:      string | null
-    style:       string | null
+    id: string
+    name: string
+    starred: boolean
+    prompt: string | null
+    style: string | null
     aspectRatio: string | null
-    scenes:      Scene[]
+    scenes: Scene[]
     _count: { assets: number; timelines: number; renders: number }
 }
 
 type AspectRatio = '16:9' | '9:16' | '1:1'
 
 const RATIO_OPTIONS: { label: AspectRatio; icon: React.ElementType; hint: string }[] = [
-    { label: '16:9', icon: Monitor,    hint: 'YouTube / Web'  },
+    { label: '16:9', icon: Monitor, hint: 'YouTube / Web'  },
     { label: '9:16', icon: Smartphone, hint: 'Reels / TikTok' },
-    { label: '1:1',  icon: Square,     hint: 'Feed / Square'  },
+    { label: '1:1',  icon: Square, hint: 'Feed / Square'  },
 ]
 
 function buildStartTimes(scenes: Scene[]): Map<string, number> {
@@ -54,27 +54,27 @@ function buildStartTimes(scenes: Scene[]): Map<string, number> {
 }
 
 export default function EditorPage() {
-    const params       = useParams()
+    const params = useParams()
     const searchParams = useSearchParams()
-    const projectId    = params.projectId as string
+    const projectId = params.projectId as string
 
-    const [project,        setProject]        = useState<Project | null>(null)
-    const [loading,        setLoading]        = useState(true)
-    const [error,          setError]          = useState('')
-    const [aspectRatio,    setAspectRatio]    = useState<AspectRatio>('16:9')
-    const [ratioOpen,      setRatioOpen]      = useState(false)
-    const [activeTool,     setActiveTool]     = useState<ToolId | null>(null)
-    const [aiOpen,         setAiOpen]         = useState(true)
-    const [saving,         setSaving]         = useState(false)
-    const [saved,          setSaved]          = useState(false)
-    const [playing,        setPlaying]        = useState(false)
-    const [addSceneOpen,   setAddSceneOpen]   = useState(false)
+    const [project, setProject] = useState<Project | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState('')
+    const [aspectRatio, setAspectRatio] = useState<AspectRatio>('16:9')
+    const [ratioOpen, setRatioOpen] = useState(false)
+    const [activeTool, setActiveTool] = useState<ToolId | null>(null)
+    const [aiOpen, setAiOpen] = useState(true)
+    const [saving, setSaving] = useState(false)
+    const [saved, setSaved] = useState(false)
+    const [playing, setPlaying] = useState(false)
+    const [addSceneOpen, setAddSceneOpen] = useState(false)
 
     const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-    const canvasRef     = useRef<PreviewCanvasHandle>(null)
+    const canvasRef = useRef<PreviewCanvasHandle>(null)
 
-    const [globalTime,      setGlobalTime]      = useState(0)
-    const [activeSceneId,   setActiveSceneId]   = useState<string | null>(null)
+    const [globalTime, setGlobalTime] = useState(0)
+    const [activeSceneId, setActiveSceneId] = useState<string | null>(null)
     const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(null)
 
     const startTimesRef = useRef<Map<string, number>>(new Map())
@@ -92,7 +92,7 @@ export default function EditorPage() {
     // Fetch project 
     useEffect(() => {
         if (!projectId) return
-        const scenesParam     = searchParams.get('scenes')
+        const scenesParam = searchParams.get('scenes')
         const allowedSceneIds = scenesParam ? new Set(scenesParam.split(',')) : null
 
         fetch(`/api/projects/${projectId}`)
@@ -137,8 +137,8 @@ export default function EditorPage() {
     const handleClipEnded = useCallback(() => {
         if (!project) return
         const sorted = getSortedScenes(project.scenes)
-        const idx    = sorted.findIndex(s => s.id === activeSceneId)
-        const next   = sorted[idx + 1]
+        const idx = sorted.findIndex(s => s.id === activeSceneId)
+        const next = sorted[idx + 1]
         if (next) {
             setActiveSceneId(next.id)
             setCurrentVideoUrl(next.videoUrl ?? null)
@@ -166,7 +166,7 @@ export default function EditorPage() {
     const nextVideo = useMemo(() => {
         if(!project) return
         const sorted = getSortedScenes(project.scenes)
-        const idx    = sorted.findIndex(s => s.id === activeSceneId)
+        const idx = sorted.findIndex(s => s.id === activeSceneId)
         const nextVideoUrl = sorted[idx + 1]?.videoUrl
         return nextVideoUrl
     }, [project, activeSceneId, getSortedScenes])
@@ -205,9 +205,9 @@ export default function EditorPage() {
         setSaving(true)
         try {
             await fetch(`/api/projects/${projectId}`, {
-                method:  'PATCH',
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ action: 'save', scenes: project.scenes }),
+                body: JSON.stringify({ action: 'save', scenes: project.scenes }),
             })
             setSaved(true)
             setTimeout(() => setSaved(false), 3000)
@@ -219,9 +219,9 @@ export default function EditorPage() {
         autoSaveTimer.current = setTimeout(async () => {
             try {
                 await fetch(`/api/projects/${projectId}`, {
-                    method:  'PATCH',
+                    method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body:    JSON.stringify({ action: 'save', scenes }),
+                    body: JSON.stringify({ action: 'save', scenes }),
                 })
             } catch (err) { console.error('Auto-save failed:', err) }
         }, 800)
@@ -230,15 +230,15 @@ export default function EditorPage() {
     const handleExport = useCallback(async () => {
         try {
             await fetch('/api/render', {
-                method:  'POST',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ projectId, aspectRatio }),
+                body: JSON.stringify({ projectId, aspectRatio }),
             })
             alert("Export queued! You'll be notified when ready.")
         } catch { alert('Export failed. Please try again.') }
     }, [projectId, aspectRatio])
 
-    // Add scene — modal confirms, then we append
+    // Add scene
     const handleSceneAdded = useCallback((scene: Scene) => {
         if (!project) return
         const updated = [...project.scenes, scene]
@@ -311,7 +311,10 @@ export default function EditorPage() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100dvh', overflow: 'hidden', backgroundColor: 'var(--bg)' }}>
 
-            <div style={{ flexShrink: 0 }}>
+            <div 
+                style={{ flexShrink: 0 }} 
+                className="w-full h-[10%] "
+            >
                 <EditorTopBar
                     projectId={projectId}
                     projectName={project.name}
@@ -323,8 +326,14 @@ export default function EditorPage() {
                 />
             </div>
 
-            <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-                <div style={{ flexShrink: 0 }}>
+            <div 
+                style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}
+                className="w-full h-3/5 "
+            >
+                <div 
+                    style={{ flexShrink: 0 }}
+                    className="w-[4%] max-w-[4.5%]"
+                >
                     <LeftToolsPanel
                         activeTool={activeTool}
                         onToolClick={id => setActiveTool(prev => prev === id ? null : id)}
@@ -337,7 +346,6 @@ export default function EditorPage() {
                     </div>
                 )}
 
-                {/* Preview */}
                 <div
                     className="relative"
                     style={{ flex: '1 1 0', minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: 'var(--surface-raised)' }}
@@ -350,9 +358,9 @@ export default function EditorPage() {
                         onTimeUpdate={handleTimeUpdate}
                         onEnded={handleClipEnded}
                         onPlayStateChange={handlePlayStateChange}
+                        onAddScene={() => setAddSceneOpen(true)}
                     />
 
-                    {/* Aspect ratio picker */}
                     <div className="absolute bottom-4 right-4 flex flex-col items-end gap-1" style={{ zIndex: 20 }}>
                         <button
                             onClick={() => setRatioOpen(o => !o)}
@@ -396,9 +404,10 @@ export default function EditorPage() {
                     </div>
                 </div>
 
-                {/* AI Sidebar */}
-                <div style={{ width: aiOpen ? '300px' : '0px', flexShrink: 0, overflow: 'hidden', transition: 'width 0.25s cubic-bezier(0.4,0,0.2,1)', borderLeft: aiOpen ? '1px solid var(--border-default)' : 'none' }}>
-                    <div style={{ width: '300px', height: '100%', overflow: 'hidden' }}>
+                <div 
+                    style={{ width: aiOpen ? '30%' : '0%', flexShrink: 0, overflow: 'hidden', transition: 'width 0.25s cubic-bezier(0.4,0,0.2,1)', borderLeft: aiOpen ? '1px solid var(--border-default)' : 'none' }}
+                >
+                    <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
                         <AISidebar
                             projectId={projectId}
                             projectName={project.name}
@@ -411,8 +420,10 @@ export default function EditorPage() {
                 </div>
             </div>
 
-            {/* Timeline */}
-            <div style={{ flexShrink: 0 }}>
+            <div 
+                style={{ flexShrink: 0 }}
+                className="w-full h-[30%] "
+            >
                 <SceneTimeline
                     scenes={project.scenes}
                     activeSceneId={activeSceneId}
@@ -431,7 +442,6 @@ export default function EditorPage() {
                 )}
             </div>
 
-            {/* Add Scene Modal */}
             {addSceneOpen && (
                 <AddSceneModal
                     projectId={projectId}

@@ -5,29 +5,28 @@ import { Clock, MoreHorizontal, Play, Star, Copy, Pencil, Trash2, Check, X } fro
 import Image from 'next/image'
 
 export interface Project {
-    id:         string
-    name:       string
+    id: string
+    name: string
     lastEdited: string
     thumbnail?: string
-    starred?:   boolean
+    starred?: boolean
 }
 
 interface DashboardCardProps {
-    project:   Project
-    onUpdate?: () => void  // refresh list after mutation
+    project: Project
+    onUpdate?: () => void
 }
 
 export default function DashboardCard({ project, onUpdate }: DashboardCardProps) {
-    const [menuOpen,   setMenuOpen]   = useState(false)
-    const [renaming,   setRenaming]   = useState(false)
-    const [nameVal,    setNameVal]    = useState(project.name)
-    const [starred,    setStarred]    = useState(project.starred ?? false)
-    const [loading,    setLoading]    = useState<string | null>(null)
+    const [menuOpen, setMenuOpen] = useState(false)
+    const [renaming, setRenaming] = useState(false)
+    const [nameVal, setNameVal] = useState(project.name)
+    const [starred, setStarred] = useState(project.starred ?? false)
+    const [loading, setLoading] = useState<string | null>(null)
 
     const menuRef  = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
 
-    // Close menu on outside click
     useEffect(() => {
         if (!menuOpen) return
         const handler = (e: MouseEvent) => {
@@ -37,7 +36,6 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
         return () => document.removeEventListener('mousedown', handler)
     }, [menuOpen])
 
-    // Focus input when renaming starts
     useEffect(() => {
         if (renaming) setTimeout(() => inputRef.current?.select(), 50)
     }, [renaming])
@@ -47,9 +45,9 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
         if (!trimmed || trimmed === project.name) { setRenaming(false); setNameVal(project.name); return }
         setLoading('rename')
         await fetch(`/api/projects/${project.id}`, {
-            method:  'PATCH',
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ name: trimmed }),
+            body: JSON.stringify({ name: trimmed }),
         })
         setLoading(null)
         setRenaming(false)
@@ -60,9 +58,9 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
         setStarred(s => !s)
         setMenuOpen(false)
         await fetch(`/api/projects/${project.id}`, {
-            method:  'PATCH',
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ starred: !starred }),
+            body: JSON.stringify({ starred: !starred }),
         })
         onUpdate?.()
     }
@@ -79,9 +77,9 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
         setLoading('delete')
         setMenuOpen(false)
         await fetch(`/api/projects/${project.id}`, {
-            method:  'PATCH',
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ deletedAt: new Date().toISOString() }),
+            body: JSON.stringify({ deletedAt: new Date().toISOString() }),
         })
         setLoading(null)
         onUpdate?.()
@@ -89,30 +87,30 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
 
     const menuItems = [
         {
-            id:      'rename',
-            label:   'Rename',
-            icon:    Pencil,
-            action:  () => { setMenuOpen(false); setRenaming(true) },
+            id: 'rename',
+            label: 'Rename',
+            icon: Pencil,
+            action: () => { setMenuOpen(false); setRenaming(true) },
         },
         {
-            id:      'star',
-            label:   starred ? 'Unstar' : 'Star',
-            icon:    Star,
-            action:  handleStar,
-            active:  starred,
+            id: 'star',
+            label: starred ? 'Unstar' : 'Star',
+            icon: Star,
+            action: handleStar,
+            active: starred,
         },
         {
-            id:      'duplicate',
-            label:   'Duplicate',
-            icon:    Copy,
-            action:  handleDuplicate,
+            id: 'duplicate',
+            label: 'Duplicate',
+            icon: Copy,
+            action: handleDuplicate,
         },
         {
-            id:      'delete',
-            label:   'Move to Trash',
-            icon:    Trash2,
-            action:  handleDelete,
-            danger:  true,
+            id: 'delete',
+            label: 'Move to Trash',
+            icon: Trash2,
+            action: handleDelete,
+            danger: true,
         },
     ]
 
@@ -148,49 +146,47 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
                     </div>
                 )}
 
-                {/* Star badge */}
                 {starred && (
                     <div className="absolute top-2 left-2">
                         <Star size={12} fill="var(--turquoise)" style={{ color: 'var(--turquoise)' }} />
                     </div>
                 )}
 
-                {/* Hover overlay */}
                 <div
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center"
                     style={{ backgroundColor: 'rgba(2,2,2,0.3)' }}
                 >
-                    <span className="text-[0.7rem] font-bold tracking-widest uppercase text-white">Open in Editor</span>
+                    <span className="text-[0.9rem] font-bold tracking-widest uppercase text-white">
+                        Open in Editor
+                    </span>
                 </div>
 
-                {/* ⋯ button */}
                 <div ref={menuRef} style={{ position: 'absolute', top: 8, right: 8, zIndex: 30 }}>
                     <button
                         onClick={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(o => !o) }}
                         className="w-6 h-6 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:outline-none focus:opacity-100"
                         style={{
                             backgroundColor: menuOpen ? 'var(--turquoise)' : 'rgba(2,2,2,0.55)',
-                            backdropFilter:  'blur(4px)',
-                            border:          'none',
-                            color:           menuOpen ? '#020202' : '#fefefe',
-                            cursor:          'pointer',
+                            backdropFilter: 'blur(4px)',
+                            border: 'none',
+                            color: menuOpen ? '#020202' : '#fefefe',
+                            cursor: 'pointer',
                         }}
                     >
                         <MoreHorizontal size={13} />
                     </button>
 
-                    {/* Dropdown */}
                     {menuOpen && (
                         <div
                             onClick={e => e.stopPropagation()}
                             className="absolute right-0 flex flex-col p-1 rounded-xl"
                             style={{
-                                top:             'calc(100% + 6px)',
-                                width:           '168px',
+                                top: 'calc(100% + 6px)',
+                                width: '168px',
                                 backgroundColor: 'var(--bg)',
-                                border:          '1px solid var(--border-default)',
-                                boxShadow:       '0 8px 32px rgba(0,0,0,0.2)',
-                                zIndex:          50,
+                                border: '1px solid var(--border-default)',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                                zIndex: 50,
                             }}
                         >
                             {menuItems.map(item => (
@@ -200,13 +196,13 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
                                     disabled={loading === item.id}
                                     className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-left w-full transition-colors duration-100"
                                     style={{
-                                        fontSize:        '12px',
-                                        fontWeight:      600,
-                                        color:           item.danger ? '#ef4444' : item.active ? 'var(--turquoise)' : 'var(--text-secondary)',
+                                        fontSize: '12px',
+                                        fontWeight: 600,
+                                        color: item.danger ? '#ef4444' : item.active ? 'var(--turquoise)' : 'var(--text-secondary)',
                                         backgroundColor: 'transparent',
-                                        border:          'none',
-                                        cursor:          'pointer',
-                                        opacity:         loading === item.id ? 0.5 : 1,
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        opacity: loading === item.id ? 0.5 : 1,
                                     }}
                                     onMouseEnter={e => {
                                         e.currentTarget.style.backgroundColor = item.danger
@@ -224,7 +220,6 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
                 </div>
             </div>
 
-            {/* Info */}
             <div
                 className="flex flex-col gap-1 px-4 py-3"
                 style={{ backgroundColor: 'var(--bg)', borderTop: '1px solid var(--border-subtle)' }}
@@ -245,10 +240,10 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
                             className="flex-1 rounded-md px-2 py-0.5 text-sm font-bold"
                             style={{
                                 backgroundColor: 'var(--surface-raised)',
-                                border:          '1px solid var(--turquoise-42)',
-                                color:           'var(--text)',
-                                outline:         'none',
-                                minWidth:        0,
+                                border: '1px solid var(--turquoise-42)',
+                                color: 'var(--text)',
+                                outline: 'none',
+                                minWidth: 0,
                             }}
                         />
                         <button onClick={handleRename} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--turquoise)', padding: 2 }}>

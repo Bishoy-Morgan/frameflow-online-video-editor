@@ -6,20 +6,19 @@ import { useUser } from '@/components/providers/UserContext'
 import Image from 'next/image'
 
 interface EditorTopBarProps {
-  projectId:   string
+  projectId: string
   projectName: string
-  saving:      boolean
-  saved:        boolean
-  aiOpen:      boolean
-  onToggleAi:  () => void
-  onSave:      () => void
-  onExport:    () => void
+  saving: boolean
+  saved: boolean
+  aiOpen: boolean
+  onToggleAi: () => void
+  onSave: () => void
+  onExport: () => void
 }
 
 function UserAvatar() {
   const user = useUser()
 
-  // Build initials from name, fall back to email first char
   const initials = user.name
     ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
     : user.email[0].toUpperCase()
@@ -51,8 +50,8 @@ function UserAvatar() {
           className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold"
           style={{
             backgroundColor: 'var(--turquoise-16)',
-            border:          '1px solid var(--turquoise-42)',
-            color:           'var(--turquoise)',
+            border: '1px solid var(--turquoise-42)',
+            color: 'var(--turquoise)',
           }}
         >
           {initials}
@@ -66,15 +65,15 @@ export default function EditorTopBar({
   projectId, projectName, saving, saved, aiOpen, onToggleAi, onSave, onExport,
 }: EditorTopBarProps) {
   const [editing, setEditing] = useState(false)
-  const [name,    setName]    = useState(projectName)
+  const [name, setName] = useState(projectName)
 
   const handleNameBlur = async () => {
     setEditing(false)
     if (name.trim() === projectName || !name.trim()) return
     await fetch(`/api/projects/${projectId}`, {
-      method:  'PATCH',
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ action: 'rename', name: name.trim() }),
+      body: JSON.stringify({ action: 'rename', name: name.trim() }),
     })
   }
 
@@ -82,9 +81,9 @@ export default function EditorTopBar({
     <div
       className="flex items-center justify-between px-4 shrink-0 z-20"
       style={{
-        height:          '48px',
+        height: '100%',
         backgroundColor: 'var(--bg)',
-        borderBottom:    '1px solid var(--border-default)',
+        borderBottom: '1px solid var(--border-default)',
       }}
     >
       {/* Left — back + project title */}
@@ -112,9 +111,9 @@ export default function EditorTopBar({
             className="text-sm font-bold outline-none rounded-md px-2 py-0.5 min-w-0"
             style={{
               backgroundColor: 'var(--surface-raised)',
-              border:          '1px solid var(--turquoise-42)',
-              color:           'var(--text)',
-              maxWidth:        '260px',
+              border: '1px solid var(--turquoise-42)',
+              color: 'var(--text)',
+              maxWidth: '260px',
             }}
           />
         ) : (
@@ -123,12 +122,12 @@ export default function EditorTopBar({
             className="flex items-center gap-1.5 text-sm font-bold group"
             style={{
               background:  'none',
-              border:      'none',
-              color:       'var(--text)',
-              cursor:      'pointer',
-              padding:     0,
-              maxWidth:    '280px',
-              overflow:    'hidden',
+              border: 'none',
+              color: 'var(--text)',
+              cursor: 'pointer',
+              padding: 0,
+              maxWidth: '280px',
+              overflow: 'hidden',
             }}
           >
             <span className="truncate">{name}</span>
@@ -141,29 +140,27 @@ export default function EditorTopBar({
         )}
       </div>
 
-      {/* Right — AI toggle + save + export + user */}
       <div className="flex items-center gap-2">
 
-        {/* AI Sidebar toggle */}
         <button
           onClick={onToggleAi}
           title={aiOpen ? 'Hide AI sidebar' : 'Show AI sidebar'}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
           style={{
-            backgroundColor: aiOpen ? 'var(--turquoise-8)'           : 'var(--surface-raised)',
-            border:          aiOpen ? '1px solid var(--turquoise-42)' : '1px solid var(--border-default)',
-            color:           aiOpen ? 'var(--turquoise)'              : 'var(--text-tertiary)',
-            cursor:          'pointer',
+            backgroundColor: aiOpen ? 'var(--turquoise-8)' : 'var(--surface-raised)',
+            border: aiOpen ? '1px solid var(--turquoise-42)' : '1px solid var(--border-default)',
+            color: aiOpen ? 'var(--turquoise)' : 'var(--text-tertiary)',
+            cursor: 'pointer',
           }}
           onMouseEnter={e => {
             if (!aiOpen) {
-              e.currentTarget.style.color       = 'var(--text)'
+              e.currentTarget.style.color = 'var(--text)'
               e.currentTarget.style.borderColor = 'var(--border-strong)'
             }
           }}
           onMouseLeave={e => {
             if (!aiOpen) {
-              e.currentTarget.style.color       = 'var(--text-tertiary)'
+              e.currentTarget.style.color = 'var(--text-tertiary)'
               e.currentTarget.style.borderColor = 'var(--border-default)'
             }
           }}
@@ -174,16 +171,15 @@ export default function EditorTopBar({
 
         <div className="w-px h-4 shrink-0" style={{ backgroundColor: 'var(--border-default)' }} />
 
-        {/* Save */}
         <button
           onClick={onSave}
           disabled={saving}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
           style={{
-            backgroundColor: saved ? 'rgba(52,211,153,0.1)'          : 'var(--surface-raised)',
-            border:          saved ? '1px solid rgba(52,211,153,0.3)' : '1px solid var(--border-default)',
-            color:           saved ? '#34d399'                        : 'var(--text-tertiary)',
-            cursor:          saving ? 'wait' : 'pointer',
+            backgroundColor: saved ? 'rgba(52,211,153,0.1)' : 'var(--surface-raised)',
+            border: saved ? '1px solid rgba(52,211,153,0.3)' : '1px solid var(--border-default)',
+            color: saved ? '#34d399' : 'var(--text-tertiary)',
+            cursor: saving ? 'wait' : 'pointer',
           }}
           onMouseEnter={e => { if (!saved) { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--border-strong)' } }}
           onMouseLeave={e => { if (!saved) { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.borderColor = 'var(--border-default)' } }}
@@ -198,10 +194,10 @@ export default function EditorTopBar({
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-opacity"
           style={{
             backgroundColor: 'var(--turquoise)',
-            border:          'none',
-            color:           '#fff',
-            cursor:          'pointer',
-            boxShadow:       '0 2px 8px var(--turquoise-22)',
+            border: 'none',
+            color: '#fff',
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px var(--turquoise-22)',
           }}
           onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
           onMouseLeave={e => e.currentTarget.style.opacity = '1'}
@@ -211,7 +207,6 @@ export default function EditorTopBar({
 
         <div className="w-px h-4 shrink-0" style={{ backgroundColor: 'var(--border-default)' }} />
 
-        {/* User identity */}
         <UserAvatar />
       </div>
     </div>

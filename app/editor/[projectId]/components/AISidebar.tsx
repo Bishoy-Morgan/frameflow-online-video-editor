@@ -17,24 +17,23 @@ interface Scene {
 interface Message { role: 'user' | 'assistant'; content: string }
 
 interface AISidebarProps {
-    projectId:      string
-    projectName:    string
-    prompt:         string | null
-    scenes:         Scene[]
-    videoUrl:       string | null
+    projectId: string
+    projectName: string
+    prompt: string | null
+    scenes: Scene[]
+    videoUrl: string | null
     onScenesUpdate: (scenes: Scene[]) => void
 }
 
 // AI Chat
-
 function AiChat({ projectName, prompt, scenes }: { projectName: string; prompt: string | null; scenes: Scene[] }) {
     const [messages, setMessages] = useState<Message[]>([{
-        role:    'assistant',
+        role: 'assistant',
         content: `Hi! I'm your AI editor for **${projectName}**. I can help you improve scenes, suggest transitions, write scripts, or answer any editing question. What would you like to do?`,
     }])
-    const [input,   setInput]   = useState('')
+    const [input, setInput] = useState('')
     const [loading, setLoading] = useState(false)
-    const [copied,  setCopied]  = useState<number | null>(null)
+    const [copied, setCopied] = useState<number | null>(null)
     const bottomRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
@@ -55,7 +54,7 @@ function AiChat({ projectName, prompt, scenes }: { projectName: string; prompt: 
 
             const res  = await fetch('/api/ai/chat', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body:   JSON.stringify({ messages: updated, context }),
+                body: JSON.stringify({ messages: updated, context }),
             })
             const data = await res.json()
             setMessages(m => [...m, { role: 'assistant', content: data.reply ?? 'Sorry, something went wrong.' }])
@@ -136,19 +135,18 @@ function AiChat({ projectName, prompt, scenes }: { projectName: string; prompt: 
 }
 
 // Auto Captions — Groq generates captions from scene descriptions (text-based)
-
 function AutoCaptions({ projectId, scenes }: { projectId: string; scenes: Scene[] }) {
-    const [loading,  setLoading]  = useState(false)
+    const [loading, setLoading] = useState(false)
     const [captions, setCaptions] = useState<{ time: string; text: string }[]>([])
-    const [error,    setError]    = useState('')
+    const [error, setError] = useState('')
 
     const generate = async () => {
         setLoading(true); setError('')
         try {
             const res  = await fetch('/api/ai/captions', {
-                method:  'POST',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ projectId, scenes }),
+                body: JSON.stringify({ projectId, scenes }),
             })
             const data = await res.json()
             if (data.captions) setCaptions(data.captions)
@@ -218,8 +216,8 @@ function SceneDetect({ projectId, scenes, onScenesUpdate }: {
     projectId: string; scenes: Scene[]; onScenesUpdate: (s: Scene[]) => void
 }) {
     const [loading, setLoading] = useState(false)
-    const [done,    setDone]    = useState(false)
-    const [error,   setError]   = useState('')
+    const [done, setDone] = useState(false)
+    const [error, setError] = useState('')
 
     const detect = async () => {
         setLoading(true); setError('')
@@ -232,7 +230,7 @@ function SceneDetect({ projectId, scenes, onScenesUpdate }: {
             if (data.scenes) { onScenesUpdate(data.scenes); setDone(true) }
             else setError(data.error ?? 'Failed')
         } catch { setError('Connection error') }
-        finally   { setLoading(false) }
+        finally { setLoading(false) }
     }
 
     return (
@@ -354,7 +352,7 @@ export default function AISidebar({
 
     return (
         <div className="flex flex-col h-full"
-            style={{ width: '300px', backgroundColor: 'var(--bg)' }}>
+            style={{ width: '100%', backgroundColor: 'var(--bg)' }}>
 
             {/* Header */}
             <div className="flex items-center gap-2 px-3 shrink-0"

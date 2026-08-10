@@ -13,61 +13,57 @@ import DashboardHeader from '../../components/DashboardHeader'
 
 
 type Scene = {
-    id:          string
-    title:       string
+    id: string
+    title: string
     description: string
-    musicMood:   string
-    duration:    number
-    order:       number
+    musicMood: string
+    duration: number
+    order: number
 }
 
 type Project = {
-    id:          string
-    name:        string
-    starred:     boolean
-    deletedAt:   string | null
-    prompt:      string | null
-    style:       string | null
+    id: string
+    name: string
+    starred: boolean
+    deletedAt: string | null
+    prompt: string | null
+    style: string | null
     aspectRatio: string | null
-    aiDuration:  string | null
-    thumbnail:   string | null
-    createdAt:   string
-    updatedAt:   string
-    scenes:      Scene[]
+    aiDuration: string | null
+    thumbnail: string | null
+    createdAt: string
+    updatedAt: string
+    scenes: Scene[]
     _count: {
-        assets:    number
+        assets: number
         timelines: number
-        renders:   number
+        renders: number
     }
 }
 
-// Music mood colors
-
 const moodColors: Record<string, { bg: string; text: string; border: string }> = {
-    Uplifting:   { bg: 'rgba(251,191,36,0.08)',  text: '#fbbf24', border: 'rgba(251,191,36,0.22)' },
-    Dramatic:    { bg: 'rgba(239,68,68,0.08)',   text: '#ef4444', border: 'rgba(239,68,68,0.22)'  },
-    Calm:        { bg: 'rgba(99,102,241,0.08)',  text: '#818cf8', border: 'rgba(99,102,241,0.22)' },
-    Energetic:   { bg: 'rgba(249,115,22,0.08)',  text: '#fb923c', border: 'rgba(249,115,22,0.22)' },
+    Uplifting: { bg: 'rgba(251,191,36,0.08)', text: '#fbbf24', border: 'rgba(251,191,36,0.22)' },
+    Dramatic: { bg: 'rgba(239,68,68,0.08)', text: '#ef4444', border: 'rgba(239,68,68,0.22)' },
+    Calm: { bg: 'rgba(99,102,241,0.08)', text: '#818cf8', border: 'rgba(99,102,241,0.22)' },
+    Energetic: { bg: 'rgba(249,115,22,0.08)', text: '#fb923c', border: 'rgba(249,115,22,0.22)' },
     Melancholic: { bg: 'rgba(148,163,184,0.08)', text: '#94a3b8', border: 'rgba(148,163,184,0.22)'},
-    Mysterious:  { bg: 'rgba(167,139,250,0.08)', text: '#a78bfa', border: 'rgba(167,139,250,0.22)'},
-    Cinematic:   { bg: 'var(--turquoise-8)',      text: 'var(--turquoise)', border: 'var(--turquoise-22)' },
-    Playful:     { bg: 'rgba(52,211,153,0.08)',  text: '#34d399', border: 'rgba(52,211,153,0.22)' },
+    Mysterious: { bg: 'rgba(167,139,250,0.08)', text: '#a78bfa', border: 'rgba(167,139,250,0.22)'},
+    Cinematic: { bg: 'var(--turquoise-8)', text: 'var(--turquoise)', border: 'var(--turquoise-22)' },
+    Playful: { bg: 'rgba(52,211,153,0.08)', text: '#34d399', border: 'rgba(52,211,153,0.22)' },
 }
 const defaultMood = { bg: 'var(--surface-raised)', text: 'var(--text-tertiary)', border: 'var(--border-subtle)' }
 
 function timeAgo(dateStr: string) {
-    const diff  = Date.now() - new Date(dateStr).getTime()
-    const days  = Math.floor(diff / 86400000)
+    const diff = Date.now() - new Date(dateStr).getTime()
+    const days = Math.floor(diff / 86400000)
     const hours = Math.floor(diff / 3600000)
-    const mins  = Math.floor(diff / 60000)
-    if (mins < 1)   return 'Just now'
-    if (mins < 60)  return `${mins}m ago`
+    const mins = Math.floor(diff / 60000)
+    if (mins < 1) return 'Just now'
+    if (mins < 60) return `${mins}m ago`
     if (hours < 24) return `${hours}h ago`
-    if (days < 7)   return `${days}d ago`
+    if (days < 7) return `${days}d ago`
     return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
-
-// Scene card
 
 function SceneCard({ scene, index }: { scene: Scene; index: number }) {
     const mood = moodColors[scene.musicMood] ?? defaultMood
@@ -119,8 +115,6 @@ function SceneCard({ scene, index }: { scene: Scene; index: number }) {
     )
 }
 
-// Delete confirmation modal
-
 function DeleteConfirmModal({
     open,
     projectName,
@@ -130,13 +124,13 @@ function DeleteConfirmModal({
     onClose,
     deleting,
 }: {
-    open:              boolean
-    projectName:       string
-    confirmText:       string
+    open: boolean
+    projectName: string
+    confirmText: string
     onConfirmTextChange: (text: string) => void
-    onConfirm:         () => void
-    onClose:           () => void
-    deleting:          boolean
+    onConfirm: () => void
+    onClose: () => void
+    deleting: boolean
 }) {
     if (!open) return null
 
@@ -164,7 +158,6 @@ function DeleteConfirmModal({
                     </p>
                 </div>
 
-                {/* Project name to type */}
                 <div
                     className="px-3 py-2.5 rounded-lg text-sm font-mono"
                     style={{
@@ -176,7 +169,6 @@ function DeleteConfirmModal({
                     {projectName}
                 </div>
 
-                {/* Input to confirm */}
                 <div className="flex flex-col gap-2">
                     <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
                         Type the project name to confirm
@@ -198,7 +190,6 @@ function DeleteConfirmModal({
                     />
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-3 pt-2">
                     <button
                         onClick={onClose}
@@ -251,17 +242,15 @@ function DeleteConfirmModal({
     )
 }
 
-// Project Details Page
-
 export default function ProjectDetailPage() {
-    const params   = useParams()
-    const router   = useRouter()
-    const id       = params.projectId as string
+    const params = useParams()
+    const router = useRouter()
+    const id = params.projectId as string
 
-    const [project,  setProject]  = useState<Project | null>(null)
-    const [loading,  setLoading]  = useState(true)
+    const [project, setProject] = useState<Project | null>(null)
+    const [loading, setLoading] = useState(true)
     const [starring, setStarring] = useState(false)
-    const [error,    setError]    = useState('')
+    const [error, setError] = useState('')
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
     const [deleteConfirmText, setDeleteConfirmText] = useState('')
     const [deleting, setDeleting] = useState(false)
@@ -282,9 +271,9 @@ export default function ProjectDetailPage() {
         if (!project) return
         setStarring(true)
         await fetch(`/api/projects/${id}`, {
-            method:  'PATCH',
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ action: project.starred ? 'unstar' : 'star' }),
+            body: JSON.stringify({ action: project.starred ? 'unstar' : 'star' }),
         })
         setProject(p => p ? { ...p, starred: !p.starred } : p)
         setStarring(false)
@@ -327,14 +316,17 @@ export default function ProjectDetailPage() {
             <div className="flex-1 flex flex-col items-center justify-center gap-4">
                 <p className="text-sm font-bold" style={{ color: 'var(--text)' }}>Project not found</p>
                 <Link href="/dashboard/projects" className="text-xs" style={{ color: 'var(--turquoise)' }}>
-                    ← Back to Projects
+                    <ArrowLeft size={12} strokeWidth={2} style={{ marginRight: '4px' }} /> 
+                    <span>
+                        Back to Projects
+                    </span>
                 </Link>
             </div>
         </div>
     )
 
     const totalDuration = project.scenes.reduce((sum, s) => sum + s.duration, 0)
-    const isAI          = !!project.prompt
+    const isAI = !!project.prompt
 
     return (
         <div className="relative flex flex-col flex-1 min-h-0 overflow-auto">
@@ -350,7 +342,6 @@ export default function ProjectDetailPage() {
                 deleting={deleting}
             />
 
-            {/* ── Hero Banner ── */}
             <div
                 className="relative w-full overflow-hidden"
                 style={{
@@ -361,7 +352,7 @@ export default function ProjectDetailPage() {
                     borderBottom: '1px solid var(--border-subtle)',
                 }}
             >
-                {/* Dot grid */}
+
                 <div
                     aria-hidden
                     className="pointer-events-none absolute inset-0"
@@ -376,7 +367,6 @@ export default function ProjectDetailPage() {
 
                 <div className="relative flex flex-col gap-6 px-8 py-8 max-w-6xl mx-auto w-full">
 
-                    {/* Back + actions row */}
                     <div className="flex items-center justify-between">
                         <Link
                             href="/dashboard/projects"
@@ -463,7 +453,6 @@ export default function ProjectDetailPage() {
                         </div>
                     </div>
 
-                    {/* Project title + meta */}
                     <div className="flex items-end justify-between gap-6">
                         <div className="flex flex-col gap-3">
                             {isAI && (
@@ -508,12 +497,11 @@ export default function ProjectDetailPage() {
                             </div>
                         </div>
 
-                        {/* Stats pills */}
                         <div className="hidden sm:flex items-center gap-3">
                             {[
-                                { label: 'Scenes',    value: project.scenes.length          },
-                                { label: 'Assets',    value: project._count.assets           },
-                                { label: 'Renders',   value: project._count.renders          },
+                                { label: 'Scenes', value: project.scenes.length },
+                                { label: 'Assets', value: project._count.assets },
+                                { label: 'Renders', value: project._count.renders },
                             ].map(({ label, value }) => (
                                 <div
                                     key={label}
@@ -529,10 +517,8 @@ export default function ProjectDetailPage() {
                 </div>
             </div>
 
-            {/* ── Content below hero ── */}
             <div className="flex flex-col gap-8 p-8 max-w-6xl mx-auto w-full">
 
-                {/* AI prompt recap */}
                 {project.prompt && (
                     <div className="flex flex-col gap-3">
                         <div className="flex items-center gap-3">
@@ -555,7 +541,6 @@ export default function ProjectDetailPage() {
                     </div>
                 )}
 
-                {/* Scenes */}
                 {project.scenes.length > 0 && (
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-3">
@@ -572,7 +557,6 @@ export default function ProjectDetailPage() {
                     </div>
                 )}
 
-                {/* No scenes — empty project */}
                 {project.scenes.length === 0 && (
                     <div
                         className="flex flex-col items-center justify-center py-16 gap-4 rounded-2xl"

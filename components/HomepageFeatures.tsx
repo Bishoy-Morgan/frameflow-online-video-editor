@@ -101,7 +101,7 @@ const HomepageFeatures = () => {
             {/* Glow — top right */}
             <div
                 aria-hidden
-                className="pointer-events-none absolute -top-[10%] -right-[5%] w-[500px] h-[500px] rounded-full"
+                className="pointer-events-none absolute -top-[10%] -right-[5%] w-125 h-125 rounded-full"
                 style={{ background: 'radial-gradient(circle, var(--turquoise-8) 0%, transparent 70%)', filter: 'blur(72px)' }}
             />
 
@@ -110,7 +110,7 @@ const HomepageFeatures = () => {
             <div className="container relative z-10">
 
                 {/* Header */}
-                <div ref={headerRef} className="max-w-[560px] mb-14">
+                <div ref={headerRef} className="max-w-140 mb-14">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-7 h-px bg-turquoise" />
                         <span className="text-[0.7rem] font-bold tracking-[0.14em] uppercase text-turquoise">

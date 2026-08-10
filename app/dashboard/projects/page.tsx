@@ -10,48 +10,44 @@ import {
 } from 'lucide-react'
 import DashboardHeader from '../components/DashboardHeader'
 
-// Types
-
 interface Scene {
-    id:          string
-    title:       string
+    id: string
+    title: string
     description: string
-    musicMood:   string
-    duration:    number
-    order:       number
+    musicMood: string
+    duration: number
+    order: number
 }
 
 interface Project {
-    id:          string
-    name:        string
-    style:       string | null
+    id: string
+    name: string
+    style: string | null
     aspectRatio: string | null
-    createdAt:   string
-    updatedAt:   string
-    starred:     boolean
-    deletedAt:   string | null
-    thumbnail:   string | null
-    scenes:      Scene[]
+    createdAt: string
+    updatedAt: string
+    starred: boolean
+    deletedAt: string | null
+    thumbnail: string | null
+    scenes: Scene[]
     _count?: { scenes: number }
 }
 
 type SortField = 'updatedAt' | 'createdAt' | 'name'
-type SortDir   = 'asc' | 'desc'
-type Filter    = 'all' | 'starred' | 'trash'
-type ViewMode  = 'grid' | 'list'
-
-// Helpers
+type SortDir = 'asc' | 'desc'
+type Filter = 'all' | 'starred' | 'trash'
+type ViewMode = 'grid' | 'list'
 
 function formatRelative(dateStr: string): string {
-    const diff  = Date.now() - new Date(dateStr).getTime()
-    const mins  = Math.floor(diff / 60000)
+    const diff = Date.now() - new Date(dateStr).getTime()
+    const mins = Math.floor(diff / 60000)
     const hours = Math.floor(diff / 3600000)
-    const days  = Math.floor(diff / 86400000)
-    if (mins  < 1)   return 'Just now'
-    if (mins  < 60)  return `${mins}m ago`
-    if (hours < 24)  return `${hours}h ago`
-    if (days  === 1) return 'Yesterday'
-    if (days  < 7)   return `${days}d ago`
+    const days = Math.floor(diff / 86400000)
+    if (mins < 1) return 'Just now'
+    if (mins < 60) return `${mins}m ago`
+    if (hours < 24) return `${hours}h ago`
+    if (days === 1) return 'Yesterday'
+    if (days < 7) return `${days}d ago`
     return new Date(dateStr).toLocaleDateString()
 }
 
@@ -61,39 +57,36 @@ function totalDuration(scenes: Scene[]): string {
     return `${Math.floor(secs / 60)}m ${secs % 60}s`
 }
 
-// Thumbnail placeholder
-
 function ProjectThumbnail({ project, size = 'md' }: { project: Project; size?: 'sm' | 'md' }) {
     return (
         <div
             className="relative w-full h-full flex items-center justify-center overflow-hidden"
             style={{ background: 'linear-gradient(135deg, var(--turquoise-10) 0%, var(--turquoise-8) 100%)' }}
         >
-            {/* Dot grid */}
             <div
                 className="absolute inset-0"
                 style={{
                     backgroundImage: 'radial-gradient(circle, var(--turquoise-22) 1px, transparent 1px)',
-                    backgroundSize:  size === 'sm' ? '14px 14px' : '22px 22px',
-                    opacity:         0.5,
+                    backgroundSize: size === 'sm' ? '14px 14px' : '22px 22px',
+                    opacity: 0.5,
                 }}
             />
             {/* Glow */}
             <div
                 className="absolute rounded-full blur-2xl"
                 style={{
-                    width:           size === 'sm' ? 48 : 80,
-                    height:          size === 'sm' ? 48 : 80,
+                    width: size === 'sm' ? 48 : 80,
+                    height: size === 'sm' ? 48 : 80,
                     backgroundColor: 'var(--turquoise-22)',
                 }}
             />
-            {/* Icon */}
+
             <Film
                 size={size === 'sm' ? 16 : 24}
                 style={{ color: 'var(--turquoise)', opacity: 0.8, position: 'relative', zIndex: 1 }}
                 strokeWidth={1.5}
             />
-            {/* Aspect ratio badge */}
+
             <div
                 className="absolute bottom-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded"
                 style={{ backgroundColor: 'var(--turquoise-8)', color: 'var(--turquoise)', border: '1px solid var(--turquoise-22)' }}
@@ -103,8 +96,6 @@ function ProjectThumbnail({ project, size = 'md' }: { project: Project; size?: '
         </div>
     )
 }
-
-// Context Menu
 
 function ContextMenu({
     project,
@@ -117,13 +108,13 @@ function ContextMenu({
     anchorRef,
 }: {
     project:      Project
-    onRename:     () => void
-    onDuplicate:  () => void
+    onRename: () => void
+    onDuplicate: () => void
     onToggleStar: () => void
-    onTrash:      () => void
-    onRestore:    () => void
-    onClose:      () => void
-    anchorRef:    React.RefObject<HTMLButtonElement | null>
+    onTrash: () => void
+    onRestore: () => void
+    onClose: () => void
+    anchorRef: React.RefObject<HTMLButtonElement | null>
 }) {
     const menuRef = useRef<HTMLDivElement>(null)
 
@@ -139,10 +130,10 @@ function ContextMenu({
     const items = project.deletedAt
         ? [{ label: 'Restore',   icon: FolderOpen, action: onRestore, danger: false }]
         : [
-            { label: 'Rename',   icon: Pencil,     action: onRename,     danger: false },
-            { label: 'Duplicate',icon: Copy,       action: onDuplicate,  danger: false },
+            { label: 'Rename', icon: Pencil, action: onRename, danger: false },
+            { label: 'Duplicate',icon: Copy, action: onDuplicate, danger: false },
             { label: project.starred ? 'Unstar' : 'Star', icon: Star, action: onToggleStar, danger: false },
-            { label: 'Move to Trash', icon: Trash2, action: onTrash,    danger: true  },
+            { label: 'Move to Trash', icon: Trash2, action: onTrash, danger: true  },
         ]
 
     return (
@@ -151,8 +142,8 @@ function ContextMenu({
             className="fixed right-0 top-12 z-50 rounded-xl overflow-hidden py-1 min-w-40"
             style={{
                 backgroundColor: 'var(--surface-raised)',
-                border:          '1px solid var(--border-default)',
-                boxShadow:       '0 12px 40px rgba(0,0,0,0.18)',
+                border: '1px solid var(--border-default)',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.18)',
             }}
         >
             {items.map(({ label, icon: Icon, action, danger }) => (
@@ -172,8 +163,6 @@ function ContextMenu({
     )
 }
 
-// Project Card (Grid)
-
 function ProjectCard({
     project,
     onOpen,
@@ -184,12 +173,12 @@ function ProjectCard({
     onRestore,
 }: {
     project:      Project
-    onOpen:       () => void
-    onRename:     () => void
-    onDuplicate:  () => void
+    onOpen: () => void
+    onRename: () => void
+    onDuplicate: () => void
     onToggleStar: () => void
-    onTrash:      () => void
-    onRestore:    () => void
+    onTrash: () => void
+    onRestore: () => void
 }) {
     const [menuOpen, setMenuOpen] = useState(false)
     const [hovered,  setHovered]  = useState(false)
@@ -502,21 +491,18 @@ function SortDropdown({
     )
 }
 
-// Main Page
-
 export default function ProjectsPage() {
-    const [projects,     setProjects]     = useState<Project[]>([])
-    const [loading,      setLoading]      = useState(true)
-    const [search,       setSearch]       = useState('')
-    const [viewMode,     setViewMode]     = useState<ViewMode>('grid')
-    const [filter,       setFilter]       = useState<Filter>('all')
-    const [sortField,    setSortField]    = useState<SortField>('updatedAt')
-    const [sortDir,      setSortDir]      = useState<SortDir>('desc')
-    const [sortOpen,     setSortOpen]     = useState(false)
-    const [renaming,     setRenaming]     = useState<Project | null>(null)
-    const [creating,     setCreating]     = useState(false)
+    const [projects, setProjects] = useState<Project[]>([])
+    const [loading, setLoading] = useState(true)
+    const [search, setSearch] = useState('')
+    const [viewMode, setViewMode] = useState<ViewMode>('grid')
+    const [filter, setFilter] = useState<Filter>('all')
+    const [sortField, setSortField] = useState<SortField>('updatedAt')
+    const [sortDir, setSortDir] = useState<SortDir>('desc')
+    const [sortOpen, setSortOpen] = useState(false)
+    const [renaming, setRenaming] = useState<Project | null>(null)
+    const [creating, setCreating] = useState(false)
 
-    // Fetch all projects (including trashed for trash tab)
     const fetchProjects = useCallback(async () => {
         setLoading(true)
         try {
@@ -532,17 +518,13 @@ export default function ProjectsPage() {
 
     useEffect(() => { fetchProjects() }, [fetchProjects])
 
-    // Derived list
-
     const displayed = useMemo(() => {
         let list = [...projects]
 
-        // Filter
         if (filter === 'starred') list = list.filter(p => p.starred && !p.deletedAt)
         else if (filter === 'trash') list = list.filter(p => !!p.deletedAt)
         else list = list.filter(p => !p.deletedAt)
 
-        // Search
         if (search.trim()) {
             const q = search.toLowerCase()
             list = list.filter(p =>
@@ -552,7 +534,6 @@ export default function ProjectsPage() {
             )
         }
 
-        // Sort
         list.sort((a, b) => {
             let av: string | number = a[sortField]
             let bv: string | number = b[sortField]
@@ -565,8 +546,6 @@ export default function ProjectsPage() {
         return list
     }, [projects, filter, search, sortField, sortDir])
 
-    // Actions
-
     const handleOpen = (project: Project) => {
         if (project.deletedAt) return
         window.open(`/editor/${project.id}`, '_blank')
@@ -576,9 +555,9 @@ export default function ProjectsPage() {
         setCreating(true)
         try {
             const res = await fetch('/api/projects', {
-                method:  'POST',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ name: 'Untitled Project', style: 'Modern', aspectRatio: '16:9' }),
+                body: JSON.stringify({ name: 'Untitled Project', style: 'Modern', aspectRatio: '16:9' }),
             })
             const project = await res.json()
             window.open(`/editor/${project.id}`, '_blank')
@@ -590,21 +569,21 @@ export default function ProjectsPage() {
         if (!name.trim() || name === project.name) return
         setProjects(ps => ps.map(p => p.id === project.id ? { ...p, name } : p))
         await fetch(`/api/projects/${project.id}`, {
-            method:  'PATCH',
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ name }),
+            body: JSON.stringify({ name }),
         })
     }
 
     const handleDuplicate = async (project: Project) => {
         const res = await fetch('/api/projects', {
-            method:  'POST',
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({
-                name:        `${project.name} (copy)`,
-                style:       project.style,
+            body: JSON.stringify({
+                name: `${project.name} (copy)`,
+                style: project.style,
                 aspectRatio: project.aspectRatio,
-                scenes:      project.scenes?.map(({ title, description, musicMood, duration, order }) =>
+                scenes: project.scenes?.map(({ title, description, musicMood, duration, order }) =>
                     ({ title, description, musicMood, duration, order })),
             }),
         })
@@ -616,44 +595,41 @@ export default function ProjectsPage() {
         const starred = !project.starred
         setProjects(ps => ps.map(p => p.id === project.id ? { ...p, starred } : p))
         await fetch(`/api/projects/${project.id}`, {
-            method:  'PATCH',
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ starred }),
+            body: JSON.stringify({ starred }),
         })
     }
 
     const handleTrash = async (project: Project) => {
         setProjects(ps => ps.map(p => p.id === project.id ? { ...p, deletedAt: new Date().toISOString() } : p))
         await fetch(`/api/projects/${project.id}`, {
-            method:  'PATCH',
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ action: 'trash' }),
+            body: JSON.stringify({ action: 'trash' }),
         })
     }
 
     const handleRestore = async (project: Project) => {
         setProjects(ps => ps.map(p => p.id === project.id ? { ...p, deletedAt: null } : p))
         await fetch(`/api/projects/${project.id}`, {
-            method:  'PATCH',
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ action: 'restore' }),
+            body: JSON.stringify({ action: 'restore' }),
         })
     }
 
-    // Tab counts
-
     const counts = useMemo(() => ({
-        all:     projects.filter(p => !p.deletedAt).length,
+        all: projects.filter(p => !p.deletedAt).length,
         starred: projects.filter(p => p.starred && !p.deletedAt).length,
-        trash:   projects.filter(p => !!p.deletedAt).length,
+        trash: projects.filter(p => !!p.deletedAt).length,
     }), [projects])
 
-    // Render
 
     const FILTERS: { key: Filter; label: string; icon: React.ElementType }[] = [
-        { key: 'all',     label: 'All',     icon: FolderOpen },
-        { key: 'starred', label: 'Starred', icon: Star       },
-        { key: 'trash',   label: 'Trash',   icon: Trash2     },
+        { key: 'all', label: 'All', icon: FolderOpen },
+        { key: 'starred', label: 'Starred', icon: Star },
+        { key: 'trash', label: 'Trash', icon: Trash2 },
     ]
 
     return (
@@ -662,10 +638,8 @@ export default function ProjectsPage() {
 
             <main className="flex-1 p-8 flex flex-col gap-6">
 
-                {/* ── Top bar ── */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-                    {/* Filter tabs */}
                     <div className="flex items-center gap-1 p-1 rounded-xl" style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-subtle)' }}>
                         {FILTERS.map(({ key, label, icon: Icon }) => (
                             <button
@@ -673,10 +647,10 @@ export default function ProjectsPage() {
                                 onClick={() => setFilter(key)}
                                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-150"
                                 style={{
-                                    backgroundColor: filter === key ? 'var(--bg)'               : 'transparent',
-                                    color:           filter === key ? 'var(--text)'              : 'var(--text-tertiary)',
-                                    border:          filter === key ? '1px solid var(--border-default)' : '1px solid transparent',
-                                    boxShadow:       filter === key ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
+                                    backgroundColor: filter === key ? 'var(--bg)' : 'transparent',
+                                    color: filter === key ? 'var(--text)' : 'var(--text-tertiary)',
+                                    border: filter === key ? '1px solid var(--border-default)' : '1px solid transparent',
+                                    boxShadow: filter === key ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
                                 }}
                             >
                                 <Icon size={12} strokeWidth={2} />
@@ -685,7 +659,7 @@ export default function ProjectsPage() {
                                     className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
                                     style={{
                                         backgroundColor: filter === key ? 'var(--turquoise-8)' : 'var(--surface-raised)',
-                                        color:           filter === key ? 'var(--turquoise)'   : 'var(--text-tertiary)',
+                                        color: filter === key ? 'var(--turquoise)' : 'var(--text-tertiary)',
                                     }}
                                 >
                                     {counts[key]}
@@ -694,10 +668,8 @@ export default function ProjectsPage() {
                         ))}
                     </div>
 
-                    {/* Right side controls */}
                     <div className="flex items-center gap-2">
 
-                        {/* Search */}
                         <div
                             className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
                             style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', minWidth: 200 }}
@@ -717,15 +689,14 @@ export default function ProjectsPage() {
                             )}
                         </div>
 
-                        {/* Sort */}
                         <div className="relative">
                             <button
                                 onClick={() => setSortOpen(v => !v)}
                                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150"
                                 style={{
                                     backgroundColor: sortOpen ? 'var(--bg)' : 'var(--surface-raised)',
-                                    border:          '1px solid var(--border-default)',
-                                    color:           'var(--text-secondary)',
+                                    border: '1px solid var(--border-default)',
+                                    color: 'var(--text-secondary)',
                                 }}
                             >
                                 <SlidersHorizontal size={12} strokeWidth={2} />
@@ -742,7 +713,6 @@ export default function ProjectsPage() {
                             )}
                         </div>
 
-                        {/* View toggle */}
                         <div className="flex items-center rounded-lg overflow-hidden" style={{ border: '1px solid var(--border-default)' }}>
                             {([['grid', Grid3X3], ['list', List]] as const).map(([mode, Icon]) => (
                                 <button
@@ -751,7 +721,7 @@ export default function ProjectsPage() {
                                     className="w-8 h-8 flex items-center justify-center transition-colors duration-150"
                                     style={{
                                         backgroundColor: viewMode === mode ? 'var(--turquoise-8)' : 'var(--surface-raised)',
-                                        color:           viewMode === mode ? 'var(--turquoise)'   : 'var(--text-tertiary)',
+                                        color: viewMode === mode ? 'var(--turquoise)' : 'var(--text-tertiary)',
                                     }}
                                 >
                                     <Icon size={13} strokeWidth={2} />
@@ -759,7 +729,6 @@ export default function ProjectsPage() {
                             ))}
                         </div>
 
-                        {/* New project */}
                         <button
                             onClick={handleNewProject}
                             disabled={creating}
@@ -776,7 +745,6 @@ export default function ProjectsPage() {
                     </div>
                 </div>
 
-                {/* ── List header (list mode only) ── */}
                 {viewMode === 'list' && displayed.length > 0 && (
                     <div
                         className="flex items-center gap-4 px-4 py-2"
@@ -791,7 +759,6 @@ export default function ProjectsPage() {
                     </div>
                 )}
 
-                {/* ── Content ── */}
                 {loading ? (
                     <div className={viewMode === 'grid'
                         ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4'
@@ -828,9 +795,9 @@ export default function ProjectsPage() {
                             style={{ backgroundColor: 'var(--turquoise-8)', border: '1px solid var(--turquoise-22)' }}
                         >
                             {filter === 'trash'
-                                ? <Trash2   size={24} style={{ color: 'var(--turquoise)' }} />
+                                ? <Trash2 size={24} style={{ color: 'var(--turquoise)' }} />
                                 : filter === 'starred'
-                                ? <Star     size={24} style={{ color: 'var(--turquoise)' }} />
+                                ? <Star size={24} style={{ color: 'var(--turquoise)' }} />
                                 : <FolderOpen size={24} style={{ color: 'var(--turquoise)' }} />}
                         </div>
                         <div className="flex flex-col items-center gap-1 text-center">
@@ -897,7 +864,6 @@ export default function ProjectsPage() {
                     </div>
                 )}
 
-                {/* Project count footer */}
                 {!loading && displayed.length > 0 && (
                     <p className="text-[11px] text-center" style={{ color: 'var(--text-tertiary)' }}>
                         {displayed.length} {displayed.length === 1 ? 'project' : 'projects'}
@@ -907,7 +873,6 @@ export default function ProjectsPage() {
 
             </main>
 
-            {/* Rename modal */}
             {renaming && (
                 <RenameModal
                     project={renaming}
