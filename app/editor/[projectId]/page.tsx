@@ -291,7 +291,7 @@ export default function EditorPage() {
     if (loading) return (
         <div className="flex items-center justify-center" style={{ height: '100dvh', backgroundColor: 'var(--bg)' }}>
             <div className="flex flex-col items-center gap-3">
-                <Loader2 size={28} className="animate-spin" style={{ color: 'var(--turquoise)' }} />
+                <Loader2 size={28} className="animate-spin" style={{ color: 'var(--accent)' }} />
                 <p className="text-sm font-semibold" style={{ color: 'var(--text-tertiary)' }}>Loading editor…</p>
             </div>
         </div>
@@ -301,7 +301,7 @@ export default function EditorPage() {
         <div className="flex items-center justify-center" style={{ height: '100dvh', backgroundColor: 'var(--bg)' }}>
             <div className="flex flex-col items-center gap-3">
                 <p className="text-sm font-bold" style={{ color: 'var(--text)' }}>Project not found</p>
-                <Link href="/dashboard" className="text-xs" style={{ color: 'var(--turquoise)' }}>← Back to Dashboard</Link>
+                <Link href="/dashboard" className="text-xs" style={{ color: 'var(--accent)' }}>← Back to Dashboard</Link>
             </div>
         </div>
     )
@@ -366,7 +366,7 @@ export default function EditorPage() {
                             onClick={() => setRatioOpen(o => !o)}
                             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold"
                             style={{
-                                backgroundColor: ratioOpen ? 'var(--turquoise)' : 'rgba(0,0,0,0.6)',
+                                backgroundColor: ratioOpen ? 'var(--accent)' : 'rgba(0,0,0,0.6)',
                                 backdropFilter:  'blur(8px)',
                                 border:          `1px solid ${ratioOpen ? 'transparent' : 'rgba(255,255,255,0.12)'}`,
                                 color:           ratioOpen ? '#020202' : 'white',
@@ -386,9 +386,9 @@ export default function EditorPage() {
                                         onClick={() => { setAspectRatio(label); setRatioOpen(false) }}
                                         className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left"
                                         style={{
-                                            backgroundColor: aspectRatio === label ? 'var(--turquoise-16)' : 'transparent',
-                                            color:           aspectRatio === label ? 'var(--turquoise)'    : 'rgba(255,255,255,0.8)',
-                                            border:          `1px solid ${aspectRatio === label ? 'var(--turquoise-42)' : 'transparent'}`,
+                                            backgroundColor: aspectRatio === label ? 'var(--accent-16)' : 'transparent',
+                                            color:           aspectRatio === label ? 'var(--accent)'    : 'rgba(255,255,255,0.8)',
+                                            border:          `1px solid ${aspectRatio === label ? 'var(--accent-42)' : 'transparent'}`,
                                             cursor:          'pointer',
                                         }}
                                         onMouseEnter={e => { if (aspectRatio !== label) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)' }}

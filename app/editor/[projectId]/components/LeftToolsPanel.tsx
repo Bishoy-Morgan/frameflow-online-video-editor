@@ -51,8 +51,8 @@ export default function LeftToolsPanel({ activeTool, onToolClick }: LeftToolsPan
             style={{
               width: '52px',
               height: '52px',
-              backgroundColor: active ? 'var(--turquoise-8)' : 'transparent',
-              border: active ? '1px solid var(--turquoise-22)' : '1px solid transparent',
+              backgroundColor: active ? 'var(--accent-8)' : 'transparent',
+              border: active ? '1px solid var(--accent-22)' : '1px solid transparent',
               cursor: 'pointer',
             }}
             onMouseEnter={e => {
@@ -71,13 +71,13 @@ export default function LeftToolsPanel({ activeTool, onToolClick }: LeftToolsPan
             <Icon
               size={20}
               strokeWidth={active ? 2 : 1.75}
-              style={{ color: active ? 'var(--turquoise)' : 'var(--text-tertiary)' }}
+              style={{ color: active ? 'var(--accent)' : 'var(--text-tertiary)' }}
             />
             <span
               className="font-bold leading-none"
               style={{
                 fontSize: '10px',
-                color: active ? 'var(--turquoise)' : 'var(--text-tertiary)',
+                color: active ? 'var(--accent)' : 'var(--text-tertiary)',
                 opacity: active ? 1 : 0.7,
               }}
             >

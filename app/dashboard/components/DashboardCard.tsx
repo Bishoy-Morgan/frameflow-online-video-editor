@@ -116,12 +116,12 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
 
     return (
         <div
-            onClick={() => !renaming && window.open(`/editor/${project.id}`, '_blank')}
+            onClick={() => !renaming && window.open(`/editor/${project.id}`)}
             className="group flex flex-col rounded-xl overflow-hidden transition-all duration-200 cursor-pointer"
             style={{ boxShadow: '0 0 0 1px var(--border-default)', position: 'relative' }}
             onMouseEnter={e => {
                 e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.1), 0 0 0 1px var(--turquoise-22)'
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.1), 0 0 0 1px var(--accent-22)'
             }}
             onMouseLeave={e => {
                 e.currentTarget.style.transform = 'translateY(0)'
@@ -135,20 +135,20 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
                 ) : (
                     <div
                         className="w-full h-full flex items-center justify-center"
-                        style={{ background: 'linear-gradient(135deg, var(--turquoise-10) 0%, var(--turquoise-22) 100%)' }}
+                        style={{ background: 'linear-gradient(135deg, var(--accent-10) 0%, var(--accent-22) 100%)' }}
                     >
                         <div
                             className="w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
-                            style={{ backgroundColor: 'var(--turquoise-22)', border: '1px solid var(--turquoise-40)' }}
+                            style={{ backgroundColor: 'var(--accent-22)', border: '1px solid var(--accent-40)' }}
                         >
-                            <Play size={16} strokeWidth={0} fill="var(--turquoise)" style={{ marginLeft: 2 }} />
+                            <Play size={16} strokeWidth={0} fill="var(--accent)" style={{ marginLeft: 2 }} />
                         </div>
                     </div>
                 )}
 
                 {starred && (
                     <div className="absolute top-2 left-2">
-                        <Star size={12} fill="var(--turquoise)" style={{ color: 'var(--turquoise)' }} />
+                        <Star size={12} fill="var(--accent)" style={{ color: 'var(--accent)' }} />
                     </div>
                 )}
 
@@ -166,7 +166,7 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
                         onClick={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(o => !o) }}
                         className="w-6 h-6 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:outline-none focus:opacity-100"
                         style={{
-                            backgroundColor: menuOpen ? 'var(--turquoise)' : 'rgba(2,2,2,0.55)',
+                            backgroundColor: menuOpen ? 'var(--accent)' : 'rgba(2,2,2,0.55)',
                             backdropFilter: 'blur(4px)',
                             border: 'none',
                             color: menuOpen ? '#020202' : '#fefefe',
@@ -198,7 +198,7 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
                                     style={{
                                         fontSize: '12px',
                                         fontWeight: 600,
-                                        color: item.danger ? '#ef4444' : item.active ? 'var(--turquoise)' : 'var(--text-secondary)',
+                                        color: item.danger ? '#ef4444' : item.active ? 'var(--accent)' : 'var(--text-secondary)',
                                         backgroundColor: 'transparent',
                                         border: 'none',
                                         cursor: 'pointer',
@@ -240,13 +240,13 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
                             className="flex-1 rounded-md px-2 py-0.5 text-sm font-bold"
                             style={{
                                 backgroundColor: 'var(--surface-raised)',
-                                border: '1px solid var(--turquoise-42)',
+                                border: '1px solid var(--accent-42)',
                                 color: 'var(--text)',
                                 outline: 'none',
                                 minWidth: 0,
                             }}
                         />
-                        <button onClick={handleRename} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--turquoise)', padding: 2 }}>
+                        <button onClick={handleRename} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--accent)', padding: 2 }}>
                             <Check size={13} />
                         </button>
                         <button onClick={() => { setRenaming(false); setNameVal(project.name) }} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 2 }}>

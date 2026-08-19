@@ -4,8 +4,6 @@ import { motion } from "framer-motion";
 import clsx from "clsx";
 import { ReactNode, ComponentPropsWithoutRef, useState } from "react";
 
-// Types 
-
 type Variant = "primary" | "secondary" | "ghost";
 type Size    = "sm" | "md" | "lg";
 
@@ -18,15 +16,11 @@ interface ButtonProps extends ComponentPropsWithoutRef<typeof motion.button> {
     iconPosition?: "left" | "right";
 }
 
-// Size map 
-
 const sizes: Record<Size, string> = {
     sm: "px-4 py-2 text-sm   gap-1.5",
     md: "px-6 py-3 text-base gap-2",
     lg: "px-8 py-4 text-lg   gap-2.5",
 };
-
-// Component
 
 export default function Button({
     variant  = "primary",
@@ -39,31 +33,24 @@ export default function Button({
 }: ButtonProps) {
     const [hovered, setHovered] = useState(false);
 
-    // ── Variant config ────────────────────────────────────────────────────────
-    // primary   → solid turquoise, fill wipes to --bg on hover (text flips to turquoise)
-    // secondary → transparent with turquoise border, fill wipes to turquoise on hover (text flips to --bg)
-    // ghost     → no border, no background, text turquoise, subtle underline on hover
-
     const containerStyles: Record<Variant, string> = {
-        primary:   "bg-turquoise   border border-turquoise   text-[--bg]",
-        secondary: "bg-transparent border border-turquoise   text-turquoise",
-        ghost:     "bg-transparent border border-transparent text-turquoise",
+        primary: "bg-accent border border-accent text-[--bg]",
+        secondary: "bg-transparent border border-accent text-accent",
+        ghost: "bg-transparent border border-transparent text-accent",
     };
 
     const overlayStyles: Record<Variant, string> = {
-        primary:   "bg-[var(--bg)]",
-        secondary: "bg-turquoise",
-        ghost:     "bg-transparent",
+        primary: "bg-[var(--bg)]",
+        secondary: "bg-accent",
+        ghost: "bg-transparent",
     };
 
-    // Text color before / after hover
     const textColor: Record<Variant, { initial: string; hover: string }> = {
-        primary:   { initial: "var(--bg)",        hover: "var(--turquoise)" },
-        secondary: { initial: "var(--turquoise)",  hover: "var(--bg)"       },
-        ghost:     { initial: "var(--turquoise)",  hover: "var(--turquoise)"},
-    };
+        primary: { initial: "var(--bg)", hover: "var(--accent)" },
+        secondary: { initial: "var(--accent)", hover: "var(--bg)" },
+        ghost: { initial: "var(--accent)",  hover: "var(--accent)"},
+    }; 
 
-    // ── Ghost is simpler — no fill overlay ────────────────────────────────────
     if (variant === "ghost") {
         return (
             <motion.button
@@ -73,7 +60,7 @@ export default function Button({
                 className={clsx(
                     "relative flex flex-row items-center justify-center font-semibold",
                     "rounded-lg cursor-pointer focus:outline-none transition-opacity duration-200",
-                    "focus-visible:ring-2 focus-visible:ring-(--turquoise) focus-visible:ring-offset-2",
+                    "focus-visible:ring-2 focus-visible:ring-(--accent) focus-visible:ring-offset-2",
                     sizes[size],
                     containerStyles.ghost,
                     className,
@@ -85,9 +72,8 @@ export default function Button({
                 )}
                 <span className="relative">
                     {children}
-                    {/* Underline */}
                     <motion.span
-                        className="absolute left-0 -bottom-0.5 h-px bg-turquoise"
+                        className="absolute left-0 -bottom-0.5 h-px bg-accent"
                         initial={{ width: "0%" }}
                         animate={{ width: hovered ? "100%" : "0%" }}
                         transition={{ duration: 0.25, ease: "easeOut" }}
@@ -100,7 +86,6 @@ export default function Button({
         );
     }
 
-    // ── Primary & secondary — wipe fill animation ─────────────────────────────
     return (
         <motion.button
             whileTap={{ scale: 0.97 }}
@@ -109,14 +94,13 @@ export default function Button({
             className={clsx(
                 "relative flex flex-row items-center justify-center font-semibold",
                 "rounded-lg overflow-hidden cursor-pointer focus:outline-none",
-                "focus-visible:ring-2 focus-visible:ring-(--turquoise) focus-visible:ring-offset-2",
+                "focus-visible:ring-2 focus-visible:ring-(--accent) focus-visible:ring-offset-2",
                 sizes[size],
                 containerStyles[variant],
                 className,
             )}
             {...props}
         >
-            {/* Fill wipe overlay */}
             <motion.span
                 aria-hidden
                 className={clsx("absolute inset-x-0 bottom-0 pointer-events-none", overlayStyles[variant])}
@@ -126,7 +110,6 @@ export default function Button({
                 style={{ borderRadius: "50% 50% 0 0 / 60% 60% 0 0" }}
             />
 
-            {/* Icon left */}
             {icon && iconPosition === "left" && (
                 <motion.span
                     className="relative z-10 shrink-0"
@@ -137,7 +120,6 @@ export default function Button({
                 </motion.span>
             )}
 
-            {/* Label */}
             <motion.span
                 className="relative z-10"
                 animate={{ color: hovered ? textColor[variant].hover : textColor[variant].initial }}
@@ -146,7 +128,6 @@ export default function Button({
                 {children}
             </motion.span>
 
-            {/* Icon right */}
             {icon && iconPosition === "right" && (
                 <motion.span
                     className="relative z-10 shrink-0"

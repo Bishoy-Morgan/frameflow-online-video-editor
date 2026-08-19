@@ -10,7 +10,7 @@ import {
     Play
 } from 'lucide-react'
 import DashboardHeader from '../../components/DashboardHeader'
-
+import { getMoodColor } from '@/lib/constants/moods'
 
 type Scene = {
     id: string
@@ -41,18 +41,6 @@ type Project = {
     }
 }
 
-const moodColors: Record<string, { bg: string; text: string; border: string }> = {
-    Uplifting: { bg: 'rgba(251,191,36,0.08)', text: '#fbbf24', border: 'rgba(251,191,36,0.22)' },
-    Dramatic: { bg: 'rgba(239,68,68,0.08)', text: '#ef4444', border: 'rgba(239,68,68,0.22)' },
-    Calm: { bg: 'rgba(99,102,241,0.08)', text: '#818cf8', border: 'rgba(99,102,241,0.22)' },
-    Energetic: { bg: 'rgba(249,115,22,0.08)', text: '#fb923c', border: 'rgba(249,115,22,0.22)' },
-    Melancholic: { bg: 'rgba(148,163,184,0.08)', text: '#94a3b8', border: 'rgba(148,163,184,0.22)'},
-    Mysterious: { bg: 'rgba(167,139,250,0.08)', text: '#a78bfa', border: 'rgba(167,139,250,0.22)'},
-    Cinematic: { bg: 'var(--turquoise-8)', text: 'var(--turquoise)', border: 'var(--turquoise-22)' },
-    Playful: { bg: 'rgba(52,211,153,0.08)', text: '#34d399', border: 'rgba(52,211,153,0.22)' },
-}
-const defaultMood = { bg: 'var(--surface-raised)', text: 'var(--text-tertiary)', border: 'var(--border-subtle)' }
-
 function timeAgo(dateStr: string) {
     const diff = Date.now() - new Date(dateStr).getTime()
     const days = Math.floor(diff / 86400000)
@@ -66,13 +54,13 @@ function timeAgo(dateStr: string) {
 }
 
 function SceneCard({ scene, index }: { scene: Scene; index: number }) {
-    const mood = moodColors[scene.musicMood] ?? defaultMood
+    const mood = getMoodColor(scene.musicMood)
     return (
         <div
             className="flex flex-col gap-3 p-4 rounded-2xl transition-all duration-200"
             style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}
             onMouseEnter={e => {
-                e.currentTarget.style.borderColor = 'var(--turquoise-22)'
+                e.currentTarget.style.borderColor = 'var(--accent-22)'
                 e.currentTarget.style.transform = 'translateY(-2px)'
                 e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.06)'
             }}
@@ -85,7 +73,7 @@ function SceneCard({ scene, index }: { scene: Scene; index: number }) {
             <div className="flex items-center justify-between">
                 <div
                     className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-bold"
-                    style={{ backgroundColor: 'var(--turquoise-8)', border: '1px solid var(--turquoise-22)', color: 'var(--turquoise)' }}
+                    style={{ backgroundColor: 'var(--accent-8)', border: '1px solid var(--accent-22)', color: 'var(--accent)' }}
                 >
                     <Clapperboard size={10} strokeWidth={2} />
                     Scene {index + 1}
@@ -185,7 +173,7 @@ function DeleteConfirmModal({
                             border: '1px solid var(--border-default)',
                             color: 'var(--text)',
                         }}
-                        onFocus={e => e.currentTarget.style.borderColor = 'var(--turquoise)'}
+                        onFocus={e => e.currentTarget.style.borderColor = 'var(--accent)'}
                         onBlur={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
                     />
                 </div>
@@ -219,8 +207,8 @@ function DeleteConfirmModal({
                         disabled={confirmText !== projectName || deleting}
                         className="flex-1 px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
                         style={{
-                            backgroundColor: confirmText === projectName ? '#ef4444' : 'rgba(239,68,68,0.2)',
-                            border: '1px solid ' + (confirmText === projectName ? '#ef4444' : 'transparent'),
+                            backgroundColor: confirmText === projectName ? 'var(--error)' : 'var(--error-22)',
+                            border: '1px solid ' + (confirmText === projectName ? 'var(--error)' : 'transparent'),
                             color: '#fff',
                             cursor: confirmText === projectName && !deleting ? 'pointer' : 'not-allowed',
                             opacity: confirmText === projectName ? 1 : 0.6,
@@ -315,11 +303,9 @@ export default function ProjectDetailPage() {
             <DashboardHeader title="Project" />
             <div className="flex-1 flex flex-col items-center justify-center gap-4">
                 <p className="text-sm font-bold" style={{ color: 'var(--text)' }}>Project not found</p>
-                <Link href="/dashboard/projects" className="text-xs" style={{ color: 'var(--turquoise)' }}>
-                    <ArrowLeft size={12} strokeWidth={2} style={{ marginRight: '4px' }} /> 
-                    <span>
-                        Back to Projects
-                    </span>
+                <Link href="/dashboard/projects" className="text-xs flex items-center gap-1" style={{ color: 'var(--accent)' }}>
+                    <ArrowLeft size={12} strokeWidth={2} />
+                    <span>Back to Projects</span>
                 </Link>
             </div>
         </div>
@@ -331,7 +317,7 @@ export default function ProjectDetailPage() {
     return (
         <div className="relative flex flex-col flex-1 min-h-0 overflow-auto">
             <DashboardHeader title={project.name} subtitle="Project overview" />
-            
+
             <DeleteConfirmModal
                 open={deleteConfirmOpen}
                 projectName={project.name}
@@ -347,17 +333,16 @@ export default function ProjectDetailPage() {
                 style={{
                     minHeight: '280px',
                     background: isAI
-                        ? 'linear-gradient(160deg, var(--turquoise-8) 0%, var(--bg) 70%)'
+                        ? 'linear-gradient(160deg, var(--accent-8) 0%, var(--bg) 70%)'
                         : 'linear-gradient(160deg, var(--surface-raised) 0%, var(--bg) 80%)',
                     borderBottom: '1px solid var(--border-subtle)',
                 }}
             >
-
                 <div
                     aria-hidden
                     className="pointer-events-none absolute inset-0"
                     style={{
-                        backgroundImage: 'radial-gradient(circle, var(--turquoise-22) 1px, transparent 1px)',
+                        backgroundImage: 'radial-gradient(circle, var(--accent-22) 1px, transparent 1px)',
                         backgroundSize: '28px 28px',
                         opacity: 0.2,
                         maskImage: 'radial-gradient(ellipse 80% 100% at 20% 50%, black 0%, transparent 100%)',
@@ -370,8 +355,8 @@ export default function ProjectDetailPage() {
                     <div className="flex items-center justify-between">
                         <Link
                             href="/dashboard/projects"
-                            className="flex items-center gap-2 text-xs font-semibold transition-colors"
-                            style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}
+                            className="flex items-center gap-2 text-xs font-semibold transition-colors no-underline"
+                            style={{ color: 'var(--text-tertiary)' }}
                             onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
                             onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}
                         >
@@ -382,26 +367,24 @@ export default function ProjectDetailPage() {
                             <button
                                 onClick={handleStar}
                                 disabled={starring}
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
                                 style={{
-                                    backgroundColor: project.starred ? 'rgba(251,191,36,0.1)' : 'var(--surface-raised)',
-                                    border: project.starred ? '1px solid rgba(251,191,36,0.3)' : '1px solid var(--border-default)',
-                                    color: project.starred ? '#fbbf24' : 'var(--text-tertiary)',
-                                    cursor: 'pointer',
+                                    backgroundColor: project.starred ? 'var(--mood-uplifting-8)' : 'var(--surface-raised)',
+                                    border: project.starred ? '1px solid var(--mood-uplifting-22)' : '1px solid var(--border-default)',
+                                    color: project.starred ? 'var(--mood-uplifting)' : 'var(--text-tertiary)',
                                 }}
                             >
                                 {starring
                                     ? <Loader2 size={12} className="animate-spin" />
-                                    : <Star size={12} strokeWidth={2} fill={project.starred ? '#fbbf24' : 'none'} />
+                                    : <Star size={12} strokeWidth={2} fill={project.starred ? 'var(--mood-uplifting)' : 'none'} />
                                 }
                                 {project.starred ? 'Starred' : 'Star'}
                             </button>
 
                             <Link
                                 href={`/dashboard/projects/${id}/settings`}
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors no-underline"
                                 style={{
-                                    textDecoration: 'none',
                                     backgroundColor: 'var(--surface-raised)',
                                     border: '1px solid var(--border-default)',
                                     color: 'var(--text-tertiary)',
@@ -414,26 +397,24 @@ export default function ProjectDetailPage() {
 
                             <button
                                 onClick={openDeleteConfirm}
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
                                 style={{
                                     backgroundColor: 'transparent',
                                     border: '1px solid transparent',
                                     color: 'var(--text-tertiary)',
-                                    cursor: 'pointer',
                                 }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.06)'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.2)'; e.currentTarget.style.color = '#ef4444' }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--error-8)'; e.currentTarget.style.borderColor = 'var(--error-22)'; e.currentTarget.style.color = 'var(--error)' }}
                                 onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)' }}
                             >
                                 <Trash2 size={12} strokeWidth={1.75} /> Trash
                             </button>
 
                             <button
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
                                 style={{
                                     backgroundColor: 'var(--surface-raised)',
                                     border: '1px solid var(--border-default)',
                                     color: 'var(--text-tertiary)',
-                                    cursor: 'pointer',
                                 }}
                                 onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)' }}
                                 onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-tertiary)' }}
@@ -443,8 +424,8 @@ export default function ProjectDetailPage() {
 
                             <button
                                 onClick={() => router.push(`/dashboard/projects/${id}/editor`)}
-                                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-opacity"
-                                style={{ backgroundColor: 'var(--turquoise)', color: '#fff', boxShadow: '0 4px 14px var(--turquoise-22)', border: 'none', cursor: 'pointer' }}
+                                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-opacity cursor-pointer border-none text-white"
+                                style={{ backgroundColor: 'var(--accent)', boxShadow: '0 4px 14px var(--accent-22)' }}
                                 onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }}
                                 onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
                             >
@@ -458,7 +439,7 @@ export default function ProjectDetailPage() {
                             {isAI && (
                                 <div
                                     className="flex items-center gap-1.5 w-fit px-2.5 py-1 rounded-lg text-[11px] font-bold"
-                                    style={{ backgroundColor: 'var(--turquoise-8)', border: '1px solid var(--turquoise-22)', color: 'var(--turquoise)' }}
+                                    style={{ backgroundColor: 'var(--accent-8)', border: '1px solid var(--accent-22)', color: 'var(--accent)' }}
                                 >
                                     <Wand2 size={10} strokeWidth={2.5} /> AI Generated
                                 </div>
@@ -505,10 +486,10 @@ export default function ProjectDetailPage() {
                             ].map(({ label, value }) => (
                                 <div
                                     key={label}
-                                    className="flex flex-col items-center gap-0.5 px-4 py-3 rounded-xl"
-                                    style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', minWidth: '72px' }}
+                                    className="flex flex-col items-center gap-0.5 px-4 py-3 rounded-xl min-w-18"
+                                    style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}
                                 >
-                                    <span className="text-lg font-bold" style={{ color: 'var(--text)', lineHeight: 1 }}>{value}</span>
+                                    <span className="text-lg font-bold leading-none" style={{ color: 'var(--text)' }}>{value}</span>
                                     <span className="text-[10px] font-semibold" style={{ color: 'var(--text-tertiary)' }}>{label}</span>
                                 </div>
                             ))}
@@ -522,18 +503,17 @@ export default function ProjectDetailPage() {
                 {project.prompt && (
                     <div className="flex flex-col gap-3">
                         <div className="flex items-center gap-3">
-                            <div className="w-5 h-px" style={{ backgroundColor: 'var(--turquoise)' }} />
-                            <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase" style={{ color: 'var(--turquoise)' }}>
+                            <div className="w-5 h-px" style={{ backgroundColor: 'var(--accent)' }} />
+                            <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase" style={{ color: 'var(--accent)' }}>
                                 Original Prompt
                             </span>
                         </div>
                         <p
-                            className="text-sm leading-relaxed px-4 py-3 rounded-xl"
+                            className="text-sm leading-relaxed px-4 py-3 rounded-xl italic"
                             style={{
                                 color: 'var(--text-secondary)',
                                 backgroundColor: 'var(--surface-raised)',
                                 border: '1px solid var(--border-subtle)',
-                                fontStyle: 'italic',
                             }}
                         >
                             &quot;{project.prompt}&quot;
@@ -544,8 +524,8 @@ export default function ProjectDetailPage() {
                 {project.scenes.length > 0 && (
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-3">
-                            <div className="w-5 h-px" style={{ backgroundColor: 'var(--turquoise)' }} />
-                            <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase" style={{ color: 'var(--turquoise)' }}>
+                            <div className="w-5 h-px" style={{ backgroundColor: 'var(--accent)' }} />
+                            <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase" style={{ color: 'var(--accent)' }}>
                                 Scene Breakdown · {project.scenes.length} Scenes · {totalDuration}s
                             </span>
                         </div>
@@ -573,9 +553,9 @@ export default function ProjectDetailPage() {
                             <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Start editing to add scenes and assets</p>
                         </div>
                         <button
-                            onClick={() => window.open(`/editor/${id}`, '_blank')}
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold"
-                            style={{ backgroundColor: 'var(--turquoise)', color: '#fff', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px var(--turquoise-22)' }}
+                            onClick={() => router.push(`/editor/${id}`)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border-none text-white cursor-pointer"
+                            style={{ backgroundColor: 'var(--accent)', boxShadow: '0 4px 14px var(--accent-22)' }}
                             onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }}
                             onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
                         >

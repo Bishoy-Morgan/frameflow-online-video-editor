@@ -50,7 +50,7 @@ const CTA = () => {
         aria-hidden
         className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
         style={{
-          background: 'radial-gradient(circle, var(--turquoise-16) 0%, transparent 65%)',
+          background: 'radial-gradient(circle, var(--accent-16) 0%, transparent 65%)',
           filter: 'blur(40px)',
         }}
       />
@@ -58,18 +58,18 @@ const CTA = () => {
       {/* Top separator */}
       <div
         aria-hidden
-        className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise"
+        className="absolute top-0 left-[10%] right-[10%] h-px line-accent"
       />
 
       <div className="container relative z-10 flex flex-col items-center text-center gap-10">
 
         {/* Eyebrow */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge-turquoise">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge-accent">
           <span
-            className="w-[7px] h-[7px] rounded-full bg-turquoise shadow-turquoise"
+            className="w-[7px] h-[7px] rounded-full bg-accent shadow-accent"
             style={{ animation: 'pulse-dot 2s ease-in-out infinite' }}
           />
-          <span className="text-xs font-semibold tracking-widest uppercase text-turquoise">
+          <span className="text-xs font-semibold tracking-widest uppercase text-accent">
             Start instantly
           </span>
         </div>
@@ -85,7 +85,7 @@ const CTA = () => {
           }}
         >
           Ready to edit without{' '}
-          <span className="italic text-turquoise">friction</span>?
+          <span className="italic text-accent">friction</span>?
         </h2>
 
         {/* Sub */}

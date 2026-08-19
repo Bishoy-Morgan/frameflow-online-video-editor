@@ -56,7 +56,7 @@ const FAQItem = ({ faq, index }: { faq: typeof faqs[0]; index: number }) => {
             >
                 <span
                     className="text-[0.9375rem] font-semibold leading-snug transition-colors duration-200"
-                    style={{ color: open ? 'var(--turquoise-fg)' : 'var(--text-secondary)' }}
+                    style={{ color: open ? 'var(--accent-fg)' : 'var(--text-secondary)' }}
                 >
                     {faq.q}
                 </span>
@@ -65,12 +65,12 @@ const FAQItem = ({ faq, index }: { faq: typeof faqs[0]; index: number }) => {
                 <span
                     className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300"
                     style={{
-                        backgroundColor: open ? 'var(--turquoise-10)' : 'var(--border-subtle)',
-                        border: `1px solid ${open ? 'var(--turquoise-22)' : 'var(--border-default)'}`,
+                        backgroundColor: open ? 'var(--accent-10)' : 'var(--border-subtle)',
+                        border: `1px solid ${open ? 'var(--accent-22)' : 'var(--border-default)'}`,
                         transform: open ? 'rotate(45deg)' : 'rotate(0deg)',
                     }}
                 >
-                    <Plus size={12} strokeWidth={2.5} color={open ? 'var(--turquoise-fg)' : 'var(--text-muted)'} />
+                    <Plus size={12} strokeWidth={2.5} color={open ? 'var(--accent-fg)' : 'var(--text-muted)'} />
                 </span>
             </button>
 
@@ -109,13 +109,13 @@ const PricingFAQ = () => {
 
             <SectionGrid />
 
-            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
+            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
 
             {/* Glow — top right */}
             <div
                 aria-hidden
                 className="pointer-events-none absolute -top-[10%] -right-[5%] w-[420px] h-[420px] rounded-full"
-                style={{ background: 'radial-gradient(circle, var(--turquoise-8) 0%, transparent 70%)', filter: 'blur(72px)' }}
+                style={{ background: 'radial-gradient(circle, var(--accent-8) 0%, transparent 70%)', filter: 'blur(72px)' }}
             />
 
             <div className="container relative z-10">
@@ -125,8 +125,8 @@ const PricingFAQ = () => {
                     {/* Left — label + headline */}
                     <div ref={headerRef} className="flex flex-col gap-4 lg:sticky lg:top-32">
                         <div className="flex items-center gap-3">
-                            <div className="w-7 h-px bg-turquoise" />
-                            <span className="text-[0.7rem] font-bold tracking-[0.14em] uppercase text-turquoise">
+                            <div className="w-7 h-px bg-accent" />
+                            <span className="text-[0.7rem] font-bold tracking-[0.14em] uppercase text-accent">
                                 FAQ
                             </span>
                         </div>

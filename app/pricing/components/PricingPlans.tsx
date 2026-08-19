@@ -89,17 +89,17 @@ const PlanCard = ({ plan, index }: { plan: typeof plans[0]; index: number }) => 
             className="relative flex flex-col rounded-2xl overflow-hidden"
             style={{
                 border: plan.highlighted
-                    ? '1px solid var(--turquoise-42)'
+                    ? '1px solid var(--accent-42)'
                     : '1px solid var(--border-default)',
                 backgroundColor: 'var(--bg)',
                 boxShadow: plan.highlighted
-                    ? '0 0 0 1px var(--turquoise-20), 0 20px 60px var(--turquoise-8)'
+                    ? '0 0 0 1px var(--accent-20), 0 20px 60px var(--accent-8)'
                     : 'none',
             }}
         >
             {/* Highlighted top accent bar */}
             {plan.highlighted && (
-                <div className="h-0.5 w-full bg-turquoise" style={{ boxShadow: '0 0 12px var(--turquoise-glow)' }} />
+                <div className="h-0.5 w-full bg-accent" style={{ boxShadow: '0 0 12px var(--accent-glow)' }} />
             )}
 
             {/* Badge */}
@@ -108,7 +108,7 @@ const PlanCard = ({ plan, index }: { plan: typeof plans[0]; index: number }) => 
                     <span
                         className="text-[0.6rem] font-bold tracking-[0.12em] uppercase px-2.5 py-1 rounded-full"
                         style={{
-                            backgroundColor: 'var(--turquoise)',
+                            backgroundColor: 'var(--accent)',
                             color: 'var(--bg)',
                         }}
                     >
@@ -121,7 +121,7 @@ const PlanCard = ({ plan, index }: { plan: typeof plans[0]; index: number }) => 
             <div className="px-8 pt-8 pb-6" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                 <span
                     className="text-[0.7rem] font-bold tracking-[0.14em] uppercase mb-4 block"
-                    style={{ color: plan.highlighted ? 'var(--turquoise-fg)' : 'var(--text-muted)' }}
+                    style={{ color: plan.highlighted ? 'var(--accent-fg)' : 'var(--text-muted)' }}
                 >
                     {plan.label}
                 </span>
@@ -152,12 +152,12 @@ const PlanCard = ({ plan, index }: { plan: typeof plans[0]; index: number }) => 
                             className="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center"
                             style={{
                                 backgroundColor: feature.available
-                                    ? 'var(--turquoise-10)'
+                                    ? 'var(--accent-10)'
                                     : 'var(--border-subtle)',
                             }}
                         >
                             {feature.available
-                                ? <Check size={10} strokeWidth={2.5} color="var(--turquoise-fg)" />
+                                ? <Check size={10} strokeWidth={2.5} color="var(--accent-fg)" />
                                 : <Minus size={10} strokeWidth={2} color="var(--text-subtle)" />
                             }
                         </span>
@@ -173,9 +173,9 @@ const PlanCard = ({ plan, index }: { plan: typeof plans[0]; index: number }) => 
                                 <span
                                     className="ml-2 text-[0.58rem] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full"
                                     style={{
-                                        backgroundColor: 'var(--turquoise-8)',
-                                        border: '1px solid var(--turquoise-20)',
-                                        color: 'var(--turquoise-fg)',
+                                        backgroundColor: 'var(--accent-8)',
+                                        border: '1px solid var(--accent-20)',
+                                        color: 'var(--accent-fg)',
                                     }}
                                 >
                                     {feature.note}
@@ -231,7 +231,7 @@ const PricingPlans = () => {
 
                 {/* Bottom note */}
                 <div ref={headerRef} className="mt-10 flex items-center justify-center gap-2">
-                    <span className="w-1 h-1 rounded-full bg-turquoise shadow-turquoise" />
+                    <span className="w-1 h-1 rounded-full bg-accent shadow-accent" />
                     <p className="m-0 text-sm text-tertiary font-medium">
                         No credit card required to start. Cancel anytime.
                     </p>

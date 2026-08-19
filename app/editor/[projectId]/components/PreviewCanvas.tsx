@@ -137,7 +137,7 @@ const PreviewCanvas = forwardRef<PreviewCanvasHandle, PreviewCanvasProps>(
         const paddingBottom = paddingMap[aspectRatio] ?? '56.25%'
 
         return (
-            <div className="flex items-center justify-center h-full w-full p-4 bg-turquoise! transition-colors duration-200">
+            <div className="flex items-center justify-center h-full w-full p-4 bg-accent! transition-colors duration-200">
                 <div
                     className="relative w-full"
                     style={{
@@ -162,7 +162,7 @@ const PreviewCanvas = forwardRef<PreviewCanvasHandle, PreviewCanvasProps>(
                             />
                         ) : (
                             <div className="group/scene absolute inset-0 flex flex-col items-center justify-center gap-3">
-                                <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-(--turquoise)/20 to-transparent opacity-0 transition-opacity duration-1000 ease-in-out group-hover/scene:opacity-100" />
+                                <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-(--accent)/20 to-transparent opacity-0 transition-opacity duration-1000 ease-in-out group-hover/scene:opacity-100" />
 
                                 <div
                                     className="group/button relative z-10 flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-(--border-default) bg-(--surface-raised) transition-all duration-500"
@@ -170,7 +170,7 @@ const PreviewCanvas = forwardRef<PreviewCanvasHandle, PreviewCanvasProps>(
                                 >
                                     <Plus
                                         size={30}
-                                        className="opacity-60 group-hover/button:text-(--turquoise) group-hover/button:opacity-100 transition-colors duration-200"
+                                        className="opacity-60 group-hover/button:text-(--accent) group-hover/button:opacity-100 transition-colors duration-200"
                                     />
                                 </div>
 

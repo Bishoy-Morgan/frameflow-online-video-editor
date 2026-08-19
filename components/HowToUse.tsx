@@ -90,18 +90,18 @@ const HowToUse = () => {
             <div
                 aria-hidden
                 className="pointer-events-none absolute -top-[10%] -left-[5%] w-[480px] h-[480px] rounded-full"
-                style={{ background: 'radial-gradient(circle, var(--turquoise-8) 0%, transparent 70%)', filter: 'blur(72px)' }}
+                style={{ background: 'radial-gradient(circle, var(--accent-8) 0%, transparent 70%)', filter: 'blur(72px)' }}
             />
 
-            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
+            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
 
             <div className="container relative z-10">
 
                 {/* Header */}
                 <div ref={headerRef} className="max-w-[540px] mb-16">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="w-7 h-px bg-turquoise" />
-                        <span className="text-[0.7rem] font-bold tracking-[0.14em] uppercase text-turquoise">
+                        <div className="w-7 h-px bg-accent" />
+                        <span className="text-[0.7rem] font-bold tracking-[0.14em] uppercase text-accent">
                             How it works
                         </span>
                     </div>
@@ -130,7 +130,7 @@ const HowToUse = () => {
                                             borderBottom: '1px solid var(--border-subtle)',
                                             paddingLeft: active ? '1rem' : '0',
                                             borderLeft: active
-                                                ? '2px solid var(--turquoise)'
+                                                ? '2px solid var(--accent)'
                                                 : '2px solid transparent',
                                         }}
                                     >
@@ -140,7 +140,7 @@ const HowToUse = () => {
                                             style={{
                                                 fontFamily: 'var(--font-dm-serif-display), serif',
                                                 fontSize: '1.75rem',
-                                                color: active ? 'var(--turquoise)' : 'var(--text-ghost)',
+                                                color: active ? 'var(--accent)' : 'var(--text-ghost)',
                                             }}
                                         >
                                             {step.tag}
@@ -238,22 +238,22 @@ const HowToUse = () => {
                             {/* Progress bar */}
                             <div
                                 className="absolute top-0 inset-x-0 h-0.5"
-                                style={{ backgroundColor: 'var(--turquoise-20)' }}
+                                style={{ backgroundColor: 'var(--accent-20)' }}
                             >
                                 <div
-                                    className="h-full bg-turquoise transition-none"
+                                    className="h-full bg-accent transition-none"
                                     style={{
                                         width: `${((current + 1) / steps.length) * 100}%`,
                                         transition: 'width 0.4s ease',
-                                        boxShadow: '0 0 8px var(--turquoise)',
+                                        boxShadow: '0 0 8px var(--accent)',
                                     }}
                                 />
                             </div>
 
-                            {/* Turquoise corner accent */}
+                            {/* accent corner accent */}
                             <div
-                                className="absolute top-0.5 right-0 w-16 h-0.5 bg-turquoise"
-                                style={{ boxShadow: '0 0 10px var(--turquoise)' }}
+                                className="absolute top-0.5 right-0 w-16 h-0.5 bg-accent"
+                                style={{ boxShadow: '0 0 10px var(--accent)' }}
                             />
                         </div>
 
@@ -268,8 +268,8 @@ const HowToUse = () => {
                                     style={{
                                         width: i === current ? '2rem' : '0.375rem',
                                         height: '0.375rem',
-                                        backgroundColor: i === current ? 'var(--turquoise)' : 'var(--border-strong)',
-                                        boxShadow: i === current ? '0 0 6px var(--turquoise)' : 'none',
+                                        backgroundColor: i === current ? 'var(--accent)' : 'var(--border-strong)',
+                                        boxShadow: i === current ? '0 0 6px var(--accent)' : 'none',
                                         border: 'none',
                                         padding: 0,
                                     }}

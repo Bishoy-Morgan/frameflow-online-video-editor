@@ -40,13 +40,13 @@ const PricingEnterprise = () => {
 
             <SectionGrid />
 
-            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
+            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
 
             {/* Glow — center right */}
             <div
                 aria-hidden
                 className="pointer-events-none absolute top-1/2 -translate-y-1/2 -right-[8%] w-[500px] h-[500px] rounded-full"
-                style={{ background: 'radial-gradient(circle, var(--turquoise-8) 0%, transparent 70%)', filter: 'blur(72px)' }}
+                style={{ background: 'radial-gradient(circle, var(--accent-8) 0%, transparent 70%)', filter: 'blur(72px)' }}
             />
 
             <div className="container relative z-10">
@@ -63,8 +63,8 @@ const PricingEnterprise = () => {
                     >
                         <div className="flex flex-col gap-6">
                             <div className="flex items-center gap-3">
-                                <div className="w-7 h-px bg-turquoise" />
-                                <span className="text-[0.7rem] font-bold tracking-[0.14em] uppercase text-turquoise">
+                                <div className="w-7 h-px bg-accent" />
+                                <span className="text-[0.7rem] font-bold tracking-[0.14em] uppercase text-accent">
                                     Enterprise
                                 </span>
                             </div>
@@ -74,7 +74,7 @@ const PricingEnterprise = () => {
                                 style={{ fontSize: 'clamp(1.85rem, 3.5vw, 2.75rem)' }}
                             >
                                 Need something{' '}
-                                <span className="italic text-turquoise">custom?</span>
+                                <span className="italic text-accent">custom?</span>
                             </h2>
 
                             <p className="m-0 text-[0.9375rem] leading-relaxed text-tertiary" style={{ maxWidth: '380px' }}>
@@ -107,7 +107,7 @@ const PricingEnterprise = () => {
                                         borderBottom: '1px solid var(--border-subtle)',
                                     }}
                                 >
-                                    <span className="w-1 h-1 rounded-full shrink-0 bg-turquoise shadow-turquoise" />
+                                    <span className="w-1 h-1 rounded-full shrink-0 bg-accent shadow-accent" />
                                     <span className="text-sm font-semibold text-secondary">
                                         {signal}
                                     </span>

@@ -16,8 +16,8 @@ export default function StatsCard({ label, value, sub, icon: Icon, accent }: Sta
         <div
             className="flex items-start justify-between p-5 rounded-xl"
             style={{
-                backgroundColor: accent ? 'var(--turquoise-8)' : 'var(--surface-raised)',
-                border: `1px solid ${accent ? 'var(--turquoise-22)' : 'var(--border-default)'}`,
+                backgroundColor: accent ? 'var(--accent-8)' : 'var(--surface-raised)',
+                border: `1px solid ${accent ? 'var(--accent-22)' : 'var(--border-default)'}`,
             }}
         >
             <div className="flex flex-col gap-1.5">
@@ -29,7 +29,7 @@ export default function StatsCard({ label, value, sub, icon: Icon, accent }: Sta
                     style={{
                         fontFamily: 'var(--font-dm-serif-display), serif',
                         fontSize: '2rem',
-                        color: accent ? 'var(--turquoise)' : 'var(--text)',
+                        color: accent ? 'var(--accent)' : 'var(--text)',
                     }}
                 >
                     {value}
@@ -42,9 +42,9 @@ export default function StatsCard({ label, value, sub, icon: Icon, accent }: Sta
             <div
                 className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                 style={{
-                    backgroundColor: accent ? 'var(--turquoise-16)' : 'var(--bg)',
-                    border: `1px solid ${accent ? 'var(--turquoise-32)' : 'var(--border-default)'}`,
-                    color: accent ? 'var(--turquoise)' : 'var(--text-tertiary)',
+                    backgroundColor: accent ? 'var(--accent-16)' : 'var(--bg)',
+                    border: `1px solid ${accent ? 'var(--accent-32)' : 'var(--border-default)'}`,
+                    color: accent ? 'var(--accent)' : 'var(--text-tertiary)',
                 }}
             >
                 <Icon size={16} strokeWidth={1.75} />

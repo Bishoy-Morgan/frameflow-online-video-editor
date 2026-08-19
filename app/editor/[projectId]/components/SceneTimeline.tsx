@@ -2,6 +2,7 @@
 
 import React, { useRef, useCallback, useState, useEffect } from 'react'
 import { Plus, Music2, Clock, Film, Trash2, Play, Pause, Square } from 'lucide-react'
+import { getMoodColor } from '@/lib/constants/moods'
 
 interface Scene {
   id: string
@@ -26,17 +27,6 @@ interface SceneTimelineProps {
   onPlay: () => void
   onPause: () => void
   onStop: () => void
-}
-
-const moodColors: Record<string, string> = {
-  Uplifting: '#fbbf24',
-  Dramatic: '#ef4444',
-  Calm: '#818cf8',
-  Energetic: '#fb923c',
-  Melancholic: '#94a3b8',
-  Mysterious: '#a78bfa',
-  Cinematic: 'var(--turquoise)',
-  Playful: '#34d399',
 }
 
 const MIN_PX_PER_SEC = 60
@@ -224,10 +214,10 @@ export default function SceneTimeline({
             title={playing ? 'Pause' : 'Play'}
             className="w-9 h-9 rounded-xl flex items-center justify-center transition-all"
             style={{
-              backgroundColor: 'var(--turquoise)',
+              backgroundColor: 'var(--accent)',
               border: 'none',
               cursor: 'pointer',
-              boxShadow: '0 2px 8px var(--turquoise-22)',
+              boxShadow: '0 2px 8px var(--accent-22)',
             }}
             onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
             onMouseLeave={e => e.currentTarget.style.opacity = '1'}
@@ -254,7 +244,7 @@ export default function SceneTimeline({
               color: 'var(--text-tertiary)',
               cursor: 'pointer',
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'var(--turquoise)'; e.currentTarget.style.borderColor = 'var(--turquoise-22)' }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--accent-22)' }}
             onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.borderColor = 'var(--border-default)' }}
           >
             <Plus size={13} strokeWidth={2.5} /> Add scene
@@ -312,7 +302,7 @@ export default function SceneTimeline({
               ) : (
                 scenesWithPos.map(scene => {
                   const isActive = scene.id === activeSceneId
-                  const color    = moodColors[scene.musicMood] ?? 'var(--turquoise)'
+                  const color    = getMoodColor(scene.musicMood).text
 
                   return (
                     <div
@@ -327,7 +317,7 @@ export default function SceneTimeline({
                           left: 0,
                           width: HANDLE_WIDTH,
                           cursor: 'ew-resize',
-                          backgroundColor: 'var(--turquoise)',
+                          backgroundColor: 'var(--accent)',
                           borderRadius: '6px 0 0 6px',
                         }}
                         onMouseDown={e => handleTrimMouseDown(e, scene, 'left')}
@@ -342,9 +332,9 @@ export default function SceneTimeline({
                           right: HANDLE_WIDTH,
                           top: 0,
                           bottom: 0,
-                          backgroundColor: isActive ? 'var(--turquoise-8)'   : 'var(--surface-raised)',
-                          border: `1px solid ${isActive ? 'var(--turquoise-42)' : 'var(--border-default)'}`,
-                          boxShadow: isActive ? '0 0 0 2px var(--turquoise-22)' : 'none',
+                          backgroundColor: isActive ? 'var(--accent-8)'   : 'var(--surface-raised)',
+                          border: `1px solid ${isActive ? 'var(--accent-42)' : 'var(--border-default)'}`,
+                          boxShadow: isActive ? '0 0 0 2px var(--accent-22)' : 'none',
                           cursor: 'grab',
                         }}
                         onClick={e => { e.stopPropagation(); onSceneClick(scene, scene.startTime) }}
@@ -368,7 +358,7 @@ export default function SceneTimeline({
 
                         <div className="relative z-10 flex flex-col justify-between h-full p-2 pt-3">
                           <span className="font-bold truncate leading-tight select-none"
-                            style={{ fontSize: '11px', color: isActive ? 'var(--turquoise)' : 'var(--text)' }}>
+                            style={{ fontSize: '11px', color: isActive ? 'var(--accent)' : 'var(--text)' }}>
                             {scene.title}
                           </span>
                           <div className="flex items-center justify-between">
@@ -386,15 +376,15 @@ export default function SceneTimeline({
                         <button
                           className="absolute top-2 right-2 z-20 w-7 h-7 rounded-lg items-center justify-center opacity-0 group-hover/clip:opacity-100 transition-opacity flex"
                           style={{
-                            backgroundColor: 'rgba(239,68,68,0.15)',
-                            border: '1px solid rgba(239,68,68,0.35)',
+                            backgroundColor: 'var(--error-16)',
+                            border: '1px solid var(--error-35)',
                             cursor: 'pointer',
-                            color: '#ef4444',
+                            color: 'var(--error)',
                           }}
                           onClick={e => handleDelete(e, scene.id)}
                           onMouseDown={e => e.stopPropagation()}
-                          onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.28)'}
-                          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.15)'}
+                          onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--error-22)'}
+                          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--error-16)'}
                         >
                           <Trash2 size={13} />
                         </button>
@@ -406,7 +396,7 @@ export default function SceneTimeline({
                           right: 0,
                           width: HANDLE_WIDTH,
                           cursor: 'ew-resize',
-                          backgroundColor: 'var(--turquoise)',
+                          backgroundColor: 'var(--accent)',
                           borderRadius: '0 6px 6px 0',
                         }}
                         onMouseDown={e => handleTrimMouseDown(e, scene, 'right')}
@@ -425,16 +415,16 @@ export default function SceneTimeline({
                 style={{
                   left: playheadLeft,
                   width: 2,
-                  backgroundColor: 'var(--turquoise)',
-                  boxShadow: '0 0 6px var(--turquoise)',
+                  backgroundColor: 'var(--accent)',
+                  boxShadow: '0 0 6px var(--accent)',
                 }}
               >
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 rounded-full"
                   style={{
                     width: 10,
                     height: 10,
-                    backgroundColor: 'var(--turquoise)',
-                    boxShadow: '0 0 4px var(--turquoise)',
+                    backgroundColor: 'var(--accent)',
+                    boxShadow: '0 0 4px var(--accent)',
                   }}
                 />
               </div>

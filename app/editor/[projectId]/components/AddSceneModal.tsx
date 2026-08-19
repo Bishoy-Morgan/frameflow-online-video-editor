@@ -50,7 +50,7 @@ const ALLOWED_TYPES  = ['video/mp4', 'video/quicktime', 'video/webm']
 // Shared field styling — layout via Tailwind, color via theme vars
 const fieldClass = "w-full text-sm rounded-xl px-3.5 py-3 outline-none transition-colors"
 const fieldStyle = { backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', color: 'var(--text)' }
-const fieldFocus = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => { e.currentTarget.style.borderColor = 'var(--turquoise-42)' }
+const fieldFocus = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => { e.currentTarget.style.borderColor = 'var(--accent-42)' }
 const fieldBlur  = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => { e.currentTarget.style.borderColor = 'var(--border-default)' }
 
 function UploadTab({
@@ -151,8 +151,8 @@ function UploadTab({
                 <div
                     className="flex flex-col items-center justify-center gap-5 rounded-2xl cursor-pointer transition-all h-72"
                     style={{
-                        border: `2px dashed ${dragOver ? 'var(--turquoise)' : 'var(--border-default)'}`,
-                        backgroundColor: dragOver ? 'var(--turquoise-8)' : 'var(--surface-raised)',
+                        border: `2px dashed ${dragOver ? 'var(--accent)' : 'var(--border-default)'}`,
+                        backgroundColor: dragOver ? 'var(--accent-8)' : 'var(--surface-raised)',
                     }}
                     onDragOver={e => { e.preventDefault(); setDragOver(true) }}
                     onDragLeave={() => setDragOver(false)}
@@ -169,17 +169,17 @@ function UploadTab({
                     <div
                         className="w-16 h-16 rounded-2xl flex items-center justify-center"
                         style={{
-                            backgroundColor: dragOver ? 'var(--turquoise-16)' : 'var(--bg)',
-                            border: `1px solid ${dragOver ? 'var(--turquoise-42)' : 'var(--border-default)'}`,
+                            backgroundColor: dragOver ? 'var(--accent-16)' : 'var(--bg)',
+                            border: `1px solid ${dragOver ? 'var(--accent-42)' : 'var(--border-default)'}`,
                         }}
                     >
                         <CloudUpload size={28}
-                            style={{ color: dragOver ? 'var(--turquoise)' : 'var(--text-tertiary)' }}
+                            style={{ color: dragOver ? 'var(--accent)' : 'var(--text-tertiary)' }}
                             strokeWidth={1.5} />
                     </div>
                     <div className="text-center">
                         <p className="text-base font-bold"
-                            style={{ color: dragOver ? 'var(--turquoise)' : 'var(--text)' }}>
+                            style={{ color: dragOver ? 'var(--accent)' : 'var(--text)' }}>
                             {dragOver ? 'Drop to upload' : 'Drop your video here'}
                         </p>
                         <p className="text-sm mt-1.5" style={{ color: 'var(--text-tertiary)' }}>
@@ -254,7 +254,7 @@ function UploadTab({
                 <Button
                     onClick={handleUpload}
                     disabled={uploading}
-                    style={{ backgroundColor: 'var(--turquoise)', border: 'none', cursor: uploading ? 'wait' : 'pointer', boxShadow: '0 2px 12px var(--turquoise-22)' }}
+                    style={{ backgroundColor: 'var(--accent)', border: 'none', cursor: uploading ? 'wait' : 'pointer', boxShadow: '0 2px 12px var(--accent-22)' }}
                     onMouseEnter={e => { if (!uploading) e.currentTarget.style.opacity = '0.88' }}
                     onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                 >
@@ -288,8 +288,8 @@ function PexelsVideoCard({
             onMouseLeave={() => setHovered(false)}
             className="relative w-full h-64 rounded-2xl overflow-hidden cursor-pointer shrink-0"
             style={{
-                border: `2px solid ${selected ? 'var(--turquoise)' : 'transparent'}`,
-                boxShadow: selected ? '0 0 0 2px var(--turquoise-22)' : 'none',
+                border: `2px solid ${selected ? 'var(--accent)' : 'transparent'}`,
+                boxShadow: selected ? '0 0 0 2px var(--accent-22)' : 'none',
             }}
         >
             <Image
@@ -323,7 +323,7 @@ function PexelsVideoCard({
 
             {selected && (
                 <div className="absolute top-2 right-2">
-                    <CheckCircle2 size={18} style={{ color: 'var(--turquoise)' }} fill="white" />
+                    <CheckCircle2 size={18} style={{ color: 'var(--accent)' }} fill="white" />
                 </div>
             )}
         </div>
@@ -419,7 +419,7 @@ function PexelsTab({
                     disabled={!query.trim() || loading}
                     className="px-6 rounded-2xl text-sm font-bold"
                     style={{
-                        backgroundColor: query.trim() ? 'var(--turquoise)' : 'var(--surface-raised)',
+                        backgroundColor: query.trim() ? 'var(--accent)' : 'var(--surface-raised)',
                         border: `1px solid ${query.trim() ? 'transparent' : 'var(--border-default)'}`,
                         color: query.trim() ? '#fff' : 'var(--text-tertiary)',
                         cursor: query.trim() && !loading ? 'pointer' : 'not-allowed',
@@ -450,7 +450,7 @@ function PexelsTab({
 
             {loading && (
                 <div className="flex items-center justify-center flex-1">
-                    <Loader2 size={24} className="animate-spin" style={{ color: 'var(--turquoise)' }} />
+                    <Loader2 size={24} className="animate-spin" style={{ color: 'var(--accent)' }} />
                 </div>
             )}
 
@@ -529,7 +529,7 @@ function PexelsTab({
                     <button
                         onClick={handleAdd}
                         className="flex flex-col items-center justify-center gap-1.5 px-6 h-20 rounded-2xl text-sm font-bold shrink-0 text-white"
-                        style={{ backgroundColor: 'var(--turquoise)', border: 'none', boxShadow: '0 2px 8px var(--turquoise-22)', cursor: 'pointer' }}
+                        style={{ backgroundColor: 'var(--accent)', border: 'none', boxShadow: '0 2px 8px var(--accent-22)', cursor: 'pointer' }}
                         onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
                         onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                     >
@@ -597,8 +597,8 @@ export default function AddSceneModal({
                             onClick={() => setTab(id)}
                             className="flex items-center gap-2.5 px-7 py-4 text-sm font-bold bg-transparent border-none cursor-pointer -mb-px"
                             style={{
-                                borderBottom: tab === id ? '2px solid var(--turquoise)' : '2px solid transparent',
-                                color: tab === id ? 'var(--turquoise)' : 'var(--text-tertiary)',
+                                borderBottom: tab === id ? '2px solid var(--accent)' : '2px solid transparent',
+                                color: tab === id ? 'var(--accent)' : 'var(--text-tertiary)',
                             }}
                         >
                             <Icon size={15} strokeWidth={tab === id ? 2 : 1.75} />

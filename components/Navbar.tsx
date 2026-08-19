@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTheme } from '@/hooks/useTheme'
 import { useSession } from 'next-auth/react'
-import { Moon, Sun, LayoutDashboard, ChevronDown, LogOut } from 'lucide-react'
+import { Moon, Sun, LayoutDashboard, ChevronDown, LogOut, User } from 'lucide-react'
 import Link from 'next/link'
 import Button from './ui/Button'
 import { useState, useRef, useEffect } from 'react'
@@ -13,18 +13,25 @@ import whiteLogo from '@/public/whiteLogo.png'
 import blackLogo from '@/public/blackLogo.png'
 
 const links = [
-    { name: 'Home',      href: '/'         },
-    { name: 'Features',  href: '/features' },
-    { name: 'Pricing',   href: '/pricing'  },
-    { name: 'About',     href: '/about'    },
+    { name: 'Home', href: '/' },
+    { name: 'Features', href: '/features' },
+    { name: 'Pricing', href: '/pricing' },
+    { name: 'About', href: '/about' },
 ]
 
-// User avatar dropdown (shown when signed in)
-
-function UserMenu({ name, email, image }: { name?: string | null; email?: string | null; image?: string | null }) {
+function UserMenu({ 
+        name, 
+        email, 
+        image 
+    }
+    : { 
+        name?: string | null; 
+        email?: string | null; 
+        image?: string | null 
+    }) {
     const [open, setOpen] = useState(false)
-    const router          = useRouter()
-    const ref             = useRef<HTMLDivElement>(null)
+    const router = useRouter()
+    const ref = useRef<HTMLDivElement>(null)
     const [imageFailed, setImageFailed] = useState(false)
 
     const initials    = name
@@ -44,11 +51,10 @@ function UserMenu({ name, email, image }: { name?: string | null; email?: string
         <div ref={ref} className="relative">
             <button
                 onClick={() => setOpen(o => !o)}
-                className="flex items-center gap-2 px-2 py-1.5 rounded-xl transition-all duration-150 focus:outline-none"
+                className="flex items-center gap-2 px-2 py-1.5 rounded-2xl transition-all duration-150 focus:outline-none"
                 style={{
                     backgroundColor: open ? 'var(--surface-raised)' : 'transparent',
                     border: `1px solid ${open ? 'var(--border-default)' : 'transparent'}`,
-                    cursor: 'pointer',
                 }}
                 onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--surface-raised)'; e.currentTarget.style.borderColor = 'var(--border-default)' }}
                 onMouseLeave={e => { if (!open) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'transparent' } }}
@@ -65,8 +71,8 @@ function UserMenu({ name, email, image }: { name?: string | null; email?: string
                         onError={() => setImageFailed(true)}
                     />
                 ) : (
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
-                        style={{ backgroundColor: 'var(--turquoise-10)', border: '1px solid var(--turquoise-22)', color: 'var(--turquoise)' }}>
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center font-bold shrink-0"
+                        style={{ backgroundColor: 'var(--accent-10)', border: '1px solid var(--accent-22)', color: 'var(--accent)' }}>
                         {initials}
                     </div>
                 )}
@@ -74,56 +80,40 @@ function UserMenu({ name, email, image }: { name?: string | null; email?: string
                     style={{ color: 'var(--text-tertiary)', transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
             </button>
 
-            {/* Dropdown */}
             {open && (
                 <div
-                    className="absolute right-0 top-full mt-2 w-52 rounded-xl overflow-hidden z-50"
+                    className="absolute right-0 top-full mt-2 w-52 3xl:w-60 rounded-2xl overflow-hidden z-50"
                     style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border-default)', boxShadow: '0 16px 48px rgba(0,0,0,0.14)' }}
                 >
-                    {/* Identity */}
-                    <div className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                        {image ? (
-                            <Image src={image} alt={displayName} width={32} height={32}
-                                className="rounded-lg object-cover shrink-0"
-                                style={{ border: '1px solid var(--border-default)' }} />
-                        ) : (
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
-                                style={{ backgroundColor: 'var(--turquoise-10)', border: '1px solid var(--turquoise-22)', color: 'var(--turquoise)' }}>
-                                {initials}
-                            </div>
-                        )}
-                        <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-bold truncate" style={{ color: 'var(--text-secondary)' }}>{displayName}</span>
-                            <span className="text-[0.62rem] font-medium truncate" style={{ color: 'var(--text-tertiary)' }}>{email}</span>
+                    <div className="flex justify-center gap-3 px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <div className="flex flex-col items-center">
+                            <span className="text-caption 3xl:text-body font-bold truncate" style={{ color: 'var(--text-secondary)' }}>
+                                {displayName}
+                            </span>
+                            <span className="text-small 3xl:text-caption font-medium truncate" style={{ color: 'var(--text-tertiary)' }}>{email}</span>
                         </div>
                     </div>
 
-                    {/* Menu items */}
-                    <div className="p-1">
-                        <button
+                    <div className="py-2 flex justify-center">
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            icon={<User size={14} strokeWidth={1.75} />}
                             onClick={() => { setOpen(false); router.push('/dashboard') }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors duration-150 focus:outline-none"
-                            style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer' }}
-                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--surface-raised)'; e.currentTarget.style.color = 'var(--text)' }}
-                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)' }}
                         >
-                            <LayoutDashboard size={14} strokeWidth={1.75} />
-                            <span className="text-sm font-semibold">Dashboard</span>
-                        </button>
+                            Profile
+                        </Button>
                     </div>
 
-                    {/* Sign out */}
-                    <div className="p-1" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                        <button
+                    <div className="p-1 flex justify-center" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            icon={<LogOut size={14} strokeWidth={1.75} />}
                             onClick={() => signOut({ callbackUrl: '/' })}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors duration-150 focus:outline-none"
-                            style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer' }}
-                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.06)'; e.currentTarget.style.color = '#ef4444' }}
-                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)' }}
                         >
-                            <LogOut size={14} strokeWidth={1.75} />
-                            <span className="text-sm font-semibold">Sign out</span>
-                        </button>
+                            Sign Out
+                        </Button>
                     </div>
                 </div>
             )}
@@ -131,24 +121,22 @@ function UserMenu({ name, email, image }: { name?: string | null; email?: string
     )
 }
 
-// Navbar
-
 const Navbar = () => {
-    const router            = useRouter()
-    const pathname          = usePathname()
+    const router = useRouter()
+    const pathname = usePathname()
     const { isDark, toggleTheme } = useTheme()
     const { data: session, status } = useSession()
-    const isSignedIn        = status === 'authenticated'
-    const isLoading         = status === 'loading'
+    const isSignedIn = status === 'authenticated'
+    const isLoading = status === 'loading'
 
     const isActive = (href: string) =>
         href === '/' ? pathname === '/' : pathname.startsWith(href)
 
     return (
-        <header className="fixed top-0 inset-x-0 z-50 flex justify-center pt-5 px-4 pointer-events-none">
+        <header className="fixed top-0 inset-x-0 z-50 flex justify-center pt-[2%] px-4 pointer-events-none">
             <nav
                 suppressHydrationWarning
-                className="pointer-events-auto w-full max-w-275 flex items-center justify-between px-5 py-3 rounded-2xl"
+                className="pointer-events-auto w-3/4 max-w-350 flex items-center justify-between px-5 py-3 3xl:px-8 3xl:py-4 rounded-2xl"
                 style={{
                     backgroundColor: 'var(--bg)',
                     border: '1px solid var(--border-default)',
@@ -157,13 +145,13 @@ const Navbar = () => {
                         : '0 0 0 1px var(--border-subtle), 0 8px 32px rgba(2,2,2,0.08)',
                 }}
             >
-                {/* ── Left — logo + links ── */}
-                <div className="flex items-center gap-8">
-                    <Link href="/" className="shrink-0">
+
+                <div className="flex items-center gap-8 ">
+                    <Link href="/" className="relative shrink-0 w-10 h-10">
                         <Image
                             src={isDark ? whiteLogo : blackLogo}
                             alt="Frameflow"
-                            width={32} height={32}
+                            fill
                             priority
                         />
                     </Link>
@@ -174,14 +162,14 @@ const Navbar = () => {
                         {links.map(link => {
                             const active = isActive(link.href)
                             return (
-                                <li key={link.name}>
+                                <li key={link.name} className="text-caption 3xl:text-lead ">
                                     <Link
                                         href={link.href}
-                                        className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200"
+                                        className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-semibold transition-all duration-200"
                                         style={{
-                                            color:           active ? 'var(--turquoise)' : 'var(--text-tertiary)',
-                                            backgroundColor: active ? 'var(--turquoise-8)' : 'transparent',
-                                            textDecoration:  'none',
+                                            color: active ? 'var(--accent)' : 'var(--text-tertiary)',
+                                            backgroundColor: active ? 'var(--accent-8)' : 'transparent',
+                                            textDecoration: 'none',
                                         }}
                                         onMouseEnter={e => { if (!active) { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.backgroundColor = 'var(--surface-raised)' } }}
                                         onMouseLeave={e => { if (!active) { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.backgroundColor = 'transparent' } }}
@@ -194,38 +182,43 @@ const Navbar = () => {
                     </ul>
                 </div>
 
-                {/* ── Right — theme toggle + auth ── */}
                 <div className="flex items-center gap-3">
 
-                    {/* Theme toggle */}
                     <button
                         onClick={toggleTheme}
                         aria-label="Toggle theme"
-                        className="relative flex items-center h-8 w-18 rounded-lg cursor-pointer focus:outline-none"
+                        className="relative flex items-center h-8 w-18 3xl:h-10 3xl:w-20 rounded-xl cursor-pointer focus:outline-none"
                         style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}
                     >
                         <div
                             suppressHydrationWarning
-                            className="absolute top-0.75 bottom-0.75 w-[1.85rem] rounded-md transition-all duration-300 ease-in-out"
+                            className="absolute top-0.75 3xl:top-1 w-7 h-6 3xl:w-8 3xl:h-7 rounded-lg transition-all duration-300 ease-in-out"
                             style={{
-                                left: isDark ? 'calc(100% - 2.1rem)' : '3px',
+                                left: isDark ? 'calc(100% - 2rem)' : '3px',
                                 backgroundColor: 'var(--bg)',
-                                border:          '1px solid var(--border-strong)',
-                                boxShadow:       '0 1px 3px rgba(0,0,0,0.12)',
+                                border: '1px solid var(--border-strong)',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
                             }}
                         />
-                        <div className="relative w-full flex items-center justify-between px-2">
-                            <Sun  size={13} suppressHydrationWarning style={{ color: 'var(--text)', opacity: isDark ? 0.3 : 1,   transition: 'opacity 0.2s ease' }} />
-                            <Moon size={13} suppressHydrationWarning style={{ color: 'var(--text)', opacity: isDark ? 1   : 0.3, transition: 'opacity 0.2s ease' }} />
+                        <div 
+                            className="relative w-full flex items-center justify-around "
+                        >
+                            <Sun 
+                                size={13}
+                                suppressHydrationWarning 
+                                style={{ color: 'var(--text)', opacity: isDark ? 0.3 : 1, transition: 'opacity 0.2s ease' }} 
+                            />
+                            <Moon 
+                                size={13} 
+                                suppressHydrationWarning 
+                                style={{ color: 'var(--text)', opacity: isDark ? 1 : 0.3, transition: 'opacity 0.2s ease' }} 
+                            />
                         </div>
                     </button>
 
-                    {/* Auth area */}
                     {isLoading ? (
-                        // Skeleton while session loads — prevents layout shift
                         <div className="w-24 h-8 rounded-xl animate-pulse" style={{ backgroundColor: 'var(--surface-raised)' }} />
                     ) : isSignedIn ? (
-                        // Signed in — show Dashboard link + avatar dropdown
                         <div className="flex items-center gap-2">
                             <Button
                                 variant="primary"
@@ -242,7 +235,6 @@ const Navbar = () => {
                             />
                         </div>
                     ) : (
-                        // Not signed in — show Sign In + Get Started
                         <div className="flex items-center gap-2">
                             <Button
                                 variant="ghost"

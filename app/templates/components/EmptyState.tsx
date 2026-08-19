@@ -26,9 +26,9 @@ export default function EmptyState({ clearAllFilters }: EmptyStateProps) {
                 onClick={clearAllFilters}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-opacity"
                 style={{
-                    backgroundColor: 'var(--turquoise)',
+                    backgroundColor: 'var(--accent)',
                     color:           '#fff',
-                    boxShadow:       '0 4px 14px var(--turquoise-22)',
+                    boxShadow:       '0 4px 14px var(--accent-22)',
                     border:          'none',
                     cursor:          'pointer',
                 }}

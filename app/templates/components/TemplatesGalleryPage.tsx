@@ -16,9 +16,9 @@ function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }
         <div
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
             style={{
-                backgroundColor: 'var(--turquoise-8)',
-                border:          '1px solid var(--turquoise-22)',
-                color:           'var(--turquoise)',
+                backgroundColor: 'var(--accent-8)',
+                border:          '1px solid var(--accent-22)',
+                color:           'var(--accent)',
             }}
         >
             {label}
@@ -104,9 +104,9 @@ export default function TemplatesGalleryPage() {
                                 onClick={() => setShowFilters(f => !f)}
                                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
                                 style={{
-                                    backgroundColor: showFilters ? 'var(--turquoise-8)'      : 'var(--surface-raised)',
-                                    border:          showFilters ? '1px solid var(--turquoise-22)' : '1px solid var(--border-default)',
-                                    color:           showFilters ? 'var(--turquoise)'         : 'var(--text-tertiary)',
+                                    backgroundColor: showFilters ? 'var(--accent-8)'      : 'var(--surface-raised)',
+                                    border:          showFilters ? '1px solid var(--accent-22)' : '1px solid var(--border-default)',
+                                    color:           showFilters ? 'var(--accent)'         : 'var(--text-tertiary)',
                                     cursor: 'pointer',
                                 }}
                                 onMouseEnter={e => { if (!showFilters) { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.color = 'var(--text)' } }}
@@ -117,7 +117,7 @@ export default function TemplatesGalleryPage() {
                                 {activeFilters.length > 0 && (
                                     <span
                                         className="flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold"
-                                        style={{ backgroundColor: 'var(--turquoise)', color: '#fff' }}
+                                        style={{ backgroundColor: 'var(--accent)', color: '#fff' }}
                                     >
                                         {activeFilters.length}
                                     </span>

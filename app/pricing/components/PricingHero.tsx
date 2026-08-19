@@ -36,7 +36,7 @@ const PricingHero = () => {
                 aria-hidden
                 className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
                 style={{
-                    background: 'radial-gradient(circle, var(--turquoise-10) 0%, transparent 65%)',
+                    background: 'radial-gradient(circle, var(--accent-10) 0%, transparent 65%)',
                     filter: 'blur(48px)',
                 }}
             />
@@ -50,7 +50,7 @@ const PricingHero = () => {
                     style={{ fontSize: 'clamp(2.75rem, 6vw, 4.75rem)', lineHeight: 1.08, letterSpacing: '-0.025em' }}
                 >
                     Simple,{' '}
-                    <span className="italic text-turquoise">transparent</span>{' '}
+                    <span className="italic text-accent">transparent</span>{' '}
                     pricing.
                 </h1>
 

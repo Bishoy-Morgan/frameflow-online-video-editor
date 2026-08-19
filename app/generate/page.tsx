@@ -7,6 +7,7 @@ import {
     Pencil, Download, ArrowLeft, AlertCircle,
     Clapperboard, CheckCircle2,
 } from 'lucide-react'
+import { getMoodColor } from '@/lib/constants/moods'
 
 
 type Scene = {
@@ -27,20 +28,6 @@ type Project = {
     aiDuration:  string
     scenes:      Scene[]
 }
-
-
-const moodColors: Record<string, { bg: string; text: string; border: string }> = {
-    Uplifting:  { bg: 'rgba(251,191,36,0.08)',  text: '#fbbf24', border: 'rgba(251,191,36,0.22)' },
-    Dramatic:   { bg: 'rgba(239,68,68,0.08)',   text: '#ef4444', border: 'rgba(239,68,68,0.22)'  },
-    Calm:       { bg: 'rgba(99,102,241,0.08)',  text: '#818cf8', border: 'rgba(99,102,241,0.22)' },
-    Energetic:  { bg: 'rgba(249,115,22,0.08)',  text: '#fb923c', border: 'rgba(249,115,22,0.22)' },
-    Melancholic:{ bg: 'rgba(148,163,184,0.08)', text: '#94a3b8', border: 'rgba(148,163,184,0.22)'},
-    Mysterious: { bg: 'rgba(167,139,250,0.08)', text: '#a78bfa', border: 'rgba(167,139,250,0.22)'},
-    Cinematic:  { bg: 'var(--turquoise-8)',      text: 'var(--turquoise)', border: 'var(--turquoise-22)' },
-    Playful:    { bg: 'rgba(52,211,153,0.08)',  text: '#34d399', border: 'rgba(52,211,153,0.22)' },
-}
-
-const defaultMood = { bg: 'var(--surface-raised)', text: 'var(--text-tertiary)', border: 'var(--border-subtle)' }
 
 
 const loadingSteps = [
@@ -69,12 +56,12 @@ function LoadingScreen({ prompt }: { prompt: string }) {
                 <div
                     className="w-24 h-24 rounded-full"
                     style={{
-                        background: 'radial-gradient(circle, var(--turquoise-22) 0%, var(--turquoise-8) 60%, transparent 100%)',
+                        background: 'radial-gradient(circle, var(--accent-22) 0%, var(--accent-8) 60%, transparent 100%)',
                         animation: 'pulse 1.8s ease-in-out infinite',
                     }}
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <Wand2 size={32} style={{ color: 'var(--turquoise)' }} strokeWidth={1.5} />
+                    <Wand2 size={32} style={{ color: 'var(--accent)' }} strokeWidth={1.5} />
                 </div>
             </div>
 
@@ -100,7 +87,7 @@ function LoadingScreen({ prompt }: { prompt: string }) {
                         style={{
                             width:  i <= step ? '20px' : '6px',
                             height: '6px',
-                            backgroundColor: i <= step ? 'var(--turquoise)' : 'var(--border-default)',
+                            backgroundColor: i <= step ? 'var(--accent)' : 'var(--border-default)',
                         }}
                     />
                 ))}
@@ -123,9 +110,9 @@ function ErrorScreen({ message, onRetry }: { message: string; onRetry: () => voi
         <div className="flex flex-col items-center justify-center min-h-screen gap-6 px-6">
             <div
                 className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                style={{ backgroundColor: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.22)' }}
+                style={{ backgroundColor: 'var(--error-8)', border: '1px solid var(--error-22)' }}
             >
-                <AlertCircle size={28} style={{ color: '#f87171' }} strokeWidth={1.5} />
+                <AlertCircle size={28} style={{ color: 'var(--error-fg)' }} strokeWidth={1.5} />
             </div>
             <div className="flex flex-col items-center gap-2 text-center">
                 <p className="text-sm font-bold" style={{ color: 'var(--text)' }}>Generation failed</p>
@@ -144,7 +131,7 @@ function ErrorScreen({ message, onRetry }: { message: string; onRetry: () => voi
                 <button
                     onClick={onRetry}
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-opacity"
-                    style={{ backgroundColor: 'var(--turquoise)', color: '#fff' }}
+                    style={{ backgroundColor: 'var(--accent)', color: '#fff' }}
                     onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }}
                     onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
                 >
@@ -158,7 +145,7 @@ function ErrorScreen({ message, onRetry }: { message: string; onRetry: () => voi
 // ─── Scene card ───────────────────────────────────────────────────────────────
 
 function SceneCard({ scene, index }: { scene: Scene; index: number }) {
-    const mood = moodColors[scene.musicMood] ?? defaultMood
+    const mood = getMoodColor(scene.musicMood)
 
     return (
         <div
@@ -168,7 +155,7 @@ function SceneCard({ scene, index }: { scene: Scene; index: number }) {
                 border: '1px solid var(--border-default)',
             }}
             onMouseEnter={e => {
-                e.currentTarget.style.borderColor = 'var(--turquoise-22)'
+                e.currentTarget.style.borderColor = 'var(--accent-22)'
                 e.currentTarget.style.transform = 'translateY(-2px)'
                 e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.08)'
             }}
@@ -183,9 +170,9 @@ function SceneCard({ scene, index }: { scene: Scene; index: number }) {
                 <div
                     className="flex items-center gap-2 px-2.5 py-1 rounded-lg text-[11px] font-bold"
                     style={{
-                        backgroundColor: 'var(--turquoise-8)',
-                        border: '1px solid var(--turquoise-22)',
-                        color: 'var(--turquoise)',
+                        backgroundColor: 'var(--accent-8)',
+                        border: '1px solid var(--accent-22)',
+                        color: 'var(--accent)',
                     }}
                 >
                     <Clapperboard size={11} strokeWidth={2} />
@@ -259,9 +246,9 @@ function ReviewScreen({ project }: { project: Project }) {
                 <div className="flex items-center gap-3">
                     <div
                         className="w-7 h-7 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: 'var(--turquoise-8)', border: '1px solid var(--turquoise-22)' }}
+                        style={{ backgroundColor: 'var(--accent-8)', border: '1px solid var(--accent-22)' }}
                     >
-                        <Sparkles size={13} style={{ color: 'var(--turquoise)' }} strokeWidth={2} />
+                        <Sparkles size={13} style={{ color: 'var(--accent)' }} strokeWidth={2} />
                     </div>
                     <div>
                         <p className="text-sm font-bold" style={{ color: 'var(--text)' }}>{project.name}</p>
@@ -306,9 +293,9 @@ function ReviewScreen({ project }: { project: Project }) {
                         onClick={() => router.push(`/dashboard/projects/${project.id}/editor`)}
                         className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-opacity"
                         style={{
-                            backgroundColor: 'var(--turquoise)',
+                            backgroundColor: 'var(--accent)',
                             color: '#fff',
-                            boxShadow: '0 4px 14px var(--turquoise-22)',
+                            boxShadow: '0 4px 14px var(--accent-22)',
                         }}
                         onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }}
                         onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
@@ -326,16 +313,16 @@ function ReviewScreen({ project }: { project: Project }) {
                 <div
                     className="flex items-center gap-3 px-5 py-4 rounded-2xl"
                     style={{
-                        backgroundColor: 'var(--turquoise-8)',
-                        border: '1px solid var(--turquoise-22)',
+                        backgroundColor: 'var(--accent-8)',
+                        border: '1px solid var(--accent-22)',
                     }}
                 >
-                    <CheckCircle2 size={18} style={{ color: 'var(--turquoise)' }} strokeWidth={2} />
+                    <CheckCircle2 size={18} style={{ color: 'var(--accent)' }} strokeWidth={2} />
                     <div>
-                        <p className="text-sm font-bold" style={{ color: 'var(--turquoise)' }}>
+                        <p className="text-sm font-bold" style={{ color: 'var(--accent)' }}>
                             Your video project is ready!
                         </p>
-                        <p className="text-xs" style={{ color: 'var(--turquoise)', opacity: 0.75 }}>
+                        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.75 }}>
                             AI generated {project.scenes.length} scenes based on your prompt. Review them below then jump into the editor.
                         </p>
                     </div>
@@ -344,8 +331,8 @@ function ReviewScreen({ project }: { project: Project }) {
                 {/* Prompt recap */}
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
-                        <div className="w-5 h-px" style={{ backgroundColor: 'var(--turquoise)' }} />
-                        <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase" style={{ color: 'var(--turquoise)' }}>
+                        <div className="w-5 h-px" style={{ backgroundColor: 'var(--accent)' }} />
+                        <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase" style={{ color: 'var(--accent)' }}>
                             Your Prompt
                         </span>
                     </div>
@@ -365,8 +352,8 @@ function ReviewScreen({ project }: { project: Project }) {
                 {/* Scene cards */}
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-5 h-px" style={{ backgroundColor: 'var(--turquoise)' }} />
-                        <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase" style={{ color: 'var(--turquoise)' }}>
+                        <div className="w-5 h-px" style={{ backgroundColor: 'var(--accent)' }} />
+                        <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase" style={{ color: 'var(--accent)' }}>
                             Scene Breakdown · {project.scenes.length} Scenes
                         </span>
                     </div>
@@ -398,9 +385,9 @@ function ReviewScreen({ project }: { project: Project }) {
                         onClick={() => router.push(`/dashboard/projects/${project.id}/editor`)}
                         className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-opacity"
                         style={{
-                            backgroundColor: 'var(--turquoise)',
+                            backgroundColor: 'var(--accent)',
                             color: '#fff',
-                            boxShadow: '0 4px 20px var(--turquoise-22)',
+                            boxShadow: '0 4px 20px var(--accent-22)',
                         }}
                         onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }}
                         onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}

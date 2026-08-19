@@ -41,22 +41,22 @@ const ReadyWhenYouAre = () => {
                 aria-hidden
                 className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
                 style={{
-                    background: 'radial-gradient(circle, var(--turquoise-16) 0%, transparent 65%)',
+                    background: 'radial-gradient(circle, var(--accent-16) 0%, transparent 65%)',
                     filter: 'blur(40px)',
                 }}
             />
 
             {/* Top separator */}
-            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
+            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
 
             <div className="container relative z-10 flex flex-col items-center text-center gap-10">
 
                 {/* Eyebrow */}
                 <div
-                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge-turquoise"
+                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge-accent"
                 >
-                    <span className="w-[7px] h-[7px] rounded-full bg-turquoise shadow-turquoise" style={{ animation: 'pulse-dot 2s ease-in-out infinite' }} />
-                    <span className="text-xs font-semibold tracking-widest uppercase text-turquoise">
+                    <span className="w-[7px] h-[7px] rounded-full bg-accent shadow-accent" style={{ animation: 'pulse-dot 2s ease-in-out infinite' }} />
+                    <span className="text-xs font-semibold tracking-widest uppercase text-accent">
                         No installation required
                     </span>
                 </div>
@@ -68,7 +68,7 @@ const ReadyWhenYouAre = () => {
                     style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
                 >
                     Ready{' '}
-                    <span className="italic text-turquoise">when</span>{' '}
+                    <span className="italic text-accent">when</span>{' '}
                     you are.
                 </h2>
 

@@ -72,9 +72,9 @@ function AiChat({ projectName, prompt, scenes }: { projectName: string; prompt: 
                     <div key={i} className={`flex flex-col gap-1 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                         <div className="relative max-w-[90%] px-3 py-2.5 rounded-xl text-xs leading-relaxed group"
                             style={{
-                                backgroundColor: msg.role === 'user' ? 'var(--turquoise-8)'           : 'var(--surface-raised)',
-                                border:          msg.role === 'user' ? '1px solid var(--turquoise-22)' : '1px solid var(--border-default)',
-                                color:           msg.role === 'user' ? 'var(--turquoise)'              : 'var(--text-secondary)',
+                                backgroundColor: msg.role === 'user' ? 'var(--accent-8)'           : 'var(--surface-raised)',
+                                border:          msg.role === 'user' ? '1px solid var(--accent-22)' : '1px solid var(--border-default)',
+                                color:           msg.role === 'user' ? 'var(--accent)'              : 'var(--text-secondary)',
                             }}>
                             <span dangerouslySetInnerHTML={{ __html: msg.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
                             {msg.role === 'assistant' && (
@@ -104,7 +104,7 @@ function AiChat({ projectName, prompt, scenes }: { projectName: string; prompt: 
                     <button key={q} onClick={() => setInput(q)}
                         className="text-[10px] font-semibold px-2 py-1 rounded-md transition-colors"
                         style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', color: 'var(--text-tertiary)', cursor: 'pointer' }}
-                        onMouseEnter={e => { e.currentTarget.style.color = 'var(--turquoise)'; e.currentTarget.style.borderColor = 'var(--turquoise-22)' }}
+                        onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--accent-22)' }}
                         onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.borderColor = 'var(--border-default)' }}>
                         {q}
                     </button>
@@ -122,7 +122,7 @@ function AiChat({ projectName, prompt, scenes }: { projectName: string; prompt: 
                     <button onClick={send} disabled={!input.trim() || loading}
                         className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                         style={{
-                            backgroundColor: input.trim() && !loading ? 'var(--turquoise)' : 'var(--bg)',
+                            backgroundColor: input.trim() && !loading ? 'var(--accent)' : 'var(--bg)',
                             border:          `1px solid ${input.trim() && !loading ? 'transparent' : 'var(--border-default)'}`,
                             cursor:          input.trim() && !loading ? 'pointer' : 'not-allowed',
                         }}>
@@ -163,8 +163,8 @@ function AutoCaptions({ projectId, scenes }: { projectId: string; scenes: Scene[
             {captions.length === 0 ? (
                 <div className="flex flex-col items-center gap-3 py-4">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: 'var(--turquoise-8)', border: '1px solid var(--turquoise-22)' }}>
-                        <Captions size={18} style={{ color: 'var(--turquoise)' }} strokeWidth={1.5} />
+                        style={{ backgroundColor: 'var(--accent-8)', border: '1px solid var(--accent-22)' }}>
+                        <Captions size={18} style={{ color: 'var(--accent)' }} strokeWidth={1.5} />
                     </div>
                     <div className="text-center">
                         <p className="text-xs font-bold" style={{ color: 'var(--text)' }}>Auto-Captions</p>
@@ -175,7 +175,7 @@ function AutoCaptions({ projectId, scenes }: { projectId: string; scenes: Scene[
                     {error && <p className="text-[11px] text-red-400">{error}</p>}
                     <button onClick={generate} disabled={loading}
                         className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold"
-                        style={{ backgroundColor: 'var(--turquoise)', color: '#fff', border: 'none', cursor: loading ? 'wait' : 'pointer' }}
+                        style={{ backgroundColor: 'var(--accent)', color: '#fff', border: 'none', cursor: loading ? 'wait' : 'pointer' }}
                         onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
                         onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
                         {loading
@@ -189,7 +189,7 @@ function AutoCaptions({ projectId, scenes }: { projectId: string; scenes: Scene[
                         <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>
                             {captions.length} captions
                         </span>
-                        <button onClick={generate} style={{ background: 'none', border: 'none', color: 'var(--turquoise)', cursor: 'pointer' }}>
+                        <button onClick={generate} style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer' }}>
                             <RefreshCw size={11} />
                         </button>
                     </div>
@@ -197,7 +197,7 @@ function AutoCaptions({ projectId, scenes }: { projectId: string; scenes: Scene[
                         {captions.map((c, i) => (
                             <div key={i} className="flex gap-2 items-start px-2 py-1.5 rounded-lg"
                                 style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-subtle)' }}>
-                                <span className="text-[10px] font-mono shrink-0 mt-0.5 font-bold" style={{ color: 'var(--turquoise)', minWidth: '36px' }}>
+                                <span className="text-[10px] font-mono shrink-0 mt-0.5 font-bold" style={{ color: 'var(--accent)', minWidth: '36px' }}>
                                     {c.time}
                                 </span>
                                 <span className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{c.text}</span>
@@ -237,8 +237,8 @@ function SceneDetect({ projectId, scenes, onScenesUpdate }: {
         <div className="flex flex-col gap-3 p-3">
             <div className="flex flex-col items-center gap-3 py-4">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{ backgroundColor: 'var(--turquoise-8)', border: '1px solid var(--turquoise-22)' }}>
-                    <Scissors size={18} style={{ color: 'var(--turquoise)' }} strokeWidth={1.5} />
+                    style={{ backgroundColor: 'var(--accent-8)', border: '1px solid var(--accent-22)' }}>
+                    <Scissors size={18} style={{ color: 'var(--accent)' }} strokeWidth={1.5} />
                 </div>
                 <div className="text-center">
                     <p className="text-xs font-bold" style={{ color: 'var(--text)' }}>Scene Detection</p>
@@ -250,7 +250,7 @@ function SceneDetect({ projectId, scenes, onScenesUpdate }: {
                 {error && <p className="text-[11px] text-red-400">{error}</p>}
                 <button onClick={detect} disabled={loading}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold"
-                    style={{ backgroundColor: 'var(--turquoise)', color: '#fff', border: 'none', cursor: loading ? 'wait' : 'pointer' }}
+                    style={{ backgroundColor: 'var(--accent)', color: '#fff', border: 'none', cursor: loading ? 'wait' : 'pointer' }}
                     onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
                     onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
                     {loading
@@ -264,7 +264,7 @@ function SceneDetect({ projectId, scenes, onScenesUpdate }: {
                         <div key={s.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg"
                             style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-subtle)' }}>
                             <span className="text-[10px] font-bold w-5 text-center rounded-md py-0.5"
-                                style={{ backgroundColor: 'var(--turquoise-8)', color: 'var(--turquoise)' }}>{i + 1}</span>
+                                style={{ backgroundColor: 'var(--accent-8)', color: 'var(--accent)' }}>{i + 1}</span>
                             <span className="text-[11px] font-semibold truncate flex-1" style={{ color: 'var(--text-secondary)' }}>{s.title}</span>
                             <span className="text-[10px] font-mono shrink-0" style={{ color: 'var(--text-tertiary)' }}>{s.duration}s</span>
                         </div>
@@ -301,7 +301,7 @@ function ScriptToEdit({ projectId, onScenesUpdate }: { projectId: string; onScen
     return (
         <div className="flex flex-col gap-3 p-3">
             <div className="flex items-center gap-2">
-                <FileText size={14} style={{ color: 'var(--turquoise)' }} strokeWidth={1.75} />
+                <FileText size={14} style={{ color: 'var(--accent)' }} strokeWidth={1.75} />
                 <span className="text-xs font-bold" style={{ color: 'var(--text)' }}>Script → Edit Plan</span>
             </div>
             <p className="text-[11px]" style={{ color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
@@ -311,14 +311,14 @@ function ScriptToEdit({ projectId, onScenesUpdate }: { projectId: string; onScen
                 placeholder="Scene 1: Open with a close-up of the product on a dark surface…"
                 className="w-full resize-none text-xs rounded-xl p-3 outline-none"
                 style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', color: 'var(--text)', lineHeight: 1.6 }}
-                onFocus={e => e.currentTarget.style.borderColor = 'var(--turquoise-42)'}
+                onFocus={e => e.currentTarget.style.borderColor = 'var(--accent-42)'}
                 onBlur={e => e.currentTarget.style.borderColor = 'var(--border-default)'} />
             <div className="flex items-center justify-between">
                 <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>{script.length}/2000</span>
                 <button onClick={generate} disabled={!script.trim() || loading}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold"
                     style={{
-                        backgroundColor: script.trim() ? 'var(--turquoise)' : 'var(--surface-raised)',
+                        backgroundColor: script.trim() ? 'var(--accent)' : 'var(--surface-raised)',
                         border:          `1px solid ${script.trim() ? 'transparent' : 'var(--border-default)'}`,
                         color:           script.trim() ? '#fff' : 'var(--text-tertiary)',
                         cursor:          script.trim() && !loading ? 'pointer' : 'not-allowed',
@@ -358,12 +358,12 @@ export default function AISidebar({
             <div className="flex items-center gap-2 px-3 shrink-0"
                 style={{ height: '44px', borderBottom: '1px solid var(--border-default)' }}>
                 <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: 'var(--turquoise-8)', border: '1px solid var(--turquoise-22)' }}>
-                    <Sparkles size={12} style={{ color: 'var(--turquoise)' }} />
+                    style={{ backgroundColor: 'var(--accent-8)', border: '1px solid var(--accent-22)' }}>
+                    <Sparkles size={12} style={{ color: 'var(--accent)' }} />
                 </div>
                 <span className="text-xs font-bold" style={{ color: 'var(--text)' }}>AI Assistant</span>
                 <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-md"
-                    style={{ backgroundColor: 'var(--turquoise-8)', color: 'var(--turquoise)', border: '1px solid var(--turquoise-22)' }}>
+                    style={{ backgroundColor: 'var(--accent-8)', color: 'var(--accent)', border: '1px solid var(--accent-22)' }}>
                     Groq
                 </span>
             </div>
@@ -378,11 +378,11 @@ export default function AISidebar({
                             style={{
                                 background:   'none',
                                 border:       'none',
-                                borderBottom: active ? '2px solid var(--turquoise)' : '2px solid transparent',
+                                borderBottom: active ? '2px solid var(--accent)' : '2px solid transparent',
                                 cursor:       'pointer',
                             }}>
-                            <Icon size={12} style={{ color: active ? 'var(--turquoise)' : 'var(--text-tertiary)' }} strokeWidth={active ? 2 : 1.75} />
-                            <span className="text-[9px] font-bold" style={{ color: active ? 'var(--turquoise)' : 'var(--text-tertiary)' }}>{label}</span>
+                            <Icon size={12} style={{ color: active ? 'var(--accent)' : 'var(--text-tertiary)' }} strokeWidth={active ? 2 : 1.75} />
+                            <span className="text-[9px] font-bold" style={{ color: active ? 'var(--accent)' : 'var(--text-tertiary)' }}>{label}</span>
                         </button>
                     )
                 })}

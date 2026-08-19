@@ -7,25 +7,25 @@ import { SectionLabel, SectionSeparator } from './FeaturesHero'
 
 const outcomes = [
     {
-        icon: <Zap size={18} color="var(--turquoise)" strokeWidth={1.5} />,
+        icon: <Zap size={18} color="var(--accent)" strokeWidth={1.5} />,
         stat: '< 2s',
         label: 'Instant project loading',
         description: 'Projects open immediately. No splash screen, no spinner spiral.',
     },
     {
-        icon: <MousePointer size={18} color="var(--turquoise)" strokeWidth={1.5} />,
+        icon: <MousePointer size={18} color="var(--accent)" strokeWidth={1.5} />,
         stat: '60fps',
         label: 'Smooth timeline interactions',
         description: 'Scrub, trim, drag — the timeline keeps up with you.',
     },
     {
-        icon: <Cpu size={18} color="var(--turquoise)" strokeWidth={1.5} />,
+        icon: <Cpu size={18} color="var(--accent)" strokeWidth={1.5} />,
         stat: '0ms',
         label: 'Optimized rendering pipeline',
         description: 'Client-side rendering with minimal overhead. No round-trips for previews.',
     },
     {
-        icon: <Download size={18} color="var(--turquoise)" strokeWidth={1.5} />,
+        icon: <Download size={18} color="var(--accent)" strokeWidth={1.5} />,
         stat: '0kb',
         label: 'No installation required',
         description: 'Open a tab. Start editing. Ship. Nothing to download or configure.',
@@ -65,9 +65,9 @@ const OutcomeCard = ({
             onClick={onClick}
             className="group flex items-start gap-5 p-6 rounded-xl cursor-pointer transition-all duration-200"
             style={{
-                border: `1px solid ${isActive ? 'var(--turquoise-42)' : 'var(--text-10)'}`,
-                backgroundColor: isActive ? 'var(--turquoise-6)' : 'var(--text-5)',
-                boxShadow: isActive ? '0 0 24px var(--turquoise-8)' : 'none',
+                border: `1px solid ${isActive ? 'var(--accent-42)' : 'var(--text-10)'}`,
+                backgroundColor: isActive ? 'var(--accent-6)' : 'var(--text-5)',
+                boxShadow: isActive ? '0 0 24px var(--accent-8)' : 'none',
             }}
         >
             {/* Icon */}
@@ -79,7 +79,7 @@ const OutcomeCard = ({
             <div className="flex flex-col gap-1 min-w-0">
                 <div className="flex items-baseline gap-3">
                     <span
-                        className="font-normal leading-none text-turquoise"
+                        className="font-normal leading-none text-accent"
                         style={{ fontFamily: 'var(--font-dm-serif-display), serif', fontSize: '1.5rem' }}
                     >
                         {outcome.stat}
@@ -106,7 +106,7 @@ const OutcomeCard = ({
 
             {/* Active dot */}
             <div
-                className="dot-turquoise shrink-0 ml-auto self-center transition-opacity duration-200"
+                className="dot-accent shrink-0 ml-auto self-center transition-opacity duration-200"
                 style={{ opacity: isActive ? 1 : 0 }}
             />
         </div>
@@ -137,9 +137,9 @@ const FlowViz = ({ activeIndex }: { activeIndex: number }) => (
                             <div
                                 className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300"
                                 style={{
-                                    backgroundColor: done ? 'var(--turquoise)' : 'var(--text-8)',
-                                    border: `2px solid ${active ? 'var(--turquoise)' : done ? 'var(--turquoise)' : 'var(--text-18)'}`,
-                                    boxShadow: active ? '0 0 12px var(--turquoise-45)' : 'none',
+                                    backgroundColor: done ? 'var(--accent)' : 'var(--text-8)',
+                                    border: `2px solid ${active ? 'var(--accent)' : done ? 'var(--accent)' : 'var(--text-18)'}`,
+                                    boxShadow: active ? '0 0 12px var(--accent-45)' : 'none',
                                     transform: active ? 'scale(1.15)' : 'scale(1)',
                                 }}
                             >
@@ -151,7 +151,7 @@ const FlowViz = ({ activeIndex }: { activeIndex: number }) => (
                             </div>
                             <span
                                 className="text-[0.65rem] font-bold tracking-wide uppercase transition-colors duration-300"
-                                style={{ color: done ? 'var(--turquoise)' : 'var(--text-35)' }}
+                                style={{ color: done ? 'var(--accent)' : 'var(--text-35)' }}
                             >
                                 {step}
                             </span>
@@ -162,7 +162,7 @@ const FlowViz = ({ activeIndex }: { activeIndex: number }) => (
                             <div
                                 className="flex-1 h-px mx-1 transition-all duration-500"
                                 style={{
-                                    backgroundColor: i < activeIndex ? 'var(--turquoise)' : 'var(--text-18)',
+                                    backgroundColor: i < activeIndex ? 'var(--accent)' : 'var(--text-18)',
                                     opacity: i < activeIndex ? 1 : 0.5,
                                 }}
                             />
@@ -182,13 +182,13 @@ const FlowViz = ({ activeIndex }: { activeIndex: number }) => (
                 <div key={label} className="flex flex-col gap-1.5">
                     <div className="flex items-center justify-between">
                         <span className="text-[0.72rem] font-semibold text-muted-55">{label}</span>
-                        <span className="text-[0.72rem] font-bold text-turquoise">
+                        <span className="text-[0.72rem] font-bold text-accent">
                             {value === 0 ? 'none' : `${value}%`}
                         </span>
                     </div>
                     <div className="h-1 rounded-full" style={{ backgroundColor: 'var(--text-8)' }}>
                         <div
-                            className="h-full rounded-full bg-turquoise transition-all duration-700"
+                            className="h-full rounded-full bg-accent transition-all duration-700"
                             style={{ width: `${value}%`, opacity: value === 0 ? 0 : 0.8 }}
                         />
                     </div>
@@ -229,12 +229,12 @@ const FastByDesign = () => {
             {/* Glow — center left */}
             <div
                 aria-hidden
-                className="pointer-events-none absolute top-[20%] -left-[8%] w-[480px] h-[480px] rounded-full bg-turquoise-8"
+                className="pointer-events-none absolute top-[20%] -left-[8%] w-[480px] h-[480px] rounded-full bg-accent-8"
                 style={{ filter: 'blur(80px)' }}
             />
 
             {/* Top separator */}
-            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
+            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
 
             <div className="container relative z-10">
 

@@ -45,13 +45,13 @@ const FrameflowChallenges = () => {
         aria-hidden
         className="pointer-events-none absolute top-[40%] left-[20%] w-[500px] h-[500px] rounded-full"
         style={{
-          background: 'radial-gradient(circle, var(--turquoise-10) 0%, transparent 65%)',
+          background: 'radial-gradient(circle, var(--accent-10) 0%, transparent 65%)',
           filter: 'blur(50px)',
         }}
       />
 
       {/* Top separator */}
-      <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
+      <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
 
       <div className="container relative z-10 max-w-[900px]">
 
@@ -68,7 +68,7 @@ const FrameflowChallenges = () => {
           }}
         >
           Video editing is still too{' '}
-          <span className="italic text-turquoise">complicated</span>{' '}
+          <span className="italic text-accent">complicated</span>{' '}
           for what it should be.
         </h2>
 
@@ -91,7 +91,7 @@ const FrameflowChallenges = () => {
             'Overloaded interfaces that confuse more than help',
           ].map((item) => (
             <div key={item} className="flex items-start gap-3 text-muted-48">
-              <div className="mt-2 w-1.5 h-1.5 rounded-full bg-turquoise" />
+              <div className="mt-2 w-1.5 h-1.5 rounded-full bg-accent" />
               <p className="leading-relaxed">{item}</p>
             </div>
           ))}

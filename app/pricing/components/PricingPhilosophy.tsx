@@ -50,10 +50,10 @@ const PricingPhilosophy = () => {
             <div
                 aria-hidden
                 className="pointer-events-none absolute -bottom-[15%] -left-[5%] w-[480px] h-[480px] rounded-full"
-                style={{ background: 'radial-gradient(circle, var(--turquoise-8) 0%, transparent 70%)', filter: 'blur(72px)' }}
+                style={{ background: 'radial-gradient(circle, var(--accent-8) 0%, transparent 70%)', filter: 'blur(72px)' }}
             />
 
-            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
+            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
 
             <div className="container relative z-10">
 
@@ -62,8 +62,8 @@ const PricingPhilosophy = () => {
                     {/* Left — headline */}
                     <div ref={headerRef} className="flex flex-col gap-5">
                         <div className="flex items-center gap-3">
-                            <div className="w-7 h-px bg-turquoise" />
-                            <span className="text-[0.7rem] font-bold tracking-[0.14em] uppercase text-turquoise">
+                            <div className="w-7 h-px bg-accent" />
+                            <span className="text-[0.7rem] font-bold tracking-[0.14em] uppercase text-accent">
                                 Pricing Philosophy
                             </span>
                         </div>
@@ -73,7 +73,7 @@ const PricingPhilosophy = () => {
                             style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}
                         >
                             Built to scale{' '}
-                            <span className="italic text-turquoise">with you.</span>
+                            <span className="italic text-accent">with you.</span>
                         </h2>
 
                         <p className="m-0 text-[0.9375rem] leading-relaxed text-tertiary" style={{ maxWidth: '420px' }}>
@@ -86,7 +86,7 @@ const PricingPhilosophy = () => {
                             className="inline-flex items-start gap-3 mt-2 px-5 py-4 rounded-xl"
                             style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border-default)' }}
                         >
-                            <div className="dot-turquoise mt-1 shrink-0" />
+                            <div className="dot-accent mt-1 shrink-0" />
                             <p className="m-0 text-sm font-semibold leading-relaxed text-secondary">
                                 No hidden fees. No long-term contracts.
                             </p>
@@ -111,7 +111,7 @@ const PricingPhilosophy = () => {
                                     style={{
                                         fontFamily: 'var(--font-dm-serif-display), serif',
                                         fontSize: '1.5rem',
-                                        color: 'var(--turquoise-fg)',
+                                        color: 'var(--accent-fg)',
                                     }}
                                 >
                                     0{i + 1}
@@ -144,7 +144,7 @@ const PricingPhilosophy = () => {
                         style={{
                             fontFamily: 'var(--font-dm-serif-display), serif',
                             fontSize: '4rem',
-                            color: 'var(--turquoise-fg)',
+                            color: 'var(--accent-fg)',
                             opacity: 0.4,
                         }}
                     >

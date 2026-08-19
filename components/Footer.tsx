@@ -53,7 +53,7 @@ const Footer = () => {
                     <div className="col-span-2 flex flex-col gap-5">
                         <Link href="/" style={{ textDecoration: 'none' }}>
                             <span
-                                className="font-normal text-turquoise"
+                                className="font-normal text-accent"
                                 style={{ fontFamily: 'var(--font-dm-serif-display), serif', fontSize: '1.5rem' }}
                             >
                                 Frameflow
@@ -77,9 +77,9 @@ const Footer = () => {
                                         color: 'var(--text-tertiary)',
                                     }}
                                     onMouseEnter={e => {
-                                        e.currentTarget.style.borderColor = 'var(--turquoise-42)'
-                                        e.currentTarget.style.backgroundColor = 'var(--turquoise-8)'
-                                        e.currentTarget.style.color = 'var(--turquoise)'
+                                        e.currentTarget.style.borderColor = 'var(--accent-42)'
+                                        e.currentTarget.style.backgroundColor = 'var(--accent-8)'
+                                        e.currentTarget.style.color = 'var(--accent)'
                                     }}
                                     onMouseLeave={e => {
                                         e.currentTarget.style.borderColor = 'var(--border-default)'
@@ -137,7 +137,7 @@ const Footer = () => {
                                 border: '1px solid var(--border-default)',
                                 color: 'var(--text)',
                             }}
-                            onFocus={e => e.currentTarget.style.borderColor = 'var(--turquoise-42)'}
+                            onFocus={e => e.currentTarget.style.borderColor = 'var(--accent-42)'}
                             onBlur={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
                         />
                         <Button variant="primary" size="sm">

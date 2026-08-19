@@ -61,12 +61,12 @@ function ProjectThumbnail({ project, size = 'md' }: { project: Project; size?: '
     return (
         <div
             className="relative w-full h-full flex items-center justify-center overflow-hidden"
-            style={{ background: 'linear-gradient(135deg, var(--turquoise-10) 0%, var(--turquoise-8) 100%)' }}
+            style={{ background: 'linear-gradient(135deg, var(--accent-10) 0%, var(--accent-8) 100%)' }}
         >
             <div
                 className="absolute inset-0"
                 style={{
-                    backgroundImage: 'radial-gradient(circle, var(--turquoise-22) 1px, transparent 1px)',
+                    backgroundImage: 'radial-gradient(circle, var(--accent-22) 1px, transparent 1px)',
                     backgroundSize: size === 'sm' ? '14px 14px' : '22px 22px',
                     opacity: 0.5,
                 }}
@@ -77,19 +77,19 @@ function ProjectThumbnail({ project, size = 'md' }: { project: Project; size?: '
                 style={{
                     width: size === 'sm' ? 48 : 80,
                     height: size === 'sm' ? 48 : 80,
-                    backgroundColor: 'var(--turquoise-22)',
+                    backgroundColor: 'var(--accent-22)',
                 }}
             />
 
             <Film
                 size={size === 'sm' ? 16 : 24}
-                style={{ color: 'var(--turquoise)', opacity: 0.8, position: 'relative', zIndex: 1 }}
+                style={{ color: 'var(--accent)', opacity: 0.8, position: 'relative', zIndex: 1 }}
                 strokeWidth={1.5}
             />
 
             <div
                 className="absolute bottom-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded"
-                style={{ backgroundColor: 'var(--turquoise-8)', color: 'var(--turquoise)', border: '1px solid var(--turquoise-22)' }}
+                style={{ backgroundColor: 'var(--accent-8)', color: 'var(--accent)', border: '1px solid var(--accent-22)' }}
             >
                 {project.aspectRatio ?? '16:9'}
             </div>
@@ -223,7 +223,7 @@ function ProjectCard({
                     <div
                         className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white transition-transform duration-200"
                         style={{
-                            backgroundColor: 'var(--turquoise)',
+                            backgroundColor: 'var(--accent)',
                             boxShadow:       '0 0 0 2px rgba(255,255,255,0.15), 0 8px 24px rgba(0,0,0,0.4)',
                             transform:       hovered ? 'scale(1)' : 'scale(0.92)',
                             border:          '1px solid rgba(255,255,255,0.2)',
@@ -418,7 +418,7 @@ function RenameModal({ project, onSave, onClose }: { project: Project; onSave: (
                         border:          '1px solid var(--border-default)',
                         color:           'var(--text)',
                     }}
-                    onFocus={e => e.currentTarget.style.borderColor = 'var(--turquoise-42)'}
+                    onFocus={e => e.currentTarget.style.borderColor = 'var(--accent-42)'}
                     onBlur={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
                 />
                 <div className="flex gap-2 justify-end">
@@ -433,7 +433,7 @@ function RenameModal({ project, onSave, onClose }: { project: Project; onSave: (
                         onClick={() => onSave(name)}
                         disabled={!name.trim()}
                         className="px-4 py-2 rounded-lg text-xs font-semibold text-white"
-                        style={{ backgroundColor: 'var(--turquoise)', opacity: name.trim() ? 1 : 0.5 }}
+                        style={{ backgroundColor: 'var(--accent)', opacity: name.trim() ? 1 : 0.5 }}
                     >
                         Save
                     </button>
@@ -477,7 +477,7 @@ function SortDropdown({
                     <button
                         onClick={() => { onChange(f, f === field ? (dir === 'asc' ? 'desc' : 'asc') : 'desc'); onClose() }}
                         className="flex-1 flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-left transition-colors"
-                        style={{ color: f === field ? 'var(--turquoise)' : 'var(--text-secondary)' }}
+                        style={{ color: f === field ? 'var(--accent)' : 'var(--text-secondary)' }}
                         onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--bg)'}
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
@@ -658,8 +658,8 @@ export default function ProjectsPage() {
                                 <span
                                     className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
                                     style={{
-                                        backgroundColor: filter === key ? 'var(--turquoise-8)' : 'var(--surface-raised)',
-                                        color: filter === key ? 'var(--turquoise)' : 'var(--text-tertiary)',
+                                        backgroundColor: filter === key ? 'var(--accent-8)' : 'var(--surface-raised)',
+                                        color: filter === key ? 'var(--accent)' : 'var(--text-tertiary)',
                                     }}
                                 >
                                     {counts[key]}
@@ -720,8 +720,8 @@ export default function ProjectsPage() {
                                     onClick={() => setViewMode(mode)}
                                     className="w-8 h-8 flex items-center justify-center transition-colors duration-150"
                                     style={{
-                                        backgroundColor: viewMode === mode ? 'var(--turquoise-8)' : 'var(--surface-raised)',
-                                        color: viewMode === mode ? 'var(--turquoise)' : 'var(--text-tertiary)',
+                                        backgroundColor: viewMode === mode ? 'var(--accent-8)' : 'var(--surface-raised)',
+                                        color: viewMode === mode ? 'var(--accent)' : 'var(--text-tertiary)',
                                     }}
                                 >
                                     <Icon size={13} strokeWidth={2} />
@@ -733,7 +733,7 @@ export default function ProjectsPage() {
                             onClick={handleNewProject}
                             disabled={creating}
                             className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all duration-150"
-                            style={{ backgroundColor: 'var(--turquoise)', boxShadow: '0 4px 12px var(--turquoise-22)' }}
+                            style={{ backgroundColor: 'var(--accent)', boxShadow: '0 4px 12px var(--accent-22)' }}
                             onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
                             onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                         >
@@ -792,13 +792,13 @@ export default function ProjectsPage() {
                     >
                         <div
                             className="w-14 h-14 rounded-2xl flex items-center justify-center"
-                            style={{ backgroundColor: 'var(--turquoise-8)', border: '1px solid var(--turquoise-22)' }}
+                            style={{ backgroundColor: 'var(--accent-8)', border: '1px solid var(--accent-22)' }}
                         >
                             {filter === 'trash'
-                                ? <Trash2 size={24} style={{ color: 'var(--turquoise)' }} />
+                                ? <Trash2 size={24} style={{ color: 'var(--accent)' }} />
                                 : filter === 'starred'
-                                ? <Star size={24} style={{ color: 'var(--turquoise)' }} />
-                                : <FolderOpen size={24} style={{ color: 'var(--turquoise)' }} />}
+                                ? <Star size={24} style={{ color: 'var(--accent)' }} />
+                                : <FolderOpen size={24} style={{ color: 'var(--accent)' }} />}
                         </div>
                         <div className="flex flex-col items-center gap-1 text-center">
                             <span className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>
@@ -824,7 +824,7 @@ export default function ProjectsPage() {
                             <button
                                 onClick={handleNewProject}
                                 className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold text-white mt-2"
-                                style={{ backgroundColor: 'var(--turquoise)', boxShadow: '0 4px 12px var(--turquoise-22)' }}
+                                style={{ backgroundColor: 'var(--accent)', boxShadow: '0 4px 12px var(--accent-22)' }}
                             >
                                 <FolderPlus size={13} strokeWidth={2.5} />
                                 New Project

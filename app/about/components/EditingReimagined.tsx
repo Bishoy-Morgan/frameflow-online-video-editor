@@ -46,13 +46,13 @@ const EditingReimagined = () => {
         aria-hidden
         className="pointer-events-none absolute top-[45%] right-[15%] w-[600px] h-[600px] rounded-full"
         style={{
-          background: 'radial-gradient(circle, var(--turquoise-14) 0%, transparent 65%)',
+          background: 'radial-gradient(circle, var(--accent-14) 0%, transparent 65%)',
           filter: 'blur(50px)',
         }}
       />
 
       {/* Top separator */}
-      <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
+      <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
 
       <div className="container relative z-10 max-w-[1000px]">
 
@@ -69,7 +69,7 @@ const EditingReimagined = () => {
           }}
         >
           So we built something{' '}
-          <span className="italic text-turquoise">different</span>.
+          <span className="italic text-accent">different</span>.
         </h2>
 
         {/* Description */}

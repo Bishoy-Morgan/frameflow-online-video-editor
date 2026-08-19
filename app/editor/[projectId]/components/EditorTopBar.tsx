@@ -49,9 +49,9 @@ function UserAvatar() {
         <div
           className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold"
           style={{
-            backgroundColor: 'var(--turquoise-16)',
-            border: '1px solid var(--turquoise-42)',
-            color: 'var(--turquoise)',
+            backgroundColor: 'var(--accent-16)',
+            border: '1px solid var(--accent-42)',
+            color: 'var(--accent)',
           }}
         >
           {initials}
@@ -111,7 +111,7 @@ export default function EditorTopBar({
             className="text-sm font-bold outline-none rounded-md px-2 py-0.5 min-w-0"
             style={{
               backgroundColor: 'var(--surface-raised)',
-              border: '1px solid var(--turquoise-42)',
+              border: '1px solid var(--accent-42)',
               color: 'var(--text)',
               maxWidth: '260px',
             }}
@@ -147,9 +147,9 @@ export default function EditorTopBar({
           title={aiOpen ? 'Hide AI sidebar' : 'Show AI sidebar'}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
           style={{
-            backgroundColor: aiOpen ? 'var(--turquoise-8)' : 'var(--surface-raised)',
-            border: aiOpen ? '1px solid var(--turquoise-42)' : '1px solid var(--border-default)',
-            color: aiOpen ? 'var(--turquoise)' : 'var(--text-tertiary)',
+            backgroundColor: aiOpen ? 'var(--accent-8)' : 'var(--surface-raised)',
+            border: aiOpen ? '1px solid var(--accent-42)' : '1px solid var(--border-default)',
+            color: aiOpen ? 'var(--accent)' : 'var(--text-tertiary)',
             cursor: 'pointer',
           }}
           onMouseEnter={e => {
@@ -193,11 +193,11 @@ export default function EditorTopBar({
           onClick={onExport}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-opacity"
           style={{
-            backgroundColor: 'var(--turquoise)',
+            backgroundColor: 'var(--accent)',
             border: 'none',
             color: '#fff',
             cursor: 'pointer',
-            boxShadow: '0 2px 8px var(--turquoise-22)',
+            boxShadow: '0 2px 8px var(--accent-22)',
           }}
           onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
           onMouseLeave={e => e.currentTarget.style.opacity = '1'}

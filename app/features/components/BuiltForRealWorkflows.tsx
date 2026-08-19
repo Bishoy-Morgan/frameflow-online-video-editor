@@ -7,21 +7,21 @@ import { SectionLabel, SectionSeparator } from './FeaturesHero'
 
 const useCases = [
     {
-        icon: <MonitorPlay size={18} color="var(--turquoise)" strokeWidth={1.5} />,
+        icon: <MonitorPlay size={18} color="var(--accent)" strokeWidth={1.5} />,
         type: 'Product Demos',
         headline: 'Show the product, not the process.',
         description:
             'Structure walkthroughs with precision. Trim dead air, sequence screens cleanly, layer in context — without fighting the tool.',
     },
     {
-        icon: <Megaphone size={18} color="var(--turquoise)" strokeWidth={1.5} />,
+        icon: <Megaphone size={18} color="var(--accent)" strokeWidth={1.5} />,
         type: 'Marketing Content',
         headline: 'Move fast. Stay on-brand.',
         description:
             'Build promotional cuts with consistent pacing. Organized asset management keeps your clips, music, and overlays in order across projects.',
     },
     {
-        icon: <Smartphone size={18} color="var(--turquoise)" strokeWidth={1.5} />,
+        icon: <Smartphone size={18} color="var(--accent)" strokeWidth={1.5} />,
         type: 'Social Videos',
         headline: 'Built for short-form. Scalable to more.',
         description:
@@ -37,10 +37,10 @@ const capabilities = [
 ]
 
 const tracks = [
-    { label: 'Video',   color: 'var(--turquoise)',    clips: [{ left: '0%',   width: '55%' }, { left: '58%', width: '38%' }] },
-    { label: 'Audio',   color: 'var(--turquoise-45)', clips: [{ left: '0%',   width: '90%' }] },
-    { label: 'Text',    color: 'var(--turquoise-22)', clips: [{ left: '10%',  width: '30%' }, { left: '60%', width: '20%' }] },
-    { label: 'Overlay', color: 'var(--turquoise-16)', clips: [{ left: '45%',  width: '25%' }] },
+    { label: 'Video',   color: 'var(--accent)',    clips: [{ left: '0%',   width: '55%' }, { left: '58%', width: '38%' }] },
+    { label: 'Audio',   color: 'var(--accent-45)', clips: [{ left: '0%',   width: '90%' }] },
+    { label: 'Text',    color: 'var(--accent-22)', clips: [{ left: '10%',  width: '30%' }, { left: '60%', width: '20%' }] },
+    { label: 'Overlay', color: 'var(--accent-16)', clips: [{ left: '45%',  width: '25%' }] },
 ]
 
 const playheadPositions = ['12%', '45%', '72%']
@@ -68,15 +68,15 @@ const TimelineMock = ({ activeIndex }: { activeIndex: number }) => {
                 {/* Playback controls */}
                 <div className="flex items-center gap-2">
                     {[4, 6, 4].map((w, i) => (
-                        <div key={i} className="h-1 rounded-full bg-turquoise-22" style={{ width: `${w * 4}px` }} />
+                        <div key={i} className="h-1 rounded-full bg-accent-22" style={{ width: `${w * 4}px` }} />
                     ))}
                     <div
                         className="w-5 h-5 rounded-full flex items-center justify-center ml-1"
-                        style={{ backgroundColor: 'var(--turquoise-10)', border: '1px solid var(--turquoise-22)' }}
+                        style={{ backgroundColor: 'var(--accent-10)', border: '1px solid var(--accent-22)' }}
                     >
                         <div
                             className="w-0 h-0"
-                            style={{ borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderLeft: '6px solid var(--turquoise)', marginLeft: '1px' }}
+                            style={{ borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderLeft: '6px solid var(--accent)', marginLeft: '1px' }}
                         />
                     </div>
                 </div>
@@ -89,11 +89,11 @@ const TimelineMock = ({ activeIndex }: { activeIndex: number }) => {
                 <div
                     ref={playheadRef}
                     className="absolute top-0 bottom-0 w-px z-10 pointer-events-none"
-                    style={{ left: '12%', backgroundColor: 'var(--turquoise)', boxShadow: '0 0 6px var(--turquoise-45)' }}
+                    style={{ left: '12%', backgroundColor: 'var(--accent)', boxShadow: '0 0 6px var(--accent-45)' }}
                 >
                     <div
                         className="w-2 h-2 rounded-full -translate-x-0.75 -translate-y-1"
-                        style={{ backgroundColor: 'var(--turquoise)' }}
+                        style={{ backgroundColor: 'var(--accent)' }}
                     />
                 </div>
 
@@ -149,8 +149,8 @@ const UseCaseTab = ({
         onClick={onClick}
         className="w-full text-left flex items-start gap-4 px-5 py-4 rounded-xl transition-all duration-200 cursor-pointer"
         style={{
-            border: `1px solid ${isActive ? 'var(--turquoise-42)' : 'var(--text-10)'}`,
-            backgroundColor: isActive ? 'var(--turquoise-6)' : 'transparent',
+            border: `1px solid ${isActive ? 'var(--accent-42)' : 'var(--text-10)'}`,
+            backgroundColor: isActive ? 'var(--accent-6)' : 'transparent',
             outline: 'none',
         }}
     >
@@ -160,7 +160,7 @@ const UseCaseTab = ({
         <div className="flex flex-col gap-1 min-w-0">
             <span
                 className="text-[0.68rem] font-bold tracking-widest uppercase transition-colors duration-200"
-                style={{ color: isActive ? 'var(--turquoise)' : 'var(--text-35)' }}
+                style={{ color: isActive ? 'var(--accent)' : 'var(--text-35)' }}
             >
                 {useCase.type}
             </span>
@@ -221,11 +221,11 @@ const BuiltForRealWorkflows = () => {
 
             <div
                 aria-hidden
-                className="pointer-events-none absolute -top-[10%] -right-[5%] w-125 h-125 rounded-full bg-turquoise-8"
+                className="pointer-events-none absolute -top-[10%] -right-[5%] w-125 h-125 rounded-full bg-accent-8"
                 style={{ filter: 'blur(80px)' }}
             />
 
-            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
+            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
 
             <div className="container relative z-10">
 
@@ -267,7 +267,7 @@ const BuiltForRealWorkflows = () => {
                                         key={cap}
                                         className="flex items-center gap-2 text-[0.8rem] font-semibold text-muted-72"
                                     >
-                                        <span className="w-1 h-1 rounded-full shrink-0 bg-turquoise shadow-turquoise" />
+                                        <span className="w-1 h-1 rounded-full shrink-0 bg-accent shadow-accent" />
                                         {cap}
                                     </li>
                                 ))}
@@ -281,9 +281,9 @@ const BuiltForRealWorkflows = () => {
 
                         <div
                             className="px-6 py-4 rounded-xl flex items-start gap-3"
-                            style={{ border: '1px solid var(--turquoise-20)', backgroundColor: 'var(--turquoise-4)' }}
+                            style={{ border: '1px solid var(--accent-20)', backgroundColor: 'var(--accent-4)' }}
                         >
-                            <div className="dot-turquoise mt-1 shrink-0" />
+                            <div className="dot-accent mt-1 shrink-0" />
                             <p className="m-0 text-[0.875rem] leading-relaxed text-muted-65 font-medium">
                                 Structured editing for people who know what they want to make — and need a tool that stays out of the way.
                             </p>

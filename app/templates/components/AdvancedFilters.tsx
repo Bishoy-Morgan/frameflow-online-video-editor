@@ -40,9 +40,9 @@ function FilterGroup<T extends string>({
                             onClick={() => onChange(option)}
                             className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-150"
                             style={{
-                                backgroundColor: active ? 'var(--turquoise-8)'   : 'var(--bg)',
-                                border:          active ? '1px solid var(--turquoise-42)' : '1px solid var(--border-default)',
-                                color:           active ? 'var(--turquoise)'     : 'var(--text-tertiary)',
+                                backgroundColor: active ? 'var(--accent-8)'   : 'var(--bg)',
+                                border:          active ? '1px solid var(--accent-42)' : '1px solid var(--border-default)',
+                                color:           active ? 'var(--accent)'     : 'var(--text-tertiary)',
                                 cursor: 'pointer',
                             }}
                             onMouseEnter={e => { if (!active) { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.color = 'var(--text)' } }}

@@ -67,7 +67,7 @@ function UserDropdown({ initials, image, name, email, isAdmin, projectCount }: {
                 ) : (
                     <div
                         className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold shrink-0"
-                        style={{ backgroundColor: 'var(--turquoise-10)', border: '1px solid var(--turquoise-22)', color: 'var(--turquoise)' }}
+                        style={{ backgroundColor: 'var(--accent-10)', border: '1px solid var(--accent-22)', color: 'var(--accent)' }}
                     >
                         {initials}
                     </div>
@@ -79,7 +79,7 @@ function UserDropdown({ initials, image, name, email, isAdmin, projectCount }: {
                         <span className="text-xs font-bold text-secondary">{name}</span>
                         {isAdmin && (
                             <span className="text-[0.5rem] font-bold tracking-wider uppercase px-1 py-0.5 rounded"
-                                style={{ backgroundColor: 'var(--turquoise-10)', border: '1px solid var(--turquoise-22)', color: 'var(--turquoise)' }}
+                                style={{ backgroundColor: 'var(--accent-10)', border: '1px solid var(--accent-22)', color: 'var(--accent)' }}
                             >
                                 Admin
                             </span>
@@ -122,7 +122,7 @@ function UserDropdown({ initials, image, name, email, isAdmin, projectCount }: {
                         ) : (
                             <div
                                 className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
-                                style={{ backgroundColor: 'var(--turquoise-10)', border: '1px solid var(--turquoise-22)', color: 'var(--turquoise)' }}
+                                style={{ backgroundColor: 'var(--accent-10)', border: '1px solid var(--accent-22)', color: 'var(--accent)' }}
                             >
                                 {initials}
                             </div>

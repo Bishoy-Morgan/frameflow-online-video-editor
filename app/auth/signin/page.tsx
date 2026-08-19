@@ -65,7 +65,7 @@ export default function SignInPage() {
                 <div
                     aria-hidden
                     className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-125 h-125 rounded-full"
-                    style={{ background: 'radial-gradient(circle, var(--turquoise-10) 0%, transparent 65%)', filter: 'blur(60px)' }}
+                    style={{ background: 'radial-gradient(circle, var(--accent-10) 0%, transparent 65%)', filter: 'blur(60px)' }}
                 />
 
                 <div className="relative z-10 flex flex-col items-center text-center gap-8 px-12">
@@ -102,7 +102,7 @@ export default function SignInPage() {
                                 style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border-default)' }}
                             >
                                 <span
-                                    className="font-normal text-turquoise"
+                                    className="font-normal text-accent"
                                     style={{ fontFamily: 'var(--font-dm-serif-display), serif', fontSize: '1.1rem' }}
                                 >
                                     {stat}
@@ -129,12 +129,12 @@ export default function SignInPage() {
                 <div
                     aria-hidden
                     className="pointer-events-none absolute -top-[20%] -right-[10%] w-100 h-100 rounded-full"
-                    style={{ background: 'radial-gradient(circle, var(--turquoise-8) 0%, transparent 70%)', filter: 'blur(60px)' }}
+                    style={{ background: 'radial-gradient(circle, var(--accent-8) 0%, transparent 70%)', filter: 'blur(60px)' }}
                 />
                 <div
                     aria-hidden
                     className="pointer-events-none absolute -bottom-[20%] -left-[10%] w-75 h-75 rounded-full"
-                    style={{ background: 'radial-gradient(circle, var(--turquoise-6) 0%, transparent 70%)', filter: 'blur(50px)' }}
+                    style={{ background: 'radial-gradient(circle, var(--accent-6) 0%, transparent 70%)', filter: 'blur(50px)' }}
                 />
 
                 {/* Form card */}
@@ -232,7 +232,7 @@ export default function SignInPage() {
                             onChange={e => setEmail(e.target.value)}
                             required
                             style={inputStyle}
-                            onFocus={e => e.currentTarget.style.borderColor = 'var(--turquoise-42)'}
+                            onFocus={e => e.currentTarget.style.borderColor = 'var(--accent-42)'}
                             onBlur={e  => e.currentTarget.style.borderColor = 'var(--border-default)'}
                         />
 
@@ -244,7 +244,7 @@ export default function SignInPage() {
                                 onChange={e => setPassword(e.target.value)}
                                 required
                                 style={{ ...inputStyle, paddingRight: '2.75rem' }}
-                                onFocus={e => e.currentTarget.style.borderColor = 'var(--turquoise-42)'}
+                                onFocus={e => e.currentTarget.style.borderColor = 'var(--accent-42)'}
                                 onBlur={e  => e.currentTarget.style.borderColor = 'var(--border-default)'}
                             />
                             <button
@@ -288,7 +288,7 @@ export default function SignInPage() {
                     {/* Sign up */}
                     <p className="m-0 text-sm text-center text-tertiary">
                         Don&apos;t have an account?{' '}
-                        <Link href="/auth/signup" className="font-semibold text-turquoise" style={{ textDecoration: 'none' }}>
+                        <Link href="/auth/signup" className="font-semibold text-accent" style={{ textDecoration: 'none' }}>
                             Sign up free
                         </Link>
                     </p>

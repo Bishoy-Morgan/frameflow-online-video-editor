@@ -8,21 +8,21 @@ import { SectionLabel, SectionSeparator } from './FeaturesHero'
 // ── Tiers ─────────────────────────────────────────────────────────────────────
 const tiers = [
     {
-        icon: <User size={16} color="var(--turquoise)" strokeWidth={1.5} />,
+        icon: <User size={16} color="var(--accent)" strokeWidth={1.5} />,
         label: 'Individual',
         description: 'Solo creators and developers building at their own pace.',
         features: ['Structured project management', 'Flexible export options', 'Performance-focused foundation'],
         available: true,
     },
     {
-        icon: <Users size={16} color="var(--turquoise)" strokeWidth={1.5} />,
+        icon: <Users size={16} color="var(--accent)" strokeWidth={1.5} />,
         label: 'Team',
         description: 'Small product teams with shared workflows and review cycles.',
         features: ['Everything in Individual', 'Collaboration layer', 'Shared asset library'],
         available: false,
     },
     {
-        icon: <Building2 size={16} color="var(--turquoise)" strokeWidth={1.5} />,
+        icon: <Building2 size={16} color="var(--accent)" strokeWidth={1.5} />,
         label: 'Organization',
         description: 'Scaled deployment with cloud workflows and enterprise structure.',
         features: ['Everything in Team', 'Cloud workflow integration', 'Advanced access control'],
@@ -42,7 +42,7 @@ const roadmap = [
 ]
 
 const statusStyles: Record<string, { dot: string; text: string; bg: string; border: string }> = {
-    shipped:  { dot: 'var(--turquoise)',    text: 'var(--turquoise)',    bg: 'var(--turquoise-8)',  border: 'var(--turquoise-20)' },
+    shipped:  { dot: 'var(--accent)',    text: 'var(--accent)',    bg: 'var(--accent-8)',  border: 'var(--accent-20)' },
     upcoming: { dot: 'var(--text-48)',      text: 'var(--text-55)',      bg: 'var(--text-5)',       border: 'var(--text-10)'      },
     planned:  { dot: 'var(--text-28)',      text: 'var(--text-35)',      bg: 'var(--text-5)',       border: 'var(--text-8)'       },
 }
@@ -80,9 +80,9 @@ const TierCard = ({
             onClick={onClick}
             className="flex flex-col gap-5 p-6 rounded-xl cursor-pointer transition-all duration-200 relative overflow-hidden"
             style={{
-                border: `1px solid ${isActive ? 'var(--turquoise-42)' : 'var(--text-10)'}`,
-                backgroundColor: isActive ? 'var(--turquoise-6)' : 'var(--text-5)',
-                boxShadow: isActive ? '0 0 28px var(--turquoise-8)' : 'none',
+                border: `1px solid ${isActive ? 'var(--accent-42)' : 'var(--text-10)'}`,
+                backgroundColor: isActive ? 'var(--accent-6)' : 'var(--text-5)',
+                boxShadow: isActive ? '0 0 28px var(--accent-8)' : 'none',
             }}
         >
             {/* Coming soon overlay for unavailable tiers */}
@@ -102,7 +102,7 @@ const TierCard = ({
                 </div>
                 <span
                     className="text-[0.8rem] font-bold tracking-[0.08em] uppercase transition-colors duration-200"
-                    style={{ color: isActive ? 'var(--turquoise)' : 'var(--text-55)' }}
+                    style={{ color: isActive ? 'var(--accent)' : 'var(--text-55)' }}
                 >
                     {tier.label}
                 </span>
@@ -124,8 +124,8 @@ const TierCard = ({
                         <span
                             className="w-1 h-1 rounded-full shrink-0"
                             style={{
-                                backgroundColor: tier.available || i === 0 ? 'var(--turquoise)' : 'var(--text-28)',
-                                boxShadow: tier.available || i === 0 ? '0 0 4px var(--turquoise)' : 'none',
+                                backgroundColor: tier.available || i === 0 ? 'var(--accent)' : 'var(--text-28)',
+                                boxShadow: tier.available || i === 0 ? '0 0 4px var(--accent)' : 'none',
                             }}
                         />
                         {f}
@@ -185,7 +185,7 @@ const RoadmapStrip = () => {
                                 className="w-1.5 h-1.5 rounded-full shrink-0"
                                 style={{
                                     backgroundColor: s.dot,
-                                    boxShadow: item.status === 'shipped' ? '0 0 5px var(--turquoise-45)' : 'none',
+                                    boxShadow: item.status === 'shipped' ? '0 0 5px var(--accent-45)' : 'none',
                                 }}
                             />
 
@@ -237,12 +237,12 @@ const DesignedToGrow = () => {
             {/* Glow — top right */}
             <div
                 aria-hidden
-                className="pointer-events-none absolute -top-[10%] -right-[5%] w-[520px] h-[520px] rounded-full bg-turquoise-8"
+                className="pointer-events-none absolute -top-[10%] -right-[5%] w-[520px] h-[520px] rounded-full bg-accent-8"
                 style={{ filter: 'blur(80px)' }}
             />
 
             {/* Top separator */}
-            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
+            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
 
             <div className="container relative z-10">
 
@@ -281,9 +281,9 @@ const DesignedToGrow = () => {
                         {/* Callout */}
                         <div
                             className="px-6 py-4 rounded-xl flex items-start gap-3"
-                            style={{ border: '1px solid var(--turquoise-20)', backgroundColor: 'var(--turquoise-4)' }}
+                            style={{ border: '1px solid var(--accent-20)', backgroundColor: 'var(--accent-4)' }}
                         >
-                            <div className="dot-turquoise mt-1 shrink-0" />
+                            <div className="dot-accent mt-1 shrink-0" />
                             <p className="m-0 text-[0.875rem] leading-relaxed text-muted-65 font-medium">
                                 The architecture was designed with scale in mind from day one.
                                 Collaboration and cloud workflows aren&apos;t add-ons they&apos;re planned extensions of the same foundation.

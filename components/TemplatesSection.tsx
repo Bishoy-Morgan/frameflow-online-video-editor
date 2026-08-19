@@ -96,9 +96,9 @@ const TemplateCard = ({
                 style={{
                     aspectRatio: '9 / 16',
                     backgroundColor: '#0a0a0a',
-                    border: `1px solid ${isHovered ? 'var(--turquoise-42)' : 'var(--turquoise-22)'}`,
+                    border: `1px solid ${isHovered ? 'var(--accent-42)' : 'var(--accent-22)'}`,
                     transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
-                    boxShadow: isHovered ? '0 0 24px var(--turquoise-16), 0 20px 40px rgba(0,0,0,0.4)' : '0 8px 24px rgba(0,0,0,0.25)',
+                    boxShadow: isHovered ? '0 0 24px var(--accent-16), 0 20px 40px rgba(0,0,0,0.4)' : '0 8px 24px rgba(0,0,0,0.25)',
                 }}
             >
                 {/* Gradient fallback */}
@@ -106,7 +106,7 @@ const TemplateCard = ({
                     <div
                         className="absolute inset-0"
                         style={{
-                            background: `linear-gradient(160deg, var(--turquoise-${[35, 22, 42, 16, 32, 20][index]}) 0%, var(--turquoise-8) 100%)`,
+                            background: `linear-gradient(160deg, var(--accent-${[35, 22, 42, 16, 32, 20][index]}) 0%, var(--accent-8) 100%)`,
                         }}
                     />
                 )}
@@ -207,13 +207,13 @@ const TemplateCard = ({
                     </div>
                 )}
 
-                {/* Bottom turquoise accent line */}
+                {/* Bottom accent accent line */}
                 <div
                     className="absolute bottom-0 inset-x-0 h-0.5 transition-opacity duration-300"
                     style={{
                         opacity: isHovered ? 1 : 0,
-                        backgroundColor: 'var(--turquoise)',
-                        boxShadow: '0 0 8px var(--turquoise)',
+                        backgroundColor: 'var(--accent)',
+                        boxShadow: '0 0 8px var(--accent)',
                         zIndex: 5,
                     }}
                 />
@@ -256,10 +256,10 @@ const TemplatesSection = () => {
             <div
                 aria-hidden
                 className="pointer-events-none absolute -bottom-[15%] -left-[5%] w-120 h-120 rounded-full"
-                style={{ background: 'radial-gradient(circle, var(--turquoise-8) 0%, transparent 70%)', filter: 'blur(72px)' }}
+                style={{ background: 'radial-gradient(circle, var(--accent-8) 0%, transparent 70%)', filter: 'blur(72px)' }}
             />
 
-            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
+            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
 
             <div className="container relative z-10">
 
@@ -267,8 +267,8 @@ const TemplatesSection = () => {
                 <div ref={headerRef} className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-12">
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-3">
-                            <div className="w-7 h-px bg-turquoise" />
-                            <span className="text-[0.7rem] font-bold tracking-[0.14em] uppercase text-turquoise">
+                            <div className="w-7 h-px bg-accent" />
+                            <span className="text-[0.7rem] font-bold tracking-[0.14em] uppercase text-accent">
                                 Templates
                             </span>
                         </div>

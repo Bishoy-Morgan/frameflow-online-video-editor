@@ -9,8 +9,8 @@ import Button from '@/components/ui/Button'
 
 export const SectionLabel = ({ children }: { children: React.ReactNode }) => (
     <div className="flex items-center gap-3 mb-4">
-        <div className="w-7 h-px bg-turquoise" />
-        <span className="text-[0.7rem] font-bold tracking-[0.14em] uppercase text-turquoise">
+        <div className="w-7 h-px bg-accent" />
+        <span className="text-[0.7rem] font-bold tracking-[0.14em] uppercase text-accent">
             {children}
         </span>
     </div>
@@ -58,8 +58,8 @@ const FeaturesHero = () => {
             <SectionGrid />
 
             {/* Glows */}
-            <div aria-hidden className="pointer-events-none absolute -top-[20%] -right-[10%] w-[600px] h-[600px] rounded-full bg-turquoise-16" style={{ filter: 'blur(80px)' }} />
-            <div aria-hidden className="pointer-events-none absolute bottom-[5%] -left-[8%] w-[400px] h-[400px] rounded-full bg-turquoise-8" style={{ filter: 'blur(60px)' }} />
+            <div aria-hidden className="pointer-events-none absolute -top-[20%] -right-[10%] w-[600px] h-[600px] rounded-full bg-accent-16" style={{ filter: 'blur(80px)' }} />
+            <div aria-hidden className="pointer-events-none absolute bottom-[5%] -left-[8%] w-[400px] h-[400px] rounded-full bg-accent-8" style={{ filter: 'blur(60px)' }} />
 
             <div className="container relative z-10 pt-52 pb-28">
                 <div className="max-w-[820px]">
@@ -71,10 +71,10 @@ const FeaturesHero = () => {
                         style={{ fontSize: 'clamp(2.75rem, 6vw, 5rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
                     >
                         Built for real-time video{' '}
-                        <span className="relative inline-block italic text-turquoise">
+                        <span className="relative inline-block italic text-accent">
                             editing
                             <svg aria-hidden viewBox="0 0 220 12" fill="none" className="absolute left-0 w-full" style={{ bottom: '-6px', height: '10px' }}>
-                                <path d="M2 8 C40 3, 80 10, 120 5 C160 1, 200 9, 218 6" stroke="var(--turquoise)" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.6" />
+                                <path d="M2 8 C40 3, 80 10, 120 5 C160 1, 200 9, 218 6" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.6" />
                             </svg>
                         </span>{' '}
                         in the browser.
@@ -90,8 +90,8 @@ const FeaturesHero = () => {
                     <div ref={ctaRef} className="flex flex-wrap items-center gap-4">
 
                         {/*
-                            primary — solid turquoise fill, --bg text.
-                            On hover: wipe reveals --bg underneath, text transitions to turquoise.
+                            primary — solid accent fill, --bg text.
+                            On hover: wipe reveals --bg underneath, text transitions to accent.
                             Play icon inherits the same color transition via the icon prop.
                             No fill needed on the icon — `currentColor` picks it up automatically.
                         */}
@@ -104,8 +104,8 @@ const FeaturesHero = () => {
                         </Button>
 
                         {/*
-                            secondary — transparent bg, turquoise border + text.
-                            On hover: wipe fills turquoise, text transitions to --bg.
+                            secondary — transparent bg, accent border + text.
+                            On hover: wipe fills accent, text transitions to --bg.
                             ArrowRight icon transitions in sync via the icon prop.
                         */}
                         <Button
@@ -127,7 +127,7 @@ const FeaturesHero = () => {
                             { value: '100%',  label: 'Browser-native'     },
                         ].map(({ value, label }) => (
                             <div key={label} className="flex flex-col gap-0.5">
-                                <span className="text-2xl font-normal leading-none text-turquoise">{value}</span>
+                                <span className="text-2xl font-normal leading-none text-accent">{value}</span>
                                 <span className="text-[0.7rem] font-semibold tracking-[0.06em] uppercase text-muted-48">{label}</span>
                             </div>
                         ))}

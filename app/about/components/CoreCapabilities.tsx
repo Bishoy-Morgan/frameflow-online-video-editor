@@ -45,13 +45,13 @@ const CoreCapabilities = () => {
         aria-hidden
         className="pointer-events-none absolute top-[35%] left-[15%] w-[550px] h-[550px] rounded-full"
         style={{
-          background: 'radial-gradient(circle, var(--turquoise-12) 0%, transparent 65%)',
+          background: 'radial-gradient(circle, var(--accent-12) 0%, transparent 65%)',
           filter: 'blur(50px)',
         }}
       />
 
       {/* Top separator */}
-      <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
+      <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
 
       <div className="container relative z-10 max-w-[1100px]">
 
@@ -68,7 +68,7 @@ const CoreCapabilities = () => {
           }}
         >
           Everything you need —{' '}
-          <span className="italic text-turquoise">nothing you don’t</span>.
+          <span className="italic text-accent">nothing you don’t</span>.
         </h2>
 
         {/* Description */}
@@ -114,7 +114,7 @@ const CoreCapabilities = () => {
           ].map((item) => (
             <div
               key={item.title}
-              className="group relative p-6 rounded-2xl border border-muted-10 bg-white/2 backdrop-blur-sm transition-all duration-300 hover:border-turquoise/30 hover:bg-white/[0.04]"
+              className="group relative p-6 rounded-2xl border border-muted-10 bg-white/2 backdrop-blur-sm transition-all duration-300 hover:border-accent/30 hover:bg-white/[0.04]"
             >
               <h3 className="text-lg font-normal mb-2 tracking-tight">
                 {item.title}

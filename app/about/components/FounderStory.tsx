@@ -46,7 +46,7 @@ const FounderStory = () => {
         aria-hidden
         className="pointer-events-none absolute top-[40%] right-[18%] w-[500px] h-[500px] rounded-full"
         style={{
-          background: 'radial-gradient(circle, var(--turquoise-10) 0%, transparent 65%)',
+          background: 'radial-gradient(circle, var(--accent-10) 0%, transparent 65%)',
           filter: 'blur(60px)',
         }}
       />
@@ -54,7 +54,7 @@ const FounderStory = () => {
       {/* Top separator */}
       <div
         aria-hidden
-        className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise"
+        className="absolute top-0 left-[10%] right-[10%] h-px line-accent"
       />
 
       <div className="container relative z-10 max-w-[1100px]">
@@ -74,7 +74,7 @@ const FounderStory = () => {
             }}
           >
             Built from frustration —{' '}
-            <span className="italic text-turquoise">refined</span>{' '}
+            <span className="italic text-accent">refined</span>{' '}
             through experience.
           </h2>
 

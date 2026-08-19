@@ -46,12 +46,12 @@ export default function TemplatesHero({ searchQuery, setSearchQuery }: Templates
             <div
                 aria-hidden
                 className="pointer-events-none absolute -top-[15%] -right-[5%] w-162.5 h-162.5 rounded-full"
-                style={{ background: 'radial-gradient(circle, var(--turquoise-10) 0%, transparent 70%)', filter: 'blur(72px)' }}
+                style={{ background: 'radial-gradient(circle, var(--accent-10) 0%, transparent 70%)', filter: 'blur(72px)' }}
             />
             <div
                 aria-hidden
                 className="pointer-events-none absolute bottom-0 -left-[10%] w-100 h-100 rounded-full"
-                style={{ background: 'radial-gradient(circle, var(--turquoise-6) 0%, transparent 70%)', filter: 'blur(60px)' }}
+                style={{ background: 'radial-gradient(circle, var(--accent-6) 0%, transparent 70%)', filter: 'blur(60px)' }}
             />
 
             <div className="container relative z-10 max-w-4xl mx-auto text-center flex flex-col items-center">
@@ -61,12 +61,12 @@ export default function TemplatesHero({ searchQuery, setSearchQuery }: Templates
                     ref={pillRef}
                     className="flex items-center gap-2 px-4 py-2 rounded-full mb-8"
                     style={{
-                        backgroundColor: 'var(--turquoise-8)',
-                        border:          '1px solid var(--turquoise-22)',
+                        backgroundColor: 'var(--accent-8)',
+                        border:          '1px solid var(--accent-22)',
                     }}
                 >
-                    <Wand2 size={13} style={{ color: 'var(--turquoise)' }} strokeWidth={2} />
-                    <span className="text-xs font-bold" style={{ color: 'var(--turquoise)' }}>
+                    <Wand2 size={13} style={{ color: 'var(--accent)' }} strokeWidth={2} />
+                    <span className="text-xs font-bold" style={{ color: 'var(--accent)' }}>
                         {TEMPLATES.length}+ Ready-to-use templates
                     </span>
                 </div>
@@ -84,7 +84,7 @@ export default function TemplatesHero({ searchQuery, setSearchQuery }: Templates
                 >
                     Start from a
                     <br />
-                    <span className="italic" style={{ color: 'var(--turquoise)' }}>professional template.</span>
+                    <span className="italic" style={{ color: 'var(--accent)' }}>professional template.</span>
                 </h1>
 
                 {/* Sub */}
@@ -124,8 +124,8 @@ export default function TemplatesHero({ searchQuery, setSearchQuery }: Templates
                             transition:      'border-color 0.2s ease, box-shadow 0.2s ease',
                         }}
                         onFocus={e => {
-                            e.currentTarget.style.borderColor = 'var(--turquoise-42)'
-                            e.currentTarget.style.boxShadow  = '0 0 0 3px var(--turquoise-8), 0 4px 24px rgba(0,0,0,0.06)'
+                            e.currentTarget.style.borderColor = 'var(--accent-42)'
+                            e.currentTarget.style.boxShadow  = '0 0 0 3px var(--accent-8), 0 4px 24px rgba(0,0,0,0.06)'
                         }}
                         onBlur={e => {
                             e.currentTarget.style.borderColor = 'var(--border-default)'
@@ -155,7 +155,7 @@ export default function TemplatesHero({ searchQuery, setSearchQuery }: Templates
                         <div key={label} className="flex items-center gap-2.5">
                             <span
                                 className="w-1.5 h-1.5 rounded-full"
-                                style={{ backgroundColor: 'var(--turquoise)' }}
+                                style={{ backgroundColor: 'var(--accent)' }}
                             />
                             <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>
                                 {value}

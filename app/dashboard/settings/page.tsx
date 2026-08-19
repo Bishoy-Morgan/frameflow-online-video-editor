@@ -35,9 +35,9 @@ function Feedback({ type, message }: { type: 'success' | 'error'; message: strin
         <div
             className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs font-semibold"
             style={{
-                backgroundColor: type === 'success' ? 'var(--turquoise-8)' : 'rgba(239,68,68,0.08)',
-                border: `1px solid ${type === 'success' ? 'var(--turquoise-22)' : 'rgba(239,68,68,0.2)'}`,
-                color: type === 'success' ? 'var(--turquoise)' : '#ef4444',
+                backgroundColor: type === 'success' ? 'var(--accent-8)' : 'rgba(239,68,68,0.08)',
+                border: `1px solid ${type === 'success' ? 'var(--accent-22)' : 'rgba(239,68,68,0.2)'}`,
+                color: type === 'success' ? 'var(--accent)' : '#ef4444',
             }}
         >
             {type === 'success'
@@ -102,9 +102,9 @@ function ProfileSection() {
                         <div
                             className="w-16 h-16 rounded-xl flex items-center justify-center text-xl font-bold"
                             style={{
-                                backgroundColor: 'var(--turquoise-10)',
-                                border: '1px solid var(--turquoise-22)',
-                                color: 'var(--turquoise)',
+                                backgroundColor: 'var(--accent-10)',
+                                border: '1px solid var(--accent-22)',
+                                color: 'var(--accent)',
                                 fontFamily: 'var(--font-dm-serif-display), serif',
                             }}
                         >
@@ -141,7 +141,7 @@ function ProfileSection() {
                     onChange={e => { setName(e.target.value); setFeedback(null) }}
                     placeholder="Your full name"
                     style={inputStyle}
-                    onFocus={e => e.currentTarget.style.borderColor = 'var(--turquoise-42)'}
+                    onFocus={e => e.currentTarget.style.borderColor = 'var(--accent-42)'}
                     onBlur={e  => e.currentTarget.style.borderColor = 'var(--border-default)'}
                 />
             </div>
@@ -171,9 +171,9 @@ function ProfileSection() {
                     <span
                         className="text-[0.6rem] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full"
                         style={{
-                            backgroundColor: user.role === 'ADMIN' ? 'var(--turquoise-8)' : 'var(--surface-raised)',
-                            border: `1px solid ${user.role === 'ADMIN' ? 'var(--turquoise-22)' : 'var(--border-default)'}`,
-                            color: user.role === 'ADMIN' ? 'var(--turquoise)' : 'var(--text-tertiary)',
+                            backgroundColor: user.role === 'ADMIN' ? 'var(--accent-8)' : 'var(--surface-raised)',
+                            border: `1px solid ${user.role === 'ADMIN' ? 'var(--accent-22)' : 'var(--border-default)'}`,
+                            color: user.role === 'ADMIN' ? 'var(--accent)' : 'var(--text-tertiary)',
                         }}
                     >
                         {user.role}
@@ -280,7 +280,7 @@ function PasswordSection() {
                             placeholder="••••••••"
                             onChange={e => { set(e.target.value); setFeedback(null) }}
                             style={{ ...inputStyle, paddingRight: '2.5rem' }}
-                            onFocus={e => e.currentTarget.style.borderColor = 'var(--turquoise-42)'}
+                            onFocus={e => e.currentTarget.style.borderColor = 'var(--accent-42)'}
                             onBlur={e  => e.currentTarget.style.borderColor = 'var(--border-default)'}
                         />
                         {/* Show/hide toggle only on first field */}
@@ -323,9 +323,9 @@ function PlanSection() {
                     <span
                         className="text-[0.6rem] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full"
                         style={{
-                            backgroundColor: 'var(--turquoise-8)',
-                            border: '1px solid var(--turquoise-22)',
-                            color: 'var(--turquoise)',
+                            backgroundColor: 'var(--accent-8)',
+                            border: '1px solid var(--accent-22)',
+                            color: 'var(--accent)',
                         }}
                     >
                         Active
@@ -352,7 +352,7 @@ export default function DashboardSettingsPage() {
             <div
                 aria-hidden
                 className="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 rounded-full"
-                style={{ background: 'radial-gradient(circle, var(--turquoise-8) 0%, transparent 65%)', filter: 'blur(72px)' }}
+                style={{ background: 'radial-gradient(circle, var(--accent-8) 0%, transparent 65%)', filter: 'blur(72px)' }}
             />
 
             <DashboardHeader title="Settings" />

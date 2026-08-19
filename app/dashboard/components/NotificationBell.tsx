@@ -13,8 +13,8 @@ const typeConfig = {
     },
     RENDER_COMPLETED: {
         icon:  CheckCircle,
-        color: 'var(--turquoise)',
-        bg:    'var(--turquoise-8)',
+        color: 'var(--accent)',
+        bg:    'var(--accent-8)',
         label: 'Render Complete',
     },
     ACCOUNT_UPDATE: {
@@ -54,8 +54,8 @@ function NotificationItem({ notification, onRead }: {
             {/* Unread dot */}
             {!notification.read && (
                 <div
-                    className="absolute right-4 top-4 w-1.5 h-1.5 rounded-full bg-turquoise"
-                    style={{ boxShadow: '0 0 4px var(--turquoise)' }}
+                    className="absolute right-4 top-4 w-1.5 h-1.5 rounded-full bg-accent"
+                    style={{ boxShadow: '0 0 4px var(--accent)' }}
                 />
             )}
 
@@ -129,9 +129,9 @@ export default function NotificationBell({ userId }: { userId: string }) {
                     <span
                         className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full flex items-center justify-center text-[0.55rem] font-bold px-1"
                         style={{
-                            backgroundColor: 'var(--turquoise)',
+                            backgroundColor: 'var(--accent)',
                             color: '#020202',
-                            boxShadow: '0 0 6px var(--turquoise)',
+                            boxShadow: '0 0 6px var(--accent)',
                         }}
                     >
                         {unreadCount > 9 ? '9+' : unreadCount}
@@ -160,7 +160,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
                             {unreadCount > 0 && (
                                 <span
                                     className="text-[0.6rem] font-bold px-1.5 py-0.5 rounded-full"
-                                    style={{ backgroundColor: 'var(--turquoise-8)', color: 'var(--turquoise)', border: '1px solid var(--turquoise-22)' }}
+                                    style={{ backgroundColor: 'var(--accent-8)', color: 'var(--accent)', border: '1px solid var(--accent-22)' }}
                                 >
                                     {unreadCount} new
                                 </span>
@@ -172,7 +172,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
                                     onClick={markAllAsRead}
                                     className="flex items-center gap-1 px-2 py-1 rounded-md text-[0.65rem] font-bold cursor-pointer transition-colors duration-150 focus:outline-none"
                                     style={{ color: 'var(--text-tertiary)', background: 'none', border: 'none' }}
-                                    onMouseEnter={e => e.currentTarget.style.color = 'var(--turquoise)'}
+                                    onMouseEnter={e => e.currentTarget.style.color = 'var(--accent)'}
                                     onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}
                                     title="Mark all as read"
                                 >

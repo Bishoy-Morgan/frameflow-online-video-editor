@@ -1,85 +1,155 @@
 @import "tailwindcss";
 
+@theme {
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  --breakpoint-3xl: 1920px;
+  --breakpoint-4xl: 2560px;
+}
+
+@utility text-hero {
+  font-size: clamp(1.125rem, 1.037rem + 0.376vw, 1.375rem);
+  line-height: 1.8;
+  color: var(--text);
+}
+
+@utility text-lead {
+  font-size: clamp(1rem, 0.956rem + 0.188vw, 1.125rem);
+  line-height: 1.75;
+  color: var(--text);
+}
+
+@utility text-body {
+  font-size: clamp(0.9375rem, 0.916rem + 0.094vw, 1rem);
+  line-height: 1.6;
+  color: var(--text);
+}
+
+@utility text-caption {
+  font-size: clamp(0.8125rem, 0.791rem + 0.094vw, 0.875rem);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+@utility text-small {
+  font-size: clamp(0.6875rem, 0.666rem + 0.094vw, 0.75rem);
+  line-height: 1.4;
+  color: var(--text-tertiary);
+}
+
+@utility text-tiny {
+  font-size: clamp(0.5625rem, 0.541rem + 0.094vw, 0.625rem);
+  line-height: 1.3;
+  color: var(--text-muted);
+}
+
 @layer base {
-
-  /* Light theme (default) */
   :root {
-    --bg:   #FAFAFA;
-    --text: #020202;
+    --accent: #00D9AA;
+    --bg: color-mix(in srgb, var(--accent) 4%, white);
+    --text: #17140F;
 
-    --turquoise:      #00FFC8;
-    --turquoise-glow: #00FFC8;
-    --turquoise-fg:   #00FFC8;
+    --accent-fg: #00A886;
 
-    --text-secondary: #2e2e2e;
-    --text-tertiary:  #555555;
-    --text-muted:     #7a7a7a;
-    --text-subtle:    #a0a0a0;
-    --text-ghost:     #c8c8c8;
+    --amber: #E08A3C;
+    --amber-fg: #B8672A;
 
-    --border-strong:  #c0c0c0;
-    --border-default: #e0e0e0;
-    --border-subtle:  #eeeeee;
+    --error: #E5484D;
+    --error-fg: #C22E33;
 
-    --surface-raised:  #f5f5f5;
-    --surface-sunken:  #efefef;
-    --surface-overlay: #fafafa;
+    --text-secondary: #33302A;
+    --text-tertiary: #5C584F;
+    --text-muted: #837E72;
+    --text-subtle: #ACA79A;
+    --text-ghost: #D6D2C4;
 
-    --turquoise-4:   color-mix(in srgb, var(--turquoise)  4%, transparent);
-    --turquoise-6:   color-mix(in srgb, var(--turquoise)  6%, transparent);
-    --turquoise-8:   color-mix(in srgb, var(--turquoise)  8%, transparent);
-    --turquoise-10:  color-mix(in srgb, var(--turquoise) 10%, transparent);
-    --turquoise-16:  color-mix(in srgb, var(--turquoise) 16%, transparent);
-    --turquoise-20:  color-mix(in srgb, var(--turquoise) 20%, transparent);
-    --turquoise-22:  color-mix(in srgb, var(--turquoise) 22%, transparent);
-    --turquoise-32:  color-mix(in srgb, var(--turquoise) 32%, transparent);
-    --turquoise-35:  color-mix(in srgb, var(--turquoise) 35%, transparent);
-    --turquoise-40:  color-mix(in srgb, var(--turquoise) 40%, transparent);
-    --turquoise-42:  color-mix(in srgb, var(--turquoise) 42%, transparent);
-    --turquoise-45:  color-mix(in srgb, var(--turquoise) 45%, transparent);
-    --turquoise-65:  color-mix(in srgb, var(--turquoise) 65%, transparent);
+    --border-strong: #C8C3B4;
+    --border-default: #E3DFD3;
+    --border-subtle: #EFECE2;
 
-    /* Legacy aliases — confirm usage before removing (see: text-muted-* classes) */
-    --text-5:  var(--surface-raised);
-    --text-7:  var(--surface-sunken);
-    --text-8:  var(--border-subtle);
-    --text-10: var(--border-default);
-    --text-18: var(--border-strong);
-    --text-28: var(--text-ghost);
-    --text-35: var(--text-subtle);
-    --text-48: var(--text-muted);
-    --text-55: var(--text-tertiary);
-    --text-60: var(--text-tertiary);
-    --text-62: var(--text-tertiary);
-    --text-65: var(--text-secondary);
-    --text-70: var(--text-secondary);
-    --text-72: var(--text-secondary);
-    --text-75: var(--text-secondary);
-    --text-80: var(--text-secondary);
+    --surface-raised: #f7fffd80;
+    --surface-sunken: #F1FCF9;
+    --surface-overlay: #FBFFFE;
+
+    --accent-4: color-mix(in srgb, var(--accent) 4%, transparent);
+    --accent-6: color-mix(in srgb, var(--accent) 6%, transparent);
+    --accent-8: color-mix(in srgb, var(--accent) 8%, transparent);
+    --accent-10: color-mix(in srgb, var(--accent) 10%, transparent);
+    --accent-16: color-mix(in srgb, var(--accent) 16%, transparent);
+    --accent-20: color-mix(in srgb, var(--accent) 20%, transparent);
+    --accent-22: color-mix(in srgb, var(--accent) 22%, transparent);
+    --accent-32: color-mix(in srgb, var(--accent) 32%, transparent);
+    --accent-35: color-mix(in srgb, var(--accent) 35%, transparent);
+    --accent-40: color-mix(in srgb, var(--accent) 40%, transparent);
+    --accent-42: color-mix(in srgb, var(--accent) 42%, transparent);
+    --accent-45: color-mix(in srgb, var(--accent) 45%, transparent);
+    --accent-65: color-mix(in srgb, var(--accent) 65%, transparent);
+
+    --amber-8: color-mix(in srgb, var(--amber) 8%, transparent);
+    --amber-16: color-mix(in srgb, var(--amber) 16%, transparent);
+    --amber-22: color-mix(in srgb, var(--amber) 22%, transparent);
+    --amber-35: color-mix(in srgb, var(--amber) 35%, transparent);
+    --amber-42: color-mix(in srgb, var(--amber) 42%, transparent);
+
+    --error-8: color-mix(in srgb, var(--error) 8%, transparent);
+    --error-16: color-mix(in srgb, var(--error) 16%, transparent);
+    --error-22: color-mix(in srgb, var(--error) 22%, transparent);
+    --error-35: color-mix(in srgb, var(--error) 35%, transparent);
+    --error-42: color-mix(in srgb, var(--error) 42%, transparent);
+
+    --mood-uplifting: #FBBF24;
+    --mood-dramatic: #EF4444;
+    --mood-calm: #818CF8;
+    --mood-energetic: #FB923C;
+    --mood-melancholic: #94A3B8;
+    --mood-mysterious: #A78BFA;
+    --mood-playful: #34D399;
+
+    --mood-uplifting-8: color-mix(in srgb, var(--mood-uplifting) 8%, transparent);
+    --mood-uplifting-22: color-mix(in srgb, var(--mood-uplifting) 22%, transparent);
+    --mood-dramatic-8: color-mix(in srgb, var(--mood-dramatic) 8%, transparent);
+    --mood-dramatic-22: color-mix(in srgb, var(--mood-dramatic) 22%, transparent);
+    --mood-calm-8: color-mix(in srgb, var(--mood-calm) 8%, transparent);
+    --mood-calm-22: color-mix(in srgb, var(--mood-calm) 22%, transparent);
+    --mood-energetic-8: color-mix(in srgb, var(--mood-energetic) 8%, transparent);
+    --mood-energetic-22: color-mix(in srgb, var(--mood-energetic) 22%, transparent);
+    --mood-melancholic-8: color-mix(in srgb, var(--mood-melancholic) 8%, transparent);
+    --mood-melancholic-22: color-mix(in srgb, var(--mood-melancholic) 22%, transparent);
+    --mood-mysterious-8: color-mix(in srgb, var(--mood-mysterious) 8%, transparent);
+    --mood-mysterious-22: color-mix(in srgb, var(--mood-mysterious) 22%, transparent);
+    --mood-playful-8: color-mix(in srgb, var(--mood-playful) 8%, transparent);
+    --mood-playful-22: color-mix(in srgb, var(--mood-playful) 22%, transparent);
   }
 
-  /* Dark theme */
   .dark {
-    --bg:   #020202;
-    --text: #FEFEFE;
+    --accent: #00E6BB;
+    --bg: color-mix(in srgb, var(--accent) 4%, black);
+    --text: #F5F3EE;
 
-    --turquoise:      #00FFC8;
-    --turquoise-glow: #00FFC8;
-    --turquoise-fg:   #00FFC8;
+    --accent-fg: #00E6BB;
 
-    --text-secondary: #d4d4d4;
-    --text-tertiary:  #9a9a9a;
-    --text-muted:     #666666;
-    --text-subtle:    #484848;
-    --text-ghost:     #2e2e2e;
+    --amber: #F2A05A;
+    --amber-fg: #F2A05A;
 
-    --border-strong:  #3a3a3a;
-    --border-default: #262626;
-    --border-subtle:  #1a1a1a;
+    --error: #FF6369;
+    --error-fg: #FF6369;
 
-    --surface-raised:  #111111;
-    --surface-sunken:  #0a0a0a;
-    --surface-overlay: #161616;
+    --text-secondary: #D8D4C9;
+    --text-tertiary: #9C978A;
+    --text-muted: #6B6759;
+    --text-subtle: #47443A;
+    --text-ghost: #2B2925;
+
+    --border-strong: #3D3A32;
+    --border-default: #262420;
+    --border-subtle: #1A1815;
+
+    --surface-raised: #16140f80;
+    --surface-sunken: #0F0E0B;
+    --surface-overlay: #1C1A15;
   }
 
   body {
@@ -88,7 +158,19 @@
     font-family: var(--font-quicksand), sans-serif;
     transition: background-color 300ms ease, color 300ms ease;
     margin: 0 auto;
+    font-size: clamp(0.9rem, 0.85rem + 0.2vw, 1rem);
   }
+
+  /*
+    Fluid type scale, headers + body text.
+    Every clamp() below is tuned so the "preferred" value hits its max
+    exactly at a 1440px viewport, then stays flat (clamped) for anything
+    wider — 1440px, 1920px, 2560px all render identically. Below 1440px
+    it scales smoothly down to the min at a 375px viewport. This is a
+    deliberate ceiling, not an accident of vw math — if you change a
+    min/max pair, recompute both the constant and the vw coefficient or
+    the plateau point will drift off 1440px.
+  */
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-dm-serif-display), serif;
@@ -98,12 +180,41 @@
     transition: color 300ms ease;
   }
 
-  h1 { font-size: 4rem;    line-height: 1.2; margin-bottom: 1.5rem;   }
-  h2 { font-size: 3.25rem; line-height: 1.3; margin-bottom: 1.25rem;  }
-  h3 { font-size: 2.25rem; line-height: 1.3; margin-bottom: 1rem;     }
-  h4 { font-size: 1.5rem;  line-height: 1.4; margin-bottom: 0.875rem; }
-  h5 { font-size: 1.25rem; line-height: 1.4; margin-bottom: 0.75rem;  }
-  h6 { font-size: 1rem;    line-height: 1.5; margin-bottom: 0.5rem;   }
+  h1 {
+    font-size: clamp(2.25rem, 1.634rem + 2.629vw, 4rem);
+    line-height: 1.15;
+    margin-bottom: 1.5rem;
+  }
+
+  h2 {
+    font-size: clamp(1.875rem, 1.391rem + 2.066vw, 3.25rem);
+    line-height: 1.2;
+    margin-bottom: 1.25rem;
+  }
+
+  h3 {
+    font-size: clamp(1.5rem, 1.236rem + 1.127vw, 2.25rem);
+    line-height: 1.25;
+    margin-bottom: 1rem;
+  }
+
+  h4 {
+    font-size: clamp(1.25rem, 1.162rem + 0.376vw, 1.5rem);
+    line-height: 1.35;
+    margin-bottom: 0.875rem;
+  }
+
+  h5 {
+    font-size: clamp(1.125rem, 1.081rem + 0.188vw, 1.25rem);
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+  }
+
+  h6 {
+    font-size: clamp(1rem, 0.956rem + 0.188vw, 1.125rem);
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+  }
 
   p {
     margin: 0 0 1rem 0;
@@ -112,26 +223,34 @@
   }
 
   a {
-    color: var(--turquoise-fg);
+    color: var(--accent-fg);
     text-decoration: none;
     transition: opacity 300ms ease;
   }
-  a:hover { opacity: 0.8; }
 
-  @media (max-width: 768px) {
-    h1 { font-size: 2.5rem;  line-height: 1.2; }
-    h2 { font-size: 2rem;    line-height: 1.3; }
-    h3 { font-size: 1.75rem; line-height: 1.3; }
-    h4 { font-size: 1.25rem; line-height: 1.4; }
+  a:hover {
+    opacity: 0.8;
   }
 }
 
 @layer utilities {
-
   .container {
-    width: 80%;
+    width: 90%;
+    max-width: 1280px;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  @media (min-width: 640px) {
+    .container { width: 88%; }
+  }
+
+  @media (min-width: 1024px) {
+    .container { width: 82%; }
+  }
+
+  @media (min-width: 1440px) {
+    .container { width: 78%; }
   }
 
   .surface {
@@ -139,94 +258,90 @@
     color: var(--text);
   }
 
-  .bg-turquoise     { background-color: var(--turquoise); }
-  .text-turquoise   { color: var(--turquoise-fg); }
-  .border-turquoise { border-color: var(--turquoise); }
-  .shadow-turquoise { box-shadow: 0 0 6px var(--turquoise-glow); }
-  .glow-turquoise   { box-shadow: 0 8px 28px var(--turquoise-32); }
+  .bg-accent { background-color: var(--accent); }
+  .text-accent { color: var(--accent-fg); }
+  .border-accent { border-color: var(--accent); }
+  .shadow-accent { box-shadow: 0 0 6px var(--accent); }
+  .glow-accent { box-shadow: 0 8px 28px var(--accent-32); }
 
-  .bg-turquoise-4   { background-color: var(--turquoise-4);  }
-  .bg-turquoise-6   { background-color: var(--turquoise-6);  }
-  .bg-turquoise-8   { background-color: var(--turquoise-8);  }
-  .bg-turquoise-10  { background-color: var(--turquoise-10); }
-  .bg-turquoise-16  { background-color: var(--turquoise-16); }
+  .bg-accent-4 { background-color: var(--accent-4); }
+  .bg-accent-6 { background-color: var(--accent-6); }
+  .bg-accent-8 { background-color: var(--accent-8); }
+  .bg-accent-10 { background-color: var(--accent-10); }
+  .bg-accent-16 { background-color: var(--accent-16); }
 
-  .border-turquoise-20 { border-color: var(--turquoise-20); }
-  .border-turquoise-22 { border-color: var(--turquoise-22); }
-  .border-turquoise-35 { border-color: var(--turquoise-35); }
-  .border-turquoise-40 { border-color: var(--turquoise-40); }
-  .border-turquoise-42 { border-color: var(--turquoise-42); }
-  .border-turquoise-45 { border-color: var(--turquoise-45); }
+  .border-accent-20 { border-color: var(--accent-20); }
+  .border-accent-22 { border-color: var(--accent-22); }
+  .border-accent-35 { border-color: var(--accent-35); }
+  .border-accent-40 { border-color: var(--accent-40); }
+  .border-accent-42 { border-color: var(--accent-42); }
+  .border-accent-45 { border-color: var(--accent-45); }
 
-  .text-turquoise-65 { color: var(--turquoise-65); }
+  .text-accent-65 { color: var(--accent-65); }
+
+  .bg-amber { background-color: var(--amber); }
+  .text-amber { color: var(--amber-fg); }
+  .border-amber { border-color: var(--amber); }
+  .glow-amber { box-shadow: 0 8px 28px var(--amber-22); }
+
+  .badge-amber {
+    background-color: var(--amber-8);
+    border: 1px solid var(--amber-35);
+    color: var(--amber-fg);
+  }
+
+  .bg-error { background-color: var(--error); }
+  .text-error { color: var(--error-fg); }
+  .border-error { border-color: var(--error); }
+  .glow-error { box-shadow: 0 8px 28px var(--error-22); }
+
+  .badge-error {
+    background-color: var(--error-8);
+    border: 1px solid var(--error-35);
+    color: var(--error-fg);
+  }
 
   .text-secondary { color: var(--text-secondary); }
-  .text-tertiary  { color: var(--text-tertiary);  }
-  .text-muted-fg  { color: var(--text-muted);     }
-  .text-subtle    { color: var(--text-subtle);     }
-  .text-ghost     { color: var(--text-ghost);      }
+  .text-tertiary { color: var(--text-tertiary); }
+  .text-muted-fg { color: var(--text-muted); }
+  .text-subtle { color: var(--text-subtle); }
+  .text-ghost { color: var(--text-ghost); }
 
-  .text-muted-5  { color: var(--text-5);  }
-  .text-muted-7  { color: var(--text-7);  }
-  .text-muted-28 { color: var(--text-28); }
-  .text-muted-35 { color: var(--text-35); }
-  .text-muted-48 { color: var(--text-48); }
-  .text-muted-55 { color: var(--text-55); }
-  .text-muted-60 { color: var(--text-60); }
-  .text-muted-62 { color: var(--text-62); }
-  .text-muted-65 { color: var(--text-65); }
-  .text-muted-70 { color: var(--text-70); }
-  .text-muted-72 { color: var(--text-72); }
-  .text-muted-80 { color: var(--text-80); }
-
-  .border-strong  { border-color: var(--border-strong);  }
+  .border-strong { border-color: var(--border-strong); }
   .border-default { border-color: var(--border-default); }
-  .border-subtle  { border-color: var(--border-subtle);  }
+  .border-subtle { border-color: var(--border-subtle); }
 
-  .border-muted-8  { border-color: var(--text-8);  }
-  .border-muted-10 { border-color: var(--text-10); }
-  .border-muted-18 { border-color: var(--text-18); }
-
-  .bg-raised  { background-color: var(--surface-raised);  }
-  .bg-sunken  { background-color: var(--surface-sunken);  }
+  .bg-raised { background-color: var(--surface-raised); }
+  .bg-sunken { background-color: var(--surface-sunken); }
   .bg-overlay { background-color: var(--surface-overlay); }
 
-  .bg-muted-5 { background-color: var(--text-5); }
-  .bg-muted-8 { background-color: var(--text-8); }
-
   .gradient-bg {
-    background-image: linear-gradient(
-      to top,
-      var(--bg) 5%,
-      var(--turquoise) 100%
-    );
+    background-image: linear-gradient(to top, var(--bg) 5%, var(--accent) 100%);
   }
 
   .section-grid {
-    background-image:
-      linear-gradient(var(--border-subtle) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px);
+    background-image: linear-gradient(var(--border-subtle) 1px, transparent 1px), linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px);
     background-size: 64px 64px;
     mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, black 30%, transparent 100%);
     -webkit-mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, black 30%, transparent 100%);
   }
 
-  .fade-top    { background: linear-gradient(to bottom, var(--bg), transparent); }
-  .fade-bottom { background: linear-gradient(to top,    var(--bg), transparent); }
+  .fade-top { background: linear-gradient(to bottom, var(--bg), transparent); }
+  .fade-bottom { background: linear-gradient(to top, var(--bg), transparent); }
 
   .line-fade-right { background: linear-gradient(90deg, var(--border-default), transparent); }
-  .line-fade-left  { background: linear-gradient(90deg, transparent, var(--border-default)); }
-  .line-turquoise  { background: linear-gradient(90deg, transparent, var(--turquoise-40), transparent); }
+  .line-fade-left { background: linear-gradient(90deg, transparent, var(--border-default)); }
+  .line-accent { background: linear-gradient(90deg, transparent, var(--accent-40), transparent); }
 
-  .badge-turquoise {
-    background-color: var(--turquoise-8);
-    border: 1px solid var(--turquoise-35);
-    color: var(--turquoise-fg);
+  .badge-accent {
+    background-color: var(--accent-8);
+    border: 1px solid var(--accent-35);
+    color: var(--accent-fg);
   }
 
   .icon-box {
-    background-color: var(--turquoise-8);
-    border: 1px solid var(--turquoise-22);
+    background-color: var(--accent-8);
+    border: 1px solid var(--accent-22);
   }
 
   .card {
@@ -235,36 +350,46 @@
     backdrop-filter: blur(8px);
     transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
   }
+
   .card:hover {
-    border-color: var(--turquoise-42);
+    border-color: var(--accent-42);
     transform: translateY(-3px);
-    box-shadow: 0 12px 40px var(--turquoise-8);
+    box-shadow: 0 12px 40px var(--accent-8);
   }
 
   .metric-box {
-    background-color: var(--turquoise-8);
-    border: 1px solid var(--turquoise-20);
+    background-color: var(--accent-8);
+    border: 1px solid var(--accent-20);
   }
 
   .panel-active {
-    background-color: var(--turquoise-4);
-    border: 1px solid var(--turquoise-20);
+    background-color: var(--accent-4);
+    border: 1px solid var(--accent-20);
   }
 
-  .dot-turquoise {
+  .dot-accent {
     width: 6px;
     height: 6px;
     border-radius: 9999px;
-    background-color: var(--turquoise);
-    box-shadow: 0 0 6px var(--turquoise-glow);
+    background-color: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
   }
 
-  .text-hero    { font-size: 1.25rem;  line-height: 1.8;  color: var(--text);           }
-  .text-lead    { font-size: 1.125rem; line-height: 1.75; color: var(--text);           }
-  .text-body    { font-size: 1rem;     line-height: 1.6;  color: var(--text);           }
-  .text-caption { font-size: 0.875rem; line-height: 1.5;  color: var(--text-secondary); }
-  .text-small   { font-size: 0.75rem;  line-height: 1.4;  color: var(--text-tertiary);  }
-  .text-tiny    { font-size: 0.625rem; line-height: 1.3;  color: var(--text-muted);     }
+  .dot-amber {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: var(--amber);
+    box-shadow: 0 0 6px var(--amber);
+  }
+
+  .dot-error {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: var(--error);
+    box-shadow: 0 0 6px var(--error);
+  }
 
   .sidebar-button {
     position: relative;
@@ -279,24 +404,54 @@
     overflow: hidden;
     transition: color 200ms ease;
   }
+
   .sidebar-button::before {
     content: "";
     position: absolute;
     inset: 0;
-    background-image: linear-gradient(
-      to bottom right,
-      transparent 25%,
-      rgba(255, 0, 127, 0.55),
-      var(--turquoise)
-    );
+    background-image: linear-gradient(to bottom right, transparent 25%, var(--amber-42), var(--accent));
     opacity: 0;
     transition: opacity 300ms ease;
     pointer-events: none;
     z-index: 0;
   }
-  .sidebar-button > * { position: relative; z-index: 1; }
-  .sidebar-button:hover::before { opacity: 1; }
 
-  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .sidebar-button > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .sidebar-button:hover::before {
+    opacity: 1;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .container { width: 92%; }
+}
+
+@media (max-width: 768px) {
+  h1 { margin-bottom: 1rem; }
+  h2 { margin-bottom: 0.875rem; }
+  h3 { margin-bottom: 0.75rem; }
+  .container { width: 94%; }
+}
+
+@media (max-width: 480px) {
+  body { font-size: 0.9375rem; }
+
+  .container {
+    width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }

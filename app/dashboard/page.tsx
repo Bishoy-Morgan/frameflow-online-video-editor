@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import DashboardHeader from './components/DashboardHeader'
 import DashboardCard, { Project } from './components/DashboardCard'
 import StatsCard from './components/StatsCard'
+import { getMoodColor } from '@/lib/constants/moods'
 
 type AspectRatio = '9:16' | '16:9' | '1:1'
 type Duration = '15s'  | '30s'  | '60s'
@@ -61,17 +62,6 @@ const EXAMPLE_PROMPTS = [
     'Dreamy travel montage through Tokyo at golden hour…',
 ]
 
-const MOOD_COLORS: Record<string, string> = {
-    Uplifting: '#34d399',
-    Dramatic: '#f87171',
-    Calm: '#60a5fa',
-    Energetic: '#fbbf24',
-    Melancholic: '#a78bfa',
-    Mysterious: '#818cf8',
-    Cinematic: '#00FFC8',
-    Playful: '#fb923c',
-}
-
 function useTypewriter(texts: string[], speed = 40, pause = 2600) {
     const [textIdx, setTextIdx] = useState(0)
     const [charIdx, setCharIdx] = useState(0)
@@ -96,9 +86,9 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
             onClick={onClick}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150"
             style={{
-                backgroundColor: active ? 'var(--turquoise-8)' : 'var(--bg)',
-                border: active ? '1px solid var(--turquoise-42)' : '1px solid var(--border-subtle)',
-                color: active ? 'var(--turquoise)' : 'var(--text-tertiary)',
+                backgroundColor: active ? 'var(--accent-8)' : 'var(--bg)',
+                border: active ? '1px solid var(--accent-42)' : '1px solid var(--border-subtle)',
+                color: active ? 'var(--accent)' : 'var(--text-tertiary)',
             }}
             onMouseEnter={e => { if (!active) { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text)' } }}
             onMouseLeave={e => { if (!active) { e.currentTarget.style.borderColor = 'var(--border-subtle)';  e.currentTarget.style.color = 'var(--text-tertiary)' } }}
@@ -111,8 +101,8 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
 function SectionLabel({ children }: { children: React.ReactNode }) {
     return (
         <div className="flex items-center gap-3">
-            <div className="w-5 h-px" style={{ backgroundColor: 'var(--turquoise)' }} />
-            <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase" style={{ color: 'var(--turquoise)' }}>
+            <div className="w-5 h-px" style={{ backgroundColor: 'var(--accent)' }} />
+            <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase" style={{ color: 'var(--accent)' }}>
                 {children}
             </span>
         </div>
@@ -146,7 +136,7 @@ function SceneCard({ scene, index, selected, onToggle }: {
     selected: boolean
     onToggle: () => void
 }) {
-    const moodColor = MOOD_COLORS[scene.musicMood] ?? 'var(--turquoise)'
+    const mood = getMoodColor(scene.musicMood)
     const videoRef = React.useRef<HTMLVideoElement>(null)
     const playingRef = React.useRef(false)
 
@@ -176,9 +166,9 @@ function SceneCard({ scene, index, selected, onToggle }: {
             onClick={onToggle}
             className="relative flex flex-col rounded-xl overflow-hidden text-left w-full transition-all duration-200 group"
             style={{
-                backgroundColor: selected ? 'var(--turquoise-8)' : 'var(--surface-raised)',
-                border: selected ? '1px solid var(--turquoise-42)' : '1px solid var(--border-default)',
-                boxShadow: selected ? '0 0 0 3px var(--turquoise-8)' : 'none',
+                backgroundColor: selected ? 'var(--accent-8)' : 'var(--surface-raised)',
+                border: selected ? '1px solid var(--accent-42)' : '1px solid var(--border-default)',
+                boxShadow: selected ? '0 0 0 3px var(--accent-8)' : 'none',
             }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
@@ -186,7 +176,7 @@ function SceneCard({ scene, index, selected, onToggle }: {
             <div
                 className="absolute top-2.5 right-2.5 z-10 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200"
                 style={{
-                    backgroundColor: selected ? 'var(--turquoise)' : 'rgba(0,0,0,0.5)',
+                    backgroundColor: selected ? 'var(--accent)' : 'rgba(0,0,0,0.5)',
                     border: selected ? 'none' : '1px solid rgba(255,255,255,0.3)',
                     backdropFilter: 'blur(4px)',
                 }}
@@ -213,7 +203,7 @@ function SceneCard({ scene, index, selected, onToggle }: {
                             <div className="flex items-center justify-between">
                                 <span
                                     className="text-[10px] font-black tracking-widest uppercase px-2 py-0.5 rounded-md"
-                                    style={{ backgroundColor: 'var(--turquoise-22)', color: 'var(--turquoise)' }}
+                                    style={{ backgroundColor: 'var(--accent-22)', color: 'var(--accent)' }}
                                 >
                                     Scene {index + 1}
                                 </span>
@@ -234,8 +224,8 @@ function SceneCard({ scene, index, selected, onToggle }: {
                     </>
                 ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center gap-2"
-                        style={{ background: 'linear-gradient(135deg, var(--turquoise-8) 0%, var(--surface-raised) 100%)' }}>
-                        <Film size={20} style={{ color: 'var(--turquoise-65)' }} />
+                        style={{ background: 'linear-gradient(135deg, var(--accent-8) 0%, var(--surface-raised) 100%)' }}>
+                        <Film size={20} style={{ color: 'var(--accent-65)' }} />
                         <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>No preview</span>
                     </div>
                 )}
@@ -247,9 +237,9 @@ function SceneCard({ scene, index, selected, onToggle }: {
                 </p>
                 <div
                     className="flex items-center gap-1.5 w-fit px-2 py-1 rounded-md text-[10px] font-bold"
-                    style={{ backgroundColor: `${moodColor}14`, color: moodColor }}
+                    style={{ backgroundColor: mood.bg, color: mood.text }}
                 >
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: moodColor }} />
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: mood.text }} />
                     {scene.musicMood}
                 </div>
             </div>
@@ -315,7 +305,7 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
             .filter((_, i) => selectedScenes.has(i))
             .map(s => s.id)
             .join(",")
-        window.open(`/editor/${generatedProject.id}?scenes=${selectedIds}`, "_blank")
+        router.push(`/editor/${generatedProject.id}?scenes=${selectedIds}`)
         setPrompt("")
         setGeneratedProject(null)
         setSelectedScenes(new Set())
@@ -340,16 +330,16 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
             className="relative rounded-2xl overflow-hidden"
             style={{
                 background: 'linear-gradient(160deg, var(--surface-raised) 0%, var(--bg) 100%)',
-                border: `1px solid ${focused ? 'var(--turquoise-42)' : 'var(--border-default)'}`,
-                boxShadow: focused ? '0 0 0 3px var(--turquoise-8), 0 16px 48px rgba(0,0,0,0.06)' : '0 4px 24px rgba(0,0,0,0.04)',
+                border: `1px solid ${focused ? 'var(--accent-42)' : 'var(--border-default)'}`,
+                boxShadow: focused ? '0 0 0 3px var(--accent-8), 0 16px 48px rgba(0,0,0,0.06)' : '0 4px 24px rgba(0,0,0,0.04)',
                 transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
             }}
         >
             <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-40"
-                style={{ background: 'radial-gradient(ellipse 90% 100% at 50% 0%, var(--turquoise-10) 0%, transparent 100%)' }} />
+                style={{ background: 'radial-gradient(ellipse 90% 100% at 50% 0%, var(--accent-10) 0%, transparent 100%)' }} />
             <div aria-hidden className="pointer-events-none absolute inset-0"
                 style={{
-                    backgroundImage: 'radial-gradient(circle, var(--turquoise-22) 1px, transparent 1px)',
+                    backgroundImage: 'radial-gradient(circle, var(--accent-22) 1px, transparent 1px)',
                     backgroundSize: '28px 28px',
                     opacity: 0.35,
                     maskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%)',
@@ -364,7 +354,7 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                         style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', color: 'var(--text)', fontFamily: 'var(--font-dm-serif-display), serif', letterSpacing: '-0.01em' }}
                     >
                         What video do you want{' '}
-                        <span style={{ color: 'var(--turquoise)', textShadow: '0 0 32px var(--turquoise-42)' }}>
+                        <span style={{ color: 'var(--accent)', textShadow: '0 0 32px var(--accent-42)' }}>
                             to create?
                         </span>
                     </h1>
@@ -399,11 +389,11 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                                 disabled={!prompt.trim() || generating}
                                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200"
                                 style={{
-                                    backgroundColor: prompt.trim() && !generating ? 'var(--turquoise)' : 'var(--surface-raised)',
+                                    backgroundColor: prompt.trim() && !generating ? 'var(--accent)' : 'var(--surface-raised)',
                                     color: prompt.trim() && !generating ? '#020202' : 'var(--text-tertiary)',
                                     border: `1px solid ${prompt.trim() && !generating ? 'transparent' : 'var(--border-default)'}`,
                                     cursor: prompt.trim() && !generating ? 'pointer' : 'not-allowed',
-                                    boxShadow: prompt.trim() && !generating ? '0 4px 12px var(--turquoise-22)' : 'none',
+                                    boxShadow: prompt.trim() && !generating ? '0 4px 12px var(--accent-22)' : 'none',
                                 }}
                             >
                                 {generating
@@ -412,7 +402,7 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                             </button>
                         </div>
                     </div>
-                    {error && <p className="text-xs text-red-400 mt-2 px-1">{error}</p>}
+                    {error && <p className="text-xs mt-2 px-1" style={{ color: 'var(--error-fg)' }}>{error}</p>}
                 </div>
 
                 <div className="flex flex-wrap justify-center gap-8">
@@ -492,11 +482,11 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                                 disabled={selectedScenes.size === 0}
                                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200"
                                 style={{
-                                    backgroundColor: selectedScenes.size > 0 ? 'var(--turquoise)' : 'var(--surface-raised)',
+                                    backgroundColor: selectedScenes.size > 0 ? 'var(--accent)' : 'var(--surface-raised)',
                                     color: selectedScenes.size > 0 ? '#020202' : 'var(--text-tertiary)',
                                     border: `1px solid ${selectedScenes.size > 0 ? 'transparent' : 'var(--border-default)'}`,
                                     cursor: selectedScenes.size > 0 ? 'pointer' : 'not-allowed',
-                                    boxShadow: selectedScenes.size > 0 ? '0 4px 16px var(--turquoise-32)' : 'none',
+                                    boxShadow: selectedScenes.size > 0 ? '0 4px 16px var(--accent-32)' : 'none',
                                 }}
                             >
                                 Open Editor <ArrowRight size={13} strokeWidth={2.5} />
@@ -563,7 +553,7 @@ export default function DashboardPage() {
             if (res.status === 401) { router.push('/auth/signin?callbackUrl=/dashboard'); return }
             if (!res.ok) throw new Error('Failed')
             const project = await res.json()
-            window.open(`/editor/${project.id}`, '_blank')
+            router.push(`/editor/${project.id}`)
             handleProjectCreated()
         } catch (err) {
             console.error(err)
@@ -601,11 +591,11 @@ export default function DashboardPage() {
                                 disabled={creatingProject}
                                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
                                 style={{
-                                    backgroundColor: 'var(--turquoise)',
+                                    backgroundColor: 'var(--accent)',
                                     color: '#020202',
                                     border: 'none',
                                     cursor: creatingProject ? 'wait' : 'pointer',
-                                    boxShadow: '0 2px 8px var(--turquoise-22)',
+                                    boxShadow: '0 2px 8px var(--accent-22)',
                                     opacity: creatingProject ? 0.7 : 1,
                                 }}
                                 onMouseEnter={e => { if (!creatingProject) e.currentTarget.style.opacity = '0.88' }}
@@ -628,8 +618,8 @@ export default function DashboardPage() {
                             style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}
                         >
                             <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                                style={{ backgroundColor: 'var(--turquoise-8)', border: '1px solid var(--turquoise-22)' }}>
-                                <FolderOpen size={22} style={{ color: 'var(--turquoise)' }} />
+                                style={{ backgroundColor: 'var(--accent-8)', border: '1px solid var(--accent-22)' }}>
+                                <FolderOpen size={22} style={{ color: 'var(--accent)' }} />
                             </div>
                             <div className="flex flex-col items-center gap-1 text-center">
                                 <span className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>
@@ -642,7 +632,7 @@ export default function DashboardPage() {
                             <button
                                 onClick={handleNewProject}
                                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200"
-                                style={{ backgroundColor: 'var(--turquoise)', color: '#020202', border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px var(--turquoise-22)' }}
+                                style={{ backgroundColor: 'var(--accent)', color: '#020202', border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px var(--accent-22)' }}
                             >
                                 <FolderPlus size={13} strokeWidth={2.5} />
                                 Start a project

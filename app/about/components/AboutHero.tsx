@@ -39,12 +39,12 @@ const AboutHero = () => {
       {/* Glows */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-[20%] -right-[10%] w-[600px] h-[600px] rounded-full bg-turquoise-16"
+        className="pointer-events-none absolute -top-[20%] -right-[10%] w-[600px] h-[600px] rounded-full bg-accent-16"
         style={{ filter: 'blur(80px)' }}
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute bottom-[5%] -left-[8%] w-[400px] h-[400px] rounded-full bg-turquoise-8"
+        className="pointer-events-none absolute bottom-[5%] -left-[8%] w-[400px] h-[400px] rounded-full bg-accent-8"
         style={{ filter: 'blur(60px)' }}
       />
 
@@ -62,7 +62,7 @@ const AboutHero = () => {
             }}
           >
             Editing video should feel{' '}
-            <span className="relative inline-block italic text-turquoise">
+            <span className="relative inline-block italic text-accent">
               effortless
               <svg
                 aria-hidden
@@ -73,7 +73,7 @@ const AboutHero = () => {
               >
                 <path
                   d="M2 8 C40 3, 80 10, 120 5 C160 1, 200 9, 218 6"
-                  stroke="var(--turquoise)"
+                  stroke="var(--accent)"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   fill="none"
@@ -123,7 +123,7 @@ const AboutHero = () => {
               { value: '100%', label: 'Runs in your browser' },
             ].map(({ value, label }) => (
               <div key={label} className="flex flex-col gap-0.5">
-                <span className="text-2xl font-normal leading-none text-turquoise">
+                <span className="text-2xl font-normal leading-none text-accent">
                   {value}
                 </span>
                 <span className="text-[0.7rem] font-semibold tracking-[0.06em] uppercase text-muted-48">

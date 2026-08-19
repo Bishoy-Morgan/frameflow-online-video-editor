@@ -22,7 +22,7 @@ export default function FilterGroup({ label, options, selected, onChange, name }
               name={name}
               checked={selected === option}
               onChange={() => onChange(option)}
-              className="w-4 h-4 accent-turquoise"
+              className="w-4 h-4 accent-accent"
             />
             <span className="text-body">{option}</span>
           </label>

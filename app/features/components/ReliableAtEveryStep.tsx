@@ -57,8 +57,8 @@ const StatusLog = () => {
                     System Log
                 </span>
                 <div className="flex items-center gap-1.5">
-                    <div className="dot-turquoise" style={{ animation: 'pulse-dot 2s ease-in-out infinite' }} />
-                    <span className="text-[0.6rem] font-semibold tracking-wide uppercase text-turquoise">
+                    <div className="dot-accent" style={{ animation: 'pulse-dot 2s ease-in-out infinite' }} />
+                    <span className="text-[0.6rem] font-semibold tracking-wide uppercase text-accent">
                         Live
                     </span>
                 </div>
@@ -78,7 +78,7 @@ const StatusLog = () => {
                         {/* Status mark */}
                         <span
                             className="text-[0.65rem] font-bold shrink-0"
-                            style={{ color: line.type === 'ok' ? 'var(--turquoise)' : 'var(--text-28)' }}
+                            style={{ color: line.type === 'ok' ? 'var(--accent)' : 'var(--text-28)' }}
                         >
                             {line.type === 'ok' ? '✓' : '·'}
                         </span>
@@ -91,7 +91,7 @@ const StatusLog = () => {
                         {/* Detail */}
                         <span
                             className="text-[0.65rem] shrink-0"
-                            style={{ color: line.type === 'ok' ? 'var(--turquoise-65)' : 'var(--text-28)' }}
+                            style={{ color: line.type === 'ok' ? 'var(--accent-65)' : 'var(--text-28)' }}
                         >
                             {line.detail}
                         </span>
@@ -102,9 +102,9 @@ const StatusLog = () => {
             {/* Cursor blink at end */}
             {visible >= logLines.length && (
                 <div className="flex items-center gap-3">
-                    <span className="text-[0.65rem] font-bold text-turquoise opacity-0">✓</span>
+                    <span className="text-[0.65rem] font-bold text-accent opacity-0">✓</span>
                     <span
-                        className="inline-block w-1.5 h-3.5 bg-turquoise rounded-sm"
+                        className="inline-block w-1.5 h-3.5 bg-accent rounded-sm"
                         style={{ animation: 'blink 1.1s step-end infinite' }}
                     />
                 </div>
@@ -136,9 +136,9 @@ const PillarCard = ({ pillar, index }: { pillar: typeof pillars[0]; index: numbe
             className="flex flex-col gap-4 p-7 rounded-xl transition-all duration-250 cursor-default"
             style={{ border: '1px solid var(--text-10)', backgroundColor: 'var(--text-5)', backdropFilter: 'blur(8px)' }}
             onMouseEnter={e => {
-                e.currentTarget.style.borderColor = 'var(--turquoise-42)'
+                e.currentTarget.style.borderColor = 'var(--accent-42)'
                 e.currentTarget.style.transform = 'translateY(-3px)'
-                e.currentTarget.style.boxShadow = '0 12px 36px var(--turquoise-8)'
+                e.currentTarget.style.boxShadow = '0 12px 36px var(--accent-8)'
             }}
             onMouseLeave={e => {
                 e.currentTarget.style.borderColor = 'var(--text-10)'
@@ -159,9 +159,9 @@ const PillarCard = ({ pillar, index }: { pillar: typeof pillars[0]; index: numbe
                 <span
                     className="text-[0.6rem] font-bold tracking-wide px-2.5 py-1 rounded-full whitespace-nowrap shrink-0 mt-1"
                     style={{
-                        backgroundColor: 'var(--turquoise-8)',
-                        border: '1px solid var(--turquoise-20)',
-                        color: 'var(--turquoise)',
+                        backgroundColor: 'var(--accent-8)',
+                        border: '1px solid var(--accent-20)',
+                        color: 'var(--accent)',
                     }}
                 >
                     {pillar.signal}
@@ -210,12 +210,12 @@ const ReliableAtEveryStep = () => {
             {/* Glow — bottom left */}
             <div
                 aria-hidden
-                className="pointer-events-none absolute -bottom-[15%] -left-[5%] w-125 h-125 rounded-full bg-turquoise-8"
+                className="pointer-events-none absolute -bottom-[15%] -left-[5%] w-125 h-125 rounded-full bg-accent-8"
                 style={{ filter: 'blur(80px)' }}
             />
 
             {/* Top separator */}
-            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
+            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
 
             <style>{`
                 @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
@@ -254,7 +254,7 @@ const ReliableAtEveryStep = () => {
                         {/* Closing statement */}
                         <div
                             className="flex flex-col justify-between p-7 rounded-xl gap-8"
-                            style={{ border: '1px solid var(--turquoise-20)', backgroundColor: 'var(--turquoise-4)' }}
+                            style={{ border: '1px solid var(--accent-20)', backgroundColor: 'var(--accent-4)' }}
                         >
                             <div className="flex flex-col gap-5">
                                 {[
@@ -266,12 +266,12 @@ const ReliableAtEveryStep = () => {
                                     <div
                                         key={label}
                                         className="flex items-center justify-between"
-                                        style={{ borderBottom: '1px solid var(--turquoise-10)', paddingBottom: '0.875rem' }}
+                                        style={{ borderBottom: '1px solid var(--accent-10)', paddingBottom: '0.875rem' }}
                                     >
                                         <span className="text-[0.8rem] font-semibold text-muted-55">{label}</span>
                                         <span
                                             className="text-[0.8rem] font-bold"
-                                            style={{ color: value === 'None' ? 'var(--turquoise)' : 'var(--text-80)' }}
+                                            style={{ color: value === 'None' ? 'var(--accent)' : 'var(--text-80)' }}
                                         >
                                             {value}
                                         </span>

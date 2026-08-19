@@ -62,7 +62,7 @@ export default function ProjectSettingsPage({ params }: Props) {
                                 value={name}
                                 onChange={e => setName(e.target.value)}
                                 style={inputStyle}
-                                onFocus={e => e.currentTarget.style.borderColor = 'var(--turquoise-42)'}
+                                onFocus={e => e.currentTarget.style.borderColor = 'var(--accent-42)'}
                                 onBlur={e  => e.currentTarget.style.borderColor = 'var(--border-default)'}
                             />
                         </div>

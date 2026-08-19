@@ -8,19 +8,7 @@ import {
     Clapperboard, Film, ArrowRight, Play,
 } from 'lucide-react'
 import { Template } from './TemplatesData'
-
-// Mood colors
-
-const moodColors: Record<string, { bg: string; text: string; border: string }> = {
-    Uplifting:   { bg: 'rgba(251,191,36,0.08)',  text: '#fbbf24', border: 'rgba(251,191,36,0.22)' },
-    Dramatic:    { bg: 'rgba(239,68,68,0.08)',   text: '#ef4444', border: 'rgba(239,68,68,0.22)'  },
-    Calm:        { bg: 'rgba(99,102,241,0.08)',  text: '#818cf8', border: 'rgba(99,102,241,0.22)' },
-    Energetic:   { bg: 'rgba(249,115,22,0.08)',  text: '#fb923c', border: 'rgba(249,115,22,0.22)' },
-    Melancholic: { bg: 'rgba(148,163,184,0.08)', text: '#94a3b8', border: 'rgba(148,163,184,0.22)'},
-    Cinematic:   { bg: 'var(--turquoise-8)',      text: 'var(--turquoise)', border: 'var(--turquoise-22)' },
-    Playful:     { bg: 'rgba(52,211,153,0.08)',  text: '#34d399', border: 'rgba(52,211,153,0.22)' },
-}
-const defaultMood = { bg: 'var(--surface-raised)', text: 'var(--text-tertiary)', border: 'var(--border-subtle)' }
+import { getMoodColor } from '@/lib/constants/moods'
 
 // Preview Modal
 
@@ -99,7 +87,7 @@ function PreviewModal({ template, onClose, onUse, loading }: {
                                     width:           i === currentClip ? '20px' : '6px',
                                     height:          '6px',
                                     borderRadius:    '3px',
-                                    backgroundColor: i === currentClip ? 'var(--turquoise)' : 'rgba(255,255,255,0.4)',
+                                    backgroundColor: i === currentClip ? 'var(--accent)' : 'rgba(255,255,255,0.4)',
                                     border:          'none',
                                     cursor:          'pointer',
                                     padding:         0,
@@ -112,7 +100,7 @@ function PreviewModal({ template, onClose, onUse, loading }: {
                     <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
                         <div
                             className="h-full transition-all duration-100"
-                            style={{ width: `${progress}%`, backgroundColor: 'var(--turquoise)' }}
+                            style={{ width: `${progress}%`, backgroundColor: 'var(--accent)' }}
                         />
                     </div>
 
@@ -175,14 +163,14 @@ function PreviewModal({ template, onClose, onUse, loading }: {
                     {/* Scene breakdown */}
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2.5 mb-1">
-                            <div className="w-4 h-px" style={{ backgroundColor: 'var(--turquoise)' }} />
-                            <span className="text-[0.62rem] font-bold tracking-[0.12em] uppercase" style={{ color: 'var(--turquoise)' }}>
+                            <div className="w-4 h-px" style={{ backgroundColor: 'var(--accent)' }} />
+                            <span className="text-[0.62rem] font-bold tracking-[0.12em] uppercase" style={{ color: 'var(--accent)' }}>
                                 Scene Breakdown
                             </span>
                         </div>
 
                         {template.scenes.map((scene, i) => {
-                            const mood = moodColors[scene.musicMood] ?? defaultMood
+                            const mood = getMoodColor(scene.musicMood)
                             return (
                                 <div
                                     key={i}
@@ -191,7 +179,7 @@ function PreviewModal({ template, onClose, onUse, loading }: {
                                 >
                                     <div
                                         className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold"
-                                        style={{ backgroundColor: 'var(--turquoise-8)', border: '1px solid var(--turquoise-22)', color: 'var(--turquoise)' }}
+                                        style={{ backgroundColor: 'var(--accent-8)', border: '1px solid var(--accent-22)', color: 'var(--accent)' }}
                                     >
                                         {i + 1}
                                     </div>
@@ -229,11 +217,11 @@ function PreviewModal({ template, onClose, onUse, loading }: {
                         disabled={loading}
                         className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-opacity shrink-0"
                         style={{
-                            backgroundColor: template.isPremium ? 'rgb(236,72,153)' : 'var(--turquoise)',
+                            backgroundColor: template.isPremium ? 'rgb(236,72,153)' : 'var(--accent)',
                             color:           '#fff',
                             border:          'none',
                             cursor:          loading ? 'wait' : 'pointer',
-                            boxShadow:       template.isPremium ? '0 4px 14px rgba(236,72,153,0.3)' : '0 4px 14px var(--turquoise-22)',
+                            boxShadow:       template.isPremium ? '0 4px 14px rgba(236,72,153,0.3)' : '0 4px 14px var(--accent-22)',
                         }}
                         onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }}
                         onMouseLeave={e => { e.currentTarget.style.opacity = '1'    }}
@@ -415,7 +403,7 @@ export default function TemplateCard({ template }: { template: Template }) {
                     <p className="text-xs leading-snug m-0" style={{ color: 'var(--text-tertiary)' }}>{template.description}</p>
                 </div>
 
-                {error && <p className="text-xs font-semibold px-0.5 m-0" style={{ color: '#ef4444' }}>{error}</p>}
+                {error && <p className="text-xs font-semibold px-0.5 m-0" style={{ color: 'var(--error-fg)' }}>{error}</p>}
             </div>
         </>
     )

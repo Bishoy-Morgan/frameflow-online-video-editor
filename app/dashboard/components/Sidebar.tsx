@@ -52,17 +52,17 @@ export default function Sidebar() {
     const NavLink = ({ label, href, icon: Icon, external }: typeof navItems[0]) => {
         const active = isActive(href)
         const sharedStyle = {
-            backgroundColor: active ? 'var(--turquoise-8)' : 'transparent',
-            border:          `1px solid ${active ? 'var(--turquoise-22)' : 'transparent'}`,
+            backgroundColor: active ? 'var(--accent-8)' : 'transparent',
+            border:          `1px solid ${active ? 'var(--accent-22)' : 'transparent'}`,
             textDecoration:  'none',
-            color:           active ? 'var(--turquoise)' : 'var(--text-tertiary)',
+            color:           active ? 'var(--accent)' : 'var(--text-tertiary)',
             minWidth: 0,
         }
         const sharedEnter = (e: React.MouseEvent<HTMLAnchorElement>) => { if (!active) { e.currentTarget.style.backgroundColor = 'var(--surface-raised)'; e.currentTarget.style.color = 'var(--text)' } }
         const sharedLeave = (e: React.MouseEvent<HTMLAnchorElement>) => { if (!active) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)' } }
         const inner = (
             <>
-                {active && <div className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-turquoise" style={{ boxShadow: '0 0 6px var(--turquoise)' }} />}
+                {active && <div className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-accent" style={{ boxShadow: '0 0 6px var(--accent)' }} />}
                 <Icon size={17} strokeWidth={active ? 2 : 1.75} className="shrink-0" />
                 <span className="text-sm font-semibold whitespace-nowrap overflow-hidden"
                     style={{ opacity: expanded ? 1 : 0, maxWidth: expanded ? '120px' : '0px', transition: 'opacity 0.15s ease, max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
@@ -147,7 +147,7 @@ export default function Sidebar() {
                             {user.image
                                 ? <Image src={user.image} alt={displayName} width={32} height={32} className="rounded-lg object-cover" style={{ border: '1px solid var(--border-default)' }} />
                                 : <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
-                                    style={{ backgroundColor: 'var(--turquoise-10)', border: '1px solid var(--turquoise-22)', color: 'var(--turquoise)' }}>{initials}</div>}
+                                    style={{ backgroundColor: 'var(--accent-10)', border: '1px solid var(--accent-22)', color: 'var(--accent)' }}>{initials}</div>}
                         </div>
                     </Tooltip>
                 ) : (
@@ -156,7 +156,7 @@ export default function Sidebar() {
                         {user.image
                             ? <Image src={user.image} alt={displayName} width={28} height={28} className="rounded-md object-cover shrink-0" style={{ border: '1px solid var(--border-default)' }} />
                             : <div className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold shrink-0"
-                                style={{ backgroundColor: 'var(--turquoise-10)', border: '1px solid var(--turquoise-22)', color: 'var(--turquoise)' }}>{initials}</div>}
+                                style={{ backgroundColor: 'var(--accent-10)', border: '1px solid var(--accent-22)', color: 'var(--accent)' }}>{initials}</div>}
                         <div className="flex flex-col min-w-0 gap-0.5">
                             <span className="text-xs font-bold text-secondary truncate leading-none">{displayName}</span>
                             <span className="text-[0.6rem] text-tertiary font-medium leading-none">{user.role === 'ADMIN' ? 'Admin' : 'Free plan'}</span>
@@ -169,7 +169,7 @@ export default function Sidebar() {
             <button onClick={() => setExpanded(e => !e)}
                 className="absolute -right-3 top-18 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer focus:outline-none z-20"
                 style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border-default)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', color: 'var(--text-tertiary)', transition: 'border-color 0.15s ease, color 0.15s ease' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--turquoise-42)'; e.currentTarget.style.color = 'var(--turquoise)' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-42)'; e.currentTarget.style.color = 'var(--accent)' }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text-tertiary)' }}>
                 <ChevronRight size={13} strokeWidth={2.5}
                     style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }} />

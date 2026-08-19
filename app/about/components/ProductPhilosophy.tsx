@@ -43,20 +43,20 @@ const ProductPhilosophy = () => {
         aria-hidden
         className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
         style={{
-          background: 'radial-gradient(circle, var(--turquoise-16) 0%, transparent 65%)',
+          background: 'radial-gradient(circle, var(--accent-16) 0%, transparent 65%)',
           filter: 'blur(40px)',
         }}
       />
 
       {/* Top separator */}
-      <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-turquoise" />
+      <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
 
       <div className="container relative z-10 flex flex-col items-center text-center max-w-[800px] gap-8">
 
         {/* Label */}
         <div ref={labelRef} className="flex items-center gap-3">
-          <div className="w-7 h-px bg-turquoise" />
-          <span className="text-[0.7rem] font-bold tracking-[0.14em] uppercase text-turquoise">
+          <div className="w-7 h-px bg-accent" />
+          <span className="text-[0.7rem] font-bold tracking-[0.14em] uppercase text-accent">
             OUR PHILOSOPHY
           </span>
         </div>
@@ -72,7 +72,7 @@ const ProductPhilosophy = () => {
           }}
         >
           Tools should feel{' '}
-          <span className="italic text-turquoise">invisible</span>{' '}
+          <span className="italic text-accent">invisible</span>{' '}
           — not overwhelming.
         </h2>
 
