@@ -17,9 +17,9 @@ interface ButtonProps extends ComponentPropsWithoutRef<typeof motion.button> {
 }
 
 const sizes: Record<Size, string> = {
-    sm: "px-4 py-2 text-sm   gap-1.5",
-    md: "px-6 py-3 text-base gap-2",
-    lg: "px-8 py-4 text-lg   gap-2.5",
+    sm: "text-body 3xl:text-lead px-4 3xl:px-6 py-2 3xl:py-2.5 gap-1.5",
+    md: "text-body 3xl:text-lead px-6 py-3 gap-2",
+    lg: "text-lead 3xl:text-hero px-6 py-3.5 3xl:py-3 gap-2.5",
 };
 
 export default function Button({
@@ -59,7 +59,7 @@ export default function Button({
                 onHoverEnd={() => setHovered(false)}
                 className={clsx(
                     "relative flex flex-row items-center justify-center font-semibold",
-                    "rounded-lg cursor-pointer focus:outline-none transition-opacity duration-200",
+                    "rounded-xl cursor-pointer focus:outline-none transition-opacity duration-200",
                     "focus-visible:ring-2 focus-visible:ring-(--accent) focus-visible:ring-offset-2",
                     sizes[size],
                     containerStyles.ghost,
@@ -93,7 +93,7 @@ export default function Button({
             onHoverEnd={() => setHovered(false)}
             className={clsx(
                 "relative flex flex-row items-center justify-center font-semibold",
-                "rounded-lg overflow-hidden cursor-pointer focus:outline-none",
+                "rounded-xl overflow-hidden cursor-pointer focus:outline-none",
                 "focus-visible:ring-2 focus-visible:ring-(--accent) focus-visible:ring-offset-2",
                 sizes[size],
                 containerStyles[variant],

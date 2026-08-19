@@ -15,15 +15,23 @@ function videoUrl(slug: string): string {
 }
 
 const templates = [
-    { name: 'Vlog Intro',       category: 'YouTube',   slug: 'vlog-intro',       isPremium: false },
-    { name: 'Product Showcase', category: 'Business',  slug: 'product-showcase', isPremium: false },
-    { name: 'Tutorial',         category: 'Education', slug: 'tutorial-opener',  isPremium: true  },
-    { name: 'Music Video',      category: 'Creative',  slug: 'music-video',      isPremium: false },
-    { name: 'Social Ad',        category: 'Marketing', slug: 'social-ad',        isPremium: false },
-    { name: 'Testimonial',      category: 'Business',  slug: 'testimonial',      isPremium: true  },
+    { name: 'Vlog Intro', category: 'YouTube', slug: 'vlog-intro', isPremium: false },
+    { name: 'Product Showcase', category: 'Business', slug: 'product-showcase', isPremium: false },
+    { name: 'Tutorial', category: 'Education', slug: 'tutorial-opener', isPremium: true },
+    { name: 'Music Video', category: 'Creative', slug: 'music-video', isPremium: false },
+    { name: 'Social Ad', category: 'Marketing', slug: 'social-ad', isPremium: false },
+    { name: 'Testimonial', category: 'Business', slug: 'testimonial', isPremium: true },
 ]
 
-// ─── Individual card ──────────────────────────────────────────────────────────
+const fallbackAccentClasses = [
+    'from-(--accent-35)',
+    'from-(--accent-22)',
+    'from-(--accent-42)',
+    'from-(--accent-16)',
+    'from-(--accent-32)',
+    'from-(--accent-20)',
+]
+
 
 const TemplateCard = ({
     template,
@@ -32,24 +40,21 @@ const TemplateCard = ({
     template: typeof templates[0]
     index:    number
 }) => {
-    const router                        = useRouter()
-    const ref                           = useRef<HTMLDivElement>(null)
-    const videoRef                      = useRef<HTMLVideoElement>(null)
-    const [isHovered,   setIsHovered]   = useState(false)
+    const router = useRouter()
+    const ref = useRef<HTMLDivElement>(null)
+    const videoRef = useRef<HTMLVideoElement>(null)
+    const [isHovered, setIsHovered] = useState(false)
     const [videoLoaded, setVideoLoaded] = useState(false)
-    const [videoError,  setVideoError]  = useState(false)
-    const [creating,    setCreating]    = useState(false)
+    const [videoError, setVideoError] = useState(false)
+    const [creating, setCreating] = useState(false)
 
-    // Staggered entrance
     useEffect(() => {
         const el = ref.current
         if (!el) return
-        el.style.opacity   = '0'
-        el.style.transform = 'translateY(20px)'
+        el.classList.add('opacity-0', 'translate-y-5')
         const t = setTimeout(() => {
-            el.style.transition = 'opacity 0.55s ease, transform 0.55s ease'
-            el.style.opacity    = '1'
-            el.style.transform  = 'translateY(0)'
+            el.classList.remove('opacity-0', 'translate-y-5')
+            el.classList.add('opacity-100', 'translate-y-0')
         }, 80 + index * 70)
         return () => clearTimeout(t)
     }, [index])
@@ -70,9 +75,9 @@ const TemplateCard = ({
         setCreating(true)
         try {
             const res = await fetch('/api/projects', {
-                method:  'POST',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ name: template.name, style: 'Modern', aspectRatio: '16:9' }),
+                body: JSON.stringify({ name: template.name, style: 'Modern', aspectRatio: '16:9' }),
             })
             if (res.status === 401) { router.push('/auth/signin?callbackUrl=/templates'); return }
             if (!res.ok) throw new Error('Failed')
@@ -90,38 +95,27 @@ const TemplateCard = ({
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
-            {/* Card */}
             <div
-                className="relative rounded-2xl overflow-hidden"
-                style={{
-                    aspectRatio: '9 / 16',
-                    backgroundColor: '#0a0a0a',
-                    border: `1px solid ${isHovered ? 'var(--accent-42)' : 'var(--accent-22)'}`,
-                    transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
-                    boxShadow: isHovered ? '0 0 24px var(--accent-16), 0 20px 40px rgba(0,0,0,0.4)' : '0 8px 24px rgba(0,0,0,0.25)',
-                }}
+                className={`relative aspect-[9/16] overflow-hidden rounded-2xl border bg-neutral-950 transition-[border-color,box-shadow] duration-300 ${
+                    isHovered
+                        ? 'border-accent-42 glow-accent'
+                        : 'border-accent-22 shadow-[0_8px_24px_rgba(0,0,0,0.25)]'
+                }`}
             >
-                {/* Gradient fallback */}
                 {(videoError || !videoLoaded) && (
                     <div
-                        className="absolute inset-0"
-                        style={{
-                            background: `linear-gradient(160deg, var(--accent-${[35, 22, 42, 16, 32, 20][index]}) 0%, var(--accent-8) 100%)`,
-                        }}
+                        className={`absolute inset-0 bg-linear-to-br ${fallbackAccentClasses[index]} to-(--accent-8)`}
                     />
                 )}
 
-                {/* Spinner while loading */}
                 {!videoLoaded && !videoError && (
-                    <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 2 }}>
+                    <div className="absolute inset-0 z-2 flex items-center justify-center">
                         <div
-                            className="w-7 h-7 rounded-full border-2 animate-spin"
-                            style={{ borderColor: 'rgba(255,255,255,0.12)', borderTopColor: 'rgba(255,255,255,0.6)' }}
+                            className="h-7 w-7 animate-spin rounded-full"
                         />
                     </div>
                 )}
 
-                {/* Video */}
                 {!videoError && (
                     <video
                         ref={videoRef}
@@ -132,97 +126,64 @@ const TemplateCard = ({
                         preload="auto"
                         onLoadedData={() => setVideoLoaded(true)}
                         onError={() => setVideoError(true)}
-                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
-                        style={{ opacity: videoLoaded ? 1 : 0, zIndex: 1 }}
+                        className={`absolute inset-0 z-1 h-full w-full object-cover transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
                     />
                 )}
 
-                {/* Dark overlay */}
                 <div
-                    className="absolute inset-0 transition-colors duration-300"
-                    style={{
-                        backgroundColor: isHovered ? 'rgba(0,0,0,0.28)' : 'rgba(0,0,0,0.18)',
-                        zIndex: 3,
-                    }}
+                    className={`absolute inset-0 z-3 transition-colors duration-300 ${isHovered ? 'bg-black/28' : 'bg-black/18'}`}
                 />
 
-                {/* Hover actions */}
                 <div
-                    className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 transition-opacity duration-250"
-                    style={{ opacity: isHovered ? 1 : 0, zIndex: 4 }}
+                    className={`absolute inset-0 z-4 flex flex-col items-center justify-center gap-2.5 transition-opacity duration-250 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
                 >
-                    {/* Use template button */}
                     <button
                         onClick={handleUseTemplate}
                         disabled={creating}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition-transform active:scale-95"
-                        style={{
-                            backgroundColor: template.isPremium ? 'rgba(236,72,153,0.85)' : 'rgba(255,255,255,0.18)',
-                            backdropFilter: 'blur(10px)',
-                            border: '1px solid rgba(255,255,255,0.25)',
-                            cursor: creating ? 'wait' : 'pointer',
-                        }}
+                        className={`flex items-center gap-1.5 rounded-xl border border-white/25 px-4 py-2 text-xs font-bold text-white backdrop-blur-[10px] transition-transform active:scale-95 ${
+                            template.isPremium ? 'bg-pink-500/85' : 'bg-white/18'
+                        } ${creating ? 'cursor-wait' : 'cursor-pointer'}`}
                     >
                         {template.isPremium ? <Lock size={11} /> : <Play size={11} strokeWidth={0} className="fill-white" />}
                         {creating ? 'Creating…' : template.isPremium ? 'Unlock PRO' : 'Use Template'}
                     </button>
 
-                    {/* Browse link */}
                     <Link
                         href="/templates"
-                        className="text-[10px] font-semibold transition-opacity"
-                        style={{ color: 'rgba(255,255,255,0.6)' }}
+                        className="text-[10px] font-semibold text-white/60 transition-opacity"
                         onClick={e => e.stopPropagation()}
                     >
                         See all templates →
                     </Link>
                 </div>
 
-                {/* PRO badge */}
                 {template.isPremium && (
-                    <div className="absolute top-3 right-3" style={{ zIndex: 5 }}>
+                    <div className="absolute right-3 top-3 z-5">
                         <span
-                            className="flex items-center gap-1 text-[0.58rem] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full"
-                            style={{ backgroundColor: 'rgba(236,72,153,0.85)', backdropFilter: 'blur(6px)', color: '#fff' }}
+                            className="flex items-center gap-1 rounded-full bg-pink-500/85 px-2.5 py-1 text-[0.58rem] font-bold uppercase tracking-widest text-white backdrop-blur-[6px]"
                         >
                             <Lock size={8} /> PRO
                         </span>
                     </div>
                 )}
 
-                {/* Category badge */}
                 {!template.isPremium && (
-                    <div className="absolute top-3 right-3" style={{ zIndex: 5 }}>
+                    <div className="absolute right-3 top-3 z-5">
                         <span
-                            className="text-[0.58rem] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full"
-                            style={{
-                                backgroundColor: 'rgba(2,2,2,0.45)',
-                                backdropFilter: 'blur(6px)',
-                                color: '#fefefe',
-                                border: '1px solid rgba(255,255,255,0.12)',
-                            }}
+                            className="rounded-full border border-white/12 bg-black/45 px-2.5 py-1 text-small font-bold uppercase tracking-widest text-white backdrop-blur-[6px]"
                         >
                             {template.category}
                         </span>
                     </div>
                 )}
 
-                {/* Bottom accent accent line */}
                 <div
-                    className="absolute bottom-0 inset-x-0 h-0.5 transition-opacity duration-300"
-                    style={{
-                        opacity: isHovered ? 1 : 0,
-                        backgroundColor: 'var(--accent)',
-                        boxShadow: '0 0 8px var(--accent)',
-                        zIndex: 5,
-                    }}
+                    className={`absolute inset-x-0 bottom-0 z-5 h-0.5 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
                 />
             </div>
 
-            {/* Name */}
             <span
-                className="text-sm font-semibold transition-colors duration-200"
-                style={{ color: isHovered ? 'var(--text)' : 'var(--text-secondary)' }}
+                className={`text-sm font-semibold transition-colors duration-200 ${isHovered ? 'text-(--text)' : 'text-secondary'}`}
             >
                 {template.name}
             </span>
@@ -230,20 +191,16 @@ const TemplateCard = ({
     )
 }
 
-// ─── Section ──────────────────────────────────────────────────────────────────
-
 const TemplatesSection = () => {
     const headerRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         const el = headerRef.current
         if (!el) return
-        el.style.opacity   = '0'
-        el.style.transform = 'translateY(14px)'
+        el.classList.add('opacity-0', 'translate-y-4')
         setTimeout(() => {
-            el.style.transition = 'opacity 0.55s ease, transform 0.55s ease'
-            el.style.opacity    = '1'
-            el.style.transform  = 'translateY(0)'
+            el.classList.remove('opacity-0', 'translate-y-4')
+            el.classList.add('opacity-100', 'translate-y-0')
         }, 60)
     }, [])
 
@@ -252,19 +209,9 @@ const TemplatesSection = () => {
 
             <SectionGrid />
 
-            {/* Glow — bottom left */}
-            <div
-                aria-hidden
-                className="pointer-events-none absolute -bottom-[15%] -left-[5%] w-120 h-120 rounded-full"
-                style={{ background: 'radial-gradient(circle, var(--accent-8) 0%, transparent 70%)', filter: 'blur(72px)' }}
-            />
-
-            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
-
             <div className="container relative z-10">
 
-                {/* Header */}
-                <div ref={headerRef} className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-12">
+                <div ref={headerRef} className="mb-12 flex translate-y-4 flex-col items-start gap-6 opacity-0 transition-all duration-550 ease-out md:flex-row md:items-end md:justify-between">
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-3">
                             <div className="w-7 h-px bg-accent" />
@@ -272,7 +219,7 @@ const TemplatesSection = () => {
                                 Templates
                             </span>
                         </div>
-                        <h2 className="font-normal m-0" style={{ fontSize: 'clamp(1.75rem, 3.5vw, 2.75rem)' }}>
+                        <h2 className="m-0 text-[clamp(1.75rem,3.5vw,2.75rem)] font-normal">
                             Ready-to-use templates.
                         </h2>
                         <p className="m-0 text-sm text-tertiary">
@@ -291,7 +238,6 @@ const TemplatesSection = () => {
                     </Link>
                 </div>
 
-                {/* Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                     {templates.map((template, i) => (
                         <TemplateCard key={template.slug} template={template} index={i} />

@@ -39,31 +39,12 @@ const HeroSection = () => {
 
             <SectionGrid />
 
-            <div
-                aria-hidden
-                className="pointer-events-none absolute -top-[15%] -right-[5%] w-162.5 h-162.5 rounded-full"
-                style={{ background: 'radial-gradient(circle, var(--accent-10) 0%, transparent 70%)', filter: 'blur(72px)' }}
-            />
-            <div
-                aria-hidden
-                className="pointer-events-none absolute bottom-0 -left-[10%] w-100 h-100 rounded-full"
-                style={{ background: 'radial-gradient(circle, var(--accent-6) 0%, transparent 70%)', filter: 'blur(60px)' }}
-            />
-
             <div className="container relative z-10 pt-40 pb-20">
                 <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
-
                     <div className="w-full lg:w-1/2 flex flex-col items-start">
-
                         <h1
                             ref={headlineRef}
-                            className="font-normal m-0 mb-6"
-                            style={{
-                                fontSize: 'clamp(2.5rem, 4.2vw, 4.5rem)',
-                                lineHeight: 1.08,
-                                letterSpacing: '-0.025em',
-                                color: 'var(--text)',
-                            }}
+                            className="font-normal m-0 mb-6 text-main "
                         >
                             Edit video.
                             <br />
@@ -74,8 +55,7 @@ const HeroSection = () => {
 
                         <p
                             ref={subRef}
-                            className="m-0 mb-10 leading-[1.75] text-tertiary"
-                            style={{ maxWidth: '460px', fontSize: 'clamp(1rem, 0.85rem + 0.5vw, 1.2rem)' }}
+                            className="m-0 mb-10 text-lead 3xl:text-hero"
                         >
                             Frameflow gives you a fast, structured timeline editor for social media,
                             marketing content, and product demos — no downloads, no complexity.
@@ -91,8 +71,8 @@ const HeroSection = () => {
                             </Button>
                             <Button
                                 variant="ghost"
-                                size="lg"
-                                icon={<ArrowRight size={15} strokeWidth={2} />}
+                                size="md"
+                                icon={<ArrowRight size={20} strokeWidth={2} />}
                                 iconPosition="right"
                                 onClick={() => window.open('/features', '_self')}
                             >
@@ -100,30 +80,15 @@ const HeroSection = () => {
                             </Button>
                         </div>
 
-                        <p className="m-0 mt-5 text-xs text-tertiary font-medium ml-1">
+                        <p className="m-0 mt-5 text-small text-tertiary font-medium ml-1">
                             No credit card required · Free forever plan available
                         </p>
                     </div>
 
                     <div ref={imageRef} className="w-full lg:w-1/2 flex items-center justify-center lg:justify-end">
                         <div className="relative w-full max-w-145">
-
-                            <div
-                                aria-hidden
-                                className="absolute inset-0 -z-10"
-                                style={{
-                                    background: 'radial-gradient(ellipse 80% 60% at 50% 100%, var(--accent-10), transparent)',
-                                    filter: 'blur(32px)',
-                                    transform: 'translateY(10%)',
-                                }}
-                            />
-
                             <div
                                 className="rounded-2xl overflow-hidden"
-                                style={{
-                                    border: '1px solid var(--border-default)',
-                                    boxShadow: '0 32px 80px rgba(0,0,0,0.1), 0 0 0 1px var(--border-subtle)',
-                                }}
                             >
                                 <Image
                                     src={laptopMockup}
@@ -137,37 +102,28 @@ const HeroSection = () => {
                             </div>
 
                             <div
-                                className="absolute -bottom-4 -left-4 flex items-center gap-2.5 px-4 py-2.5 rounded-xl"
-                                style={{
-                                    backgroundColor: 'var(--bg)',
-                                    border: '1px solid var(--border-default)',
-                                    boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-                                }}
+                                className="absolute -bottom-4 -left-4 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-(--bg) border border-(--border-default) shadow-md"
                             >
                                 <span className="w-1.5 h-1.5 rounded-full bg-accent shadow-accent" />
-                                <span className="text-xs font-bold text-secondary">No install required</span>
+                                <span className="text-small font-bold">
+                                    No install required
+                                </span>
                             </div>
 
                             <div
-                                className="absolute -top-4 -right-4 flex items-center gap-2.5 px-4 py-2.5 rounded-xl"
-                                style={{
-                                    backgroundColor: 'var(--bg)',
-                                    border: '1px solid var(--border-default)',
-                                    boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-                                }}
+                                className="absolute -top-4 -right-4 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-(--bg) border border-(--border-default) shadow-md"
                             >
                                 <span
-                                    className="font-normal leading-none text-accent"
-                                    style={{ fontFamily: 'var(--font-dm-serif-display), serif', fontSize: '1.1rem' }}
+                                    className="text-lead font-semibold font-mono leading-none text-accent"
                                 >
                                     60fps
                                 </span>
-                                <span className="text-xs text-tertiary font-medium">Timeline playback</span>
+                                <span className="text-small text-tertiary font-medium">
+                                    Timeline playback
+                                </span>
                             </div>
-
                         </div>
                     </div>
-
                 </div>
             </div>
         </section>

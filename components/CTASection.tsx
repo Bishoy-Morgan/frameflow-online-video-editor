@@ -7,14 +7,14 @@ import SectionGrid from './ui/SectionGrid'
 
 const CTASection = () => {
     const headlineRef = useRef<HTMLHeadingElement>(null)
-    const subRef      = useRef<HTMLParagraphElement>(null)
-    const ctaRef      = useRef<HTMLDivElement>(null)
+    const subRef = useRef<HTMLParagraphElement>(null)
+    const ctaRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         const seq = [
-            { el: headlineRef.current, delay: 0   },
-            { el: subRef.current,      delay: 120 },
-            { el: ctaRef.current,      delay: 240 },
+            { el: headlineRef.current, delay: 0 },
+            { el: subRef.current, delay: 120 },
+            { el: ctaRef.current, delay: 240 },
         ]
         seq.forEach(({ el, delay }) => {
             if (!el) return
@@ -29,31 +29,21 @@ const CTASection = () => {
     }, [])
 
     return (
-        <section className="relative w-full overflow-hidden py-28 surface">
-
-            <div className="opacity-70"><SectionGrid /></div>
-            <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-32 surface" />
-            <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
-
-            {/* Centered glow */}
-            <div
-                aria-hidden
-                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
-                style={{ background: 'radial-gradient(circle, var(--accent-10) 0%, transparent 65%)', filter: 'blur(48px)' }}
-            />
+        <section className="relative w-full overflow-hidden py-28">
+            <SectionGrid />
 
             <div className="container relative z-10 flex flex-col items-center text-center gap-8">
-
                 <h2
                     ref={headlineRef}
-                    className="font-normal m-0 max-w-[600px]"
-                    style={{ fontSize: 'clamp(2.25rem, 5vw, 4rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
+                    className="text-main max-w-150"
                 >
                     Start creating{' '}
-                    <span className="italic text-accent">something great.</span>
+                    <span className="italic text-(--accent-fg)">
+                        something great.
+                    </span>
                 </h2>
 
-                <p ref={subRef} className="m-0 text-base leading-relaxed text-tertiary max-w-[420px]">
+                <p ref={subRef} className="text-lead text-tertiary max-w-105">
                     Join creators building faster, cleaner video workflows — directly in the browser.
                 </p>
 
@@ -61,7 +51,7 @@ const CTASection = () => {
                     <Button
                         variant="primary"
                         size="lg"
-                        icon={<ArrowRight size={15} strokeWidth={2} />}
+                        icon={<ArrowRight size={22} strokeWidth={2} />}
                         iconPosition="right"
                         onClick={() => window.open('/auth/signup', '_self')}
                     >
@@ -70,14 +60,14 @@ const CTASection = () => {
                     <Button
                         variant="ghost"
                         size="lg"
-                        icon={<Play size={14} strokeWidth={2} />}
+                        icon={<Play size={22} strokeWidth={2} />}
                         iconPosition="left"
                     >
                         Watch Demo
                     </Button>
                 </div>
 
-                <p className="m-0 text-xs text-tertiary font-medium">
+                <p className="text-small text-tertiary font-medium">
                     No credit card required · Free forever plan available
                 </p>
 

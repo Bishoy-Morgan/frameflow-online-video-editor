@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTheme } from '@/hooks/useTheme'
 import { useSession } from 'next-auth/react'
-import { Moon, Sun, LayoutDashboard, ChevronDown, LogOut, User } from 'lucide-react'
+import { Moon, Sun, ChevronDown, ArrowLeftFromLine, User, SquareBottomDashedScissors } from 'lucide-react'
 import Link from 'next/link'
 import Button from './ui/Button'
 import { useState, useRef, useEffect } from 'react'
@@ -34,10 +34,12 @@ function UserMenu({
     const ref = useRef<HTMLDivElement>(null)
     const [imageFailed, setImageFailed] = useState(false)
 
-    const initials    = name
+    const initials = name
         ? name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
         : (email?.[0] ?? '?').toUpperCase()
+
     const displayName = name ?? email?.split('@')[0] ?? 'User'
+    const firstName = name?.split(' ')[0] ?? email?.split('@')[0] ?? 'User'
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {
@@ -51,13 +53,12 @@ function UserMenu({
         <div ref={ref} className="relative">
             <button
                 onClick={() => setOpen(o => !o)}
-                className="flex items-center gap-2 px-2 py-1.5 rounded-2xl transition-all duration-150 focus:outline-none"
-                style={{
-                    backgroundColor: open ? 'var(--surface-raised)' : 'transparent',
-                    border: `1px solid ${open ? 'var(--border-default)' : 'transparent'}`,
-                }}
-                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--surface-raised)'; e.currentTarget.style.borderColor = 'var(--border-default)' }}
-                onMouseLeave={e => { if (!open) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'transparent' } }}
+                className={`flex items-center gap-1 p-1 rounded-xl transition-all duration-150 focus:outline-none hover:shadow-md 
+                    ${open ? 'shadow-md' : ''}
+                `}
+                aria-label="User menu"
+                aria-expanded={open}
+                aria-haspopup="true"
             >
 
                 {image && !imageFailed ? (
@@ -67,17 +68,19 @@ function UserMenu({
                         width={28} 
                         height={28}
                         className="rounded-lg object-cover shrink-0"
-                        style={{ border: '1px solid var(--border-default)' }}
                         onError={() => setImageFailed(true)}
                     />
                 ) : (
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center font-bold shrink-0"
-                        style={{ backgroundColor: 'var(--accent-10)', border: '1px solid var(--accent-22)', color: 'var(--accent)' }}>
+                    <div className={`p-1 rounded-lg text-(--accent)! text-caption font-medium 3xl:text-lead bg-(--accent-10) border border-(--accent-22)`}
+                    >
                         {initials}
                     </div>
                 )}
-                <ChevronDown size={13} strokeWidth={2}
-                    style={{ color: 'var(--text-tertiary)', transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
+                <ChevronDown 
+                    size={18} 
+                    strokeWidth={2}
+                    className={`transition-transform duration-200 opacity-30 hover:opacity-100 ${open ? 'rotate-180 ' : ''}`} 
+                />
             </button>
 
             {open && (
@@ -87,8 +90,8 @@ function UserMenu({
                 >
                     <div className="flex justify-center gap-3 px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                         <div className="flex flex-col items-center">
-                            <span className="text-caption 3xl:text-body font-bold truncate" style={{ color: 'var(--text-secondary)' }}>
-                                {displayName}
+                            <span className="text-caption 3xl:text-lead font-bold truncate" style={{ color: 'var(--text-secondary)' }}>
+                                Hello, {firstName}
                             </span>
                             <span className="text-small 3xl:text-caption font-medium truncate" style={{ color: 'var(--text-tertiary)' }}>{email}</span>
                         </div>
@@ -96,20 +99,20 @@ function UserMenu({
 
                     <div className="py-2 flex justify-center">
                         <Button
-                            variant="secondary"
+                            variant="ghost"
                             size="sm"
-                            icon={<User size={14} strokeWidth={1.75} />}
+                            icon={<User size={22} strokeWidth={1.5} />}
                             onClick={() => { setOpen(false); router.push('/dashboard') }}
                         >
                             Profile
                         </Button>
                     </div>
 
-                    <div className="p-1 flex justify-center" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                    <div className="py-3 flex justify-center" style={{ borderTop: '1px solid var(--border-subtle)' }}>
                         <Button
-                            variant="ghost"
+                            variant="secondary"
                             size="sm"
-                            icon={<LogOut size={14} strokeWidth={1.75} />}
+                            icon={<ArrowLeftFromLine size={22} strokeWidth={1.5} />}
                             onClick={() => signOut({ callbackUrl: '/' })}
                         >
                             Sign Out
@@ -133,17 +136,12 @@ const Navbar = () => {
         href === '/' ? pathname === '/' : pathname.startsWith(href)
 
     return (
-        <header className="fixed top-0 inset-x-0 z-50 flex justify-center pt-[2%] px-4 pointer-events-none">
+        <header className="fixed top-0 inset-x-0 z-50 flex justify-center pt-[2%] w-full pointer-events-none">
             <nav
                 suppressHydrationWarning
-                className="pointer-events-auto w-3/4 max-w-350 flex items-center justify-between px-5 py-3 3xl:px-8 3xl:py-4 rounded-2xl"
-                style={{
-                    backgroundColor: 'var(--bg)',
-                    border: '1px solid var(--border-default)',
-                    boxShadow: isDark
-                        ? '0 0 0 1px var(--border-subtle), 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)'
-                        : '0 0 0 1px var(--border-subtle), 0 8px 32px rgba(2,2,2,0.08)',
-                }}
+                className={`pointer-events-auto w-4/5 max-w-350 flex items-center justify-between px-5 py-3 3xl:px-8 3xl:py-4 rounded-2xl border border-(--border-default) bg-(--bg)
+                    ${isDark ? 'shadow-accent ' : 'shadow-md'}
+                    `}
             >
 
                 <div className="flex items-center gap-8 ">
@@ -162,17 +160,14 @@ const Navbar = () => {
                         {links.map(link => {
                             const active = isActive(link.href)
                             return (
-                                <li key={link.name} className="text-caption 3xl:text-lead ">
+                                <li key={link.name} className="text-caption 3xl:text-lead">
                                     <Link
                                         href={link.href}
-                                        className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-semibold transition-all duration-200"
-                                        style={{
-                                            color: active ? 'var(--accent)' : 'var(--text-tertiary)',
-                                            backgroundColor: active ? 'var(--accent-8)' : 'transparent',
-                                            textDecoration: 'none',
-                                        }}
-                                        onMouseEnter={e => { if (!active) { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.backgroundColor = 'var(--surface-raised)' } }}
-                                        onMouseLeave={e => { if (!active) { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.backgroundColor = 'transparent' } }}
+                                        className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-semibold no-underline transition-all duration-200 ${
+                                            active
+                                                ? "text-(--accent) bg-(--accent-8)"
+                                                : "text-(--text-tertiary) hover:text-(--accent) focus-visible:text-(--accent) focus-visible:bg-(--accent-4)"
+                                        }`}
                                     >
                                         {link.name}
                                     </Link>
@@ -192,26 +187,23 @@ const Navbar = () => {
                     >
                         <div
                             suppressHydrationWarning
-                            className="absolute top-0.75 3xl:top-1 w-7 h-6 3xl:w-8 3xl:h-7 rounded-lg transition-all duration-300 ease-in-out"
-                            style={{
-                                left: isDark ? 'calc(100% - 2rem)' : '3px',
-                                backgroundColor: 'var(--bg)',
-                                border: '1px solid var(--border-strong)',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
-                            }}
+                            className={`
+                                absolute top-0.75 3xl:top-1 w-7 h-6 3xl:w-9 3xl:h-7.5 rounded-lg transition-all duration-300 ease-in-out border border-(--border-strong) shadow-sm
+                                ${isDark ? 'left-9.5 3xl:left-10 bg-(--accent-16)' : 'left-0.75 3xl:left-1'}
+                            `}
                         />
                         <div 
                             className="relative w-full flex items-center justify-around "
                         >
                             <Sun 
-                                size={13}
-                                suppressHydrationWarning 
-                                style={{ color: 'var(--text)', opacity: isDark ? 0.3 : 1, transition: 'opacity 0.2s ease' }} 
+                                size={16}
+                                suppressHydrationWarning
+                                className={`text-(--text) transition-opacity duration-200 ${isDark ? 'opacity-30' : 'opacity-100'}`} 
                             />
                             <Moon 
-                                size={13} 
+                                size={16} 
                                 suppressHydrationWarning 
-                                style={{ color: 'var(--text)', opacity: isDark ? 1 : 0.3, transition: 'opacity 0.2s ease' }} 
+                                className={`text-(--text) transition-opacity duration-200 ${isDark ? 'opacity-100' : 'opacity-30'}`}
                             />
                         </div>
                     </button>
@@ -224,7 +216,7 @@ const Navbar = () => {
                                 variant="primary"
                                 size="sm"
                                 onClick={() => router.push('/dashboard')}
-                                icon={<LayoutDashboard size={13} strokeWidth={2} />}
+                                icon={<SquareBottomDashedScissors size={22} strokeWidth={1.5} />}
                             >
                                 Dashboard
                             </Button>

@@ -57,10 +57,6 @@ const FeaturesHero = () => {
 
             <SectionGrid />
 
-            {/* Glows */}
-            <div aria-hidden className="pointer-events-none absolute -top-[20%] -right-[10%] w-[600px] h-[600px] rounded-full bg-accent-16" style={{ filter: 'blur(80px)' }} />
-            <div aria-hidden className="pointer-events-none absolute bottom-[5%] -left-[8%] w-[400px] h-[400px] rounded-full bg-accent-8" style={{ filter: 'blur(60px)' }} />
-
             <div className="container relative z-10 pt-52 pb-28">
                 <div className="max-w-[820px]">
 
