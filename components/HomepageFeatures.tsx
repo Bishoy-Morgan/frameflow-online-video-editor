@@ -1,99 +1,136 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useTheme } from '@/hooks/useTheme'
 import Button from './ui/Button'
 import SectionGrid from './ui/SectionGrid'
 import { ArrowRight } from 'lucide-react'
-import autoCaption  from '@/public/images/features/auto-caption.webp'
-import textEdit from '@/public/images/features/text-edit.webp'
-import bgRemoval from '@/public/images/features/bg-removal.jpg'
-import cloud from '@/public/images/features/cloud-projects.webp'
+
+import aiGenerator from '@/public/images/features/ai-generator.png'
+import aiGeneratorDark from '@/public/images/features/ai-generator.png'
+import stockFootage from '@/public/images/features/auto-caption.webp'
+import stockFootageDark from '@/public/images/features/auto-caption.webp'
+import autoCaptions from '@/public/images/features/caption.png'
+import autoCaptionsDark from '@/public/images/features/caption.png'
+import aiChat from '@/public/images/features/cloud-projects.webp'
+import aiChatDark from '@/public/images/features//cloud-projects.webp'
+import sceneRegen from '@/public/images/features/edit.jpg'
+import sceneRegenDark from '@/public/images/features/edit.jpg'
+import exportPresets from '@/public/images/features/text-edit.webp'
+import exportPresetsDark from '@/public/images/features/text-edit.webp'
+import musicMatch from '@/public/images/features/man.jpg'
+import musicMatchDark from '@/public/images/features/man.jpg'
 
 const FEATURES = [
     {
         id: 1,
         tag: '01',
-        title: 'Auto Captions',
-        description: 'Generate accurate captions in seconds. Improve engagement, accessibility, and searchability across every platform — automatically.',
-        image: autoCaption,
+        title: 'AI Project Generator',
+        description: 'Describe your video. Frameflow breaks it into a structured scene plan and matches real stock footage to each scene automatically.',
+        imageLight: aiGenerator,
+        imageDark: aiGeneratorDark,
+        live: true,
     },
     {
         id: 2,
         tag: '02',
-        title: 'Text-Based Editing',
-        description: 'Edit video like a document. Remove pauses, cut scenes, and rearrange clips by working directly with the transcript.',
-        image: textEdit,
+        title: 'Stock Footage Library',
+        description: 'Search thousands of clips by keyword and drop them straight into your timeline. No licensing hassle, no leaving the editor.',
+        imageLight: stockFootage,
+        imageDark: stockFootageDark,
+        live: true,
     },
     {
         id: 3,
         tag: '03',
-        title: 'Background Removal',
-        description: 'Remove or replace backgrounds with one click. Clean, professional results for creators, presentations, and social content.',
-        image: bgRemoval,
+        title: 'Auto-Captions',
+        description: 'Generate accurate, timestamped captions from your scenes. Improve engagement, accessibility, and searchability automatically.',
+        imageLight: autoCaptions,
+        imageDark: autoCaptionsDark,
+        live: false,
     },
     {
         id: 4,
         tag: '04',
-        title: 'Cloud Projects',
-        description: 'Your work saves automatically. Pick up exactly where you left off — from any device, any time.',
-        image: cloud,
+        title: 'AI Editing Assistant',
+        description: 'Chat with an assistant that understands your project — get suggestions on pacing, transitions, and hooks as you edit.',
+        imageLight: aiChat,
+        imageDark: aiChatDark,
+        live: false,
+    },
+    {
+        id: 5,
+        tag: '05',
+        title: 'Scene Regeneration',
+        description: 'Not happy with one scene? Reroll it independently — new footage, new framing — without touching the rest of your timeline.',
+        imageLight: sceneRegen,
+        imageDark: sceneRegenDark,
+        live: false,
+    },
+    {
+        id: 6,
+        tag: '06',
+        title: 'Platform Export Presets',
+        description: 'Export tuned to where you\u2019re posting — correct aspect ratio and length caps for TikTok, Reels, and Shorts, built in.',
+        imageLight: exportPresets,
+        imageDark: exportPresetsDark,
+        live: false,
+    },
+    {
+        id: 7,
+        tag: '07',
+        title: 'AI-Matched Music',
+        description: 'Every scene is scored for mood. Frameflow pairs it with music that fits the tone automatically.',
+        imageLight: musicMatch,
+        imageDark: musicMatchDark,
+        live: false,
     },
 ]
 
 const INTERVAL = 4800
-const FADE_MS = 280
+
+const fadeUp = {
+    hidden: { opacity: 0, y: 16 },
+    show: (delay: number) => ({
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.55, delay, ease: 'easeOut' },
+    }),
+}
 
 const HomepageFeatures = () => {
     const [current, setCurrent] = useState(0)
-    const [visible, setVisible] = useState(true)
-    const headerRef = useRef<HTMLDivElement>(null)
-    const leftRef = useRef<HTMLDivElement>(null)
-    const rightRef = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        const els = [
-            { el: headerRef.current, delay: 0 },
-            { el: leftRef.current, delay: 100 },
-            { el: rightRef.current, delay: 200 },
-        ]
-        els.forEach(({ el, delay }) => {
-            if (!el) return
-            el.classList.add('opacity-0', 'translate-y-4')
-            setTimeout(() => {
-                el.classList.remove('opacity-0', 'translate-y-4')
-                el.classList.add('opacity-100', 'translate-y-0')
-            }, delay)
-        })
-    }, [])
+    const { isDark } = useTheme()
 
     useEffect(() => {
         const id = setInterval(() => {
-            setVisible(false)
-            setTimeout(() => {
-                setCurrent(i => (i + 1) % FEATURES.length)
-                setVisible(true)
-            }, FADE_MS)
+            setCurrent(i => (i + 1) % FEATURES.length)
         }, INTERVAL)
         return () => clearInterval(id)
     }, [])
 
     const go = (index: number) => {
         if (index === current) return
-        setVisible(false)
-        setTimeout(() => {
-            setCurrent(index)
-            setVisible(true)
-        }, FADE_MS)
+        setCurrent(index)
     }
 
     const feature = FEATURES[current]
+    const activeImage = isDark ? feature.imageDark : feature.imageLight
 
     return (
         <section className="relative w-full overflow-hidden py-28">
             <SectionGrid />
             <div className="container relative z-10">
-                <div ref={headerRef} className="max-w-140 mb-14 opacity-0 translate-y-4 transition-all duration-550 ease-out">
+                <motion.div
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true }}
+                    custom={0}
+                    variants={fadeUp}
+                    className="max-w-140 mb-14"
+                >
                     <div className="flex items-center gap-3 mb-8 3xl:mb-12">
                         <div className="w-7 h-px bg-(--accent)" />
                         <span className="text-caption font-bold tracking-[0.14em] uppercase text-(--accent-fg)">
@@ -103,129 +140,96 @@ const HomepageFeatures = () => {
                     <h2 className="font-normal leading-tight">
                         Smart tools for faster video.
                     </h2>
-                </div>
+                </motion.div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-
-                    <div ref={leftRef} className="flex flex-col opacity-0 translate-y-4 transition-all duration-550 ease-out">
-                        {FEATURES.map((f, i) => {
-                            const active = i === current
-                            return (
-                                <button
-                                    key={f.id}
-                                    onClick={() => go(i)}
-                                    className="w-full text-left group cursor-pointer focus:outline-none "
-                                >
-                                    <div
-                                        className={`
-                                            flex items-start gap-5 py-5 transition-all duration-200 border-transparent 
-                                            ${active ? 'pl-6 border-l-(--accent) border-2 ' : 'pl-0'}
-                                        `}
-                                    >
-                                        <span
-                                            className={`
-                                                text-hero shrink-0 pt-0.5 select-none transition-colors duration-200
-                                                ${active ? 'text-(--accent)' : 'text-(--text-ghost)'}
-                                            `}
-                                        >
-                                            {f.tag}
-                                        </span>
-
-                                        <div className="flex flex-col gap-2 min-w-0">
-                                            <h4
-                                                className={`
-                                                    font-semibold m-0 transition-colors duration-200
-                                                    ${active ? 'text-(--text)' : 'text-(--text-tertiary)'}    
-                                                `}
-                                            >
-                                                {f.title}
-                                            </h4>
-
-                                            <div
-                                                className={`
-                                                    overflow-hidden transition-all duration-300
-                                                    ${active ? 'opacity-100' : 'opacity-40'}
-                                                `}
-                                            >
-                                                <p className="m-0 text-caption 3xl:text-body text-(--text) pr-8">
-                                                    {f.description}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </button>
-                            )
-                        })}
-
-                        <div className="mt-8 flex flex-col gap-6">
-                            <div className="flex items-center gap-2">
-                                {FEATURES.map((_, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => go(i)}
-                                        aria-label={`Go to feature ${i + 1}`}
-                                        className={`h-1.5 cursor-pointer rounded-full border-none p-0 transition-all duration-300 focus:outline-none ${
-                                            i === current
-                                                ? 'w-8 bg-(--accent) shadow-[0_0_6px_var(--accent)]'
-                                                : 'w-1.5 bg-(--border-strong)'
-                                        }`}
-                                    />
-                                ))}
-                                <span className="ml-2 text-small text-tertiary font-medium">
-                                    {current + 1} / {FEATURES.length}
-                                </span>
-                            </div>
-
-                            <Button
-                                variant="primary"
-                                icon={<ArrowRight size={22} strokeWidth={2} />}
-                                iconPosition="right"
-                                onClick={() => window.open('/auth/signup', '_self')}
-                                className='w-fit mt-6'
-                            >
-                                Sign up for free
-                            </Button>
-                        </div>
-                    </div>
-
-                    <div ref={rightRef} className="relative opacity-0 translate-y-4 transition-all duration-550 ease-out">
-                        <div
-                            className="relative aspect-4/3 overflow-hidden rounded-2xl border border-(--border-default) bg-(--surface-raised)"
+                <motion.div
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true }}
+                    custom={0.1}
+                    variants={fadeUp}
+                >
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={`text-${feature.id}`}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="max-w-160 mx-auto text-center mb-8"
                         >
-                            <div
-                                className={`absolute inset-0 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}
+                            <div className="flex items-center justify-center gap-2 mb-2">
+                                <h3 className="font-semibold m-0 text-(--text)">
+                                    {feature.title}
+                                </h3>
+                                {!feature.live && (
+                                    <span className="text-tiny font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md shrink-0 border border-(--border-default) bg-(--surface-raised) text-(--text-tertiary)">
+                                        Soon
+                                    </span>
+                                )}
+                            </div>
+                            <p className="text-caption 3xl:text-body text-(--text)">
+                                {feature.description}
+                            </p>
+                        </motion.div>
+                    </AnimatePresence>
+
+                    <div
+                        className="relative aspect-video overflow-hidden rounded-2xl w-4/5 mx-auto backdrop-blur-xl border border-(--border-default)"
+                        style={{
+                            background: 'color-mix(in srgb, var(--surface-raised) 55%, transparent)',
+                        }}
+                    >
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={`img-${feature.id}`}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="absolute inset-0 flex items-center justify-center"
                             >
                                 <Image
-                                    src={feature.image}
+                                    src={activeImage}
                                     alt={feature.title}
                                     fill
                                     className="object-cover"
                                     priority
                                 />
-                            </div>
-
-                            {/* <div
-                                className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-linear-to-t from-black/70 to-transparent px-5 py-4"
-                            >
-                                <span
-                                    className={`text-sm font-bold text-(--text) transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}
-                                >
-                                    {feature.title}
-                                </span>
-                                <span
-                                    className="font-(--font-dm-serif-display) text-body text-(--text) opacity-50"
-                                >
-                                    {feature.tag}
-                                </span>
-                            </div> */}
-
-                            {/* <div
-                                className="absolute right-0 top-0 h-0.5 w-16 bg-accent shadow-(--accent)"
-                            /> */}
-                        </div>
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
 
-                </div>
+                    <div className="mt-8 flex flex-col items-center gap-6">
+                        <div className="flex items-center gap-2">
+                            {FEATURES.map((_, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => go(i)}
+                                    aria-label={`Go to feature ${i + 1}`}
+                                    className={`h-1.5 cursor-pointer rounded-full border-none p-0 transition-all duration-300 focus:outline-none ${
+                                        i === current
+                                            ? 'w-8 bg-(--accent) shadow-[0_0_6px_var(--accent)]'
+                                            : 'w-1.5 bg-(--border-strong)'
+                                    }`}
+                                />
+                            ))}
+                            <span className="ml-2 text-small text-tertiary font-medium">
+                                {current + 1} / {FEATURES.length}
+                            </span>
+                        </div>
+
+                        <Button
+                            variant="primary"
+                            icon={<ArrowRight size={22} strokeWidth={2} />}
+                            iconPosition="right"
+                            onClick={() => window.open('/auth/signup', '_self')}
+                            className="w-fit"
+                        >
+                            Sign up for free
+                        </Button>
+                    </div>
+                </motion.div>
             </div>
         </section>
     )

@@ -1,131 +1,129 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
 import Image from 'next/image'
+import { motion } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 import Button from './ui/Button'
 import SectionGrid from './ui/SectionGrid'
-import laptopMockup from '@/public/images/laptop-mockup.webp'
+import desktop from '@/public/images/editor.png'
 import { ArrowRight } from 'lucide-react'
 
 const HeroSection = () => {
-    const pillRef = useRef<HTMLDivElement>(null)
-    const headlineRef = useRef<HTMLHeadingElement>(null)
-    const subRef = useRef<HTMLParagraphElement>(null)
-    const ctaRef = useRef<HTMLDivElement>(null)
-    const imageRef = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        const seq = [
-            { el: pillRef.current, delay: 0 },
-            { el: headlineRef.current, delay: 100 },
-            { el: subRef.current, delay: 220 },
-            { el: ctaRef.current, delay: 340 },
-            { el: imageRef.current, delay: 180 },
-        ]
-        seq.forEach(({ el, delay }) => {
-            if (!el) return
-            el.style.opacity = '0'
-            el.style.transform = 'translateY(20px)'
-            setTimeout(() => {
-                el.style.transition = 'opacity 0.65s ease, transform 0.65s ease'
-                el.style.opacity = '1'
-                el.style.transform = 'translateY(0)'
-            }, delay)
-        })
-    }, [])
+    const router = useRouter()
 
     return (
-        <section className="relative w-full h-svh max-h-250 flex items-center overflow-hidden">
+        <section className="relative w-full md:h-svh md:max-h-250 flex items-center overflow-hidden">
 
             <SectionGrid />
 
-            <div className="container relative z-10 pt-40 pb-20">
-                <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
-                    <div className="w-full lg:w-1/2 flex flex-col items-start">
-                        <h1
-                            ref={headlineRef}
-                            className="font-normal m-0 mb-6 text-main "
+            <div className="container relative z-10 pt-32 md:pt-40 pb-20">
+                <div className="w-full lg:w-1/2 flex flex-col items-start">
+
+                    <motion.h1
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.65, ease: 'easeOut', delay: 0.1 }}
+                        className="font-normal mb-6 text-main"
+                    >
+                        Edit video.
+                        <br />
+                        <span className="italic text-accent">In your browser.</span>
+                        <br />
+                        Ship faster.
+                    </motion.h1>
+
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.65, ease: 'easeOut', delay: 0.22 }}
+                        className="mb-10 text-lead 3xl:text-hero"
+                    >
+                        Frameflow gives you a fast, structured timeline editor for social media,
+                        marketing content, and product demos — no downloads, no complexity.
+                    </motion.p>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.65, ease: 'easeOut', delay: 0.34 }}
+                        className="flex flex-col items-start md:flex-row md:items-center gap-4"
+                    >
+                        <Button
+                            variant="primary"
+                            size="lg"
+                            onClick={() => router.push('/auth/signup')}
                         >
-                            Edit video.
-                            <br />
-                            <span className="italic text-accent">In your browser.</span>
-                            <br />
-                            Ship faster.
-                        </h1>
+                            Sign up for free
+                        </Button>
 
-                        <p
-                            ref={subRef}
-                            className="m-0 mb-10 text-lead 3xl:text-hero"
+                        <Button
+                            variant="ghost"
+                            size="md"
+                            icon={<ArrowRight size={20} strokeWidth={2} />}
+                            iconPosition="right"
+                            onClick={() => router.push('/features')}
                         >
-                            Frameflow gives you a fast, structured timeline editor for social media,
-                            marketing content, and product demos — no downloads, no complexity.
-                        </p>
+                            See how it works
+                        </Button>
+                    </motion.div>
 
-                        <div ref={ctaRef} className="flex flex-wrap items-center gap-4">
-                            <Button
-                                variant="primary"
-                                size="lg"
-                                onClick={() => window.open('/auth/signup', '_self')}
-                            >
-                                Sign up for free
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="md"
-                                icon={<ArrowRight size={20} strokeWidth={2} />}
-                                iconPosition="right"
-                                onClick={() => window.open('/features', '_self')}
-                            >
-                                See how it works
-                            </Button>
-                        </div>
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.65, ease: 'easeOut', delay: 0.44 }}
+                        className="m-0 mt-5 text-small text-tertiary font-medium ml-1"
+                    >
+                        No credit card required · Free forever plan available
+                    </motion.p>
 
-                        <p className="m-0 mt-5 text-small text-tertiary font-medium ml-1">
-                            No credit card required · Free forever plan available
-                        </p>
-                    </div>
-
-                    <div ref={imageRef} className="w-full lg:w-1/2 flex items-center justify-center lg:justify-end">
-                        <div className="relative w-full max-w-145">
-                            <div
-                                className="rounded-2xl overflow-hidden"
-                            >
-                                <Image
-                                    src={laptopMockup}
-                                    alt="Frameflow Video Editor Interface"
-                                    width={650}
-                                    height={524}
-                                    quality={90}
-                                    priority
-                                    className="w-full h-auto block"
-                                />
-                            </div>
-
-                            <div
-                                className="absolute -bottom-4 -left-4 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-(--bg) border border-(--border-default) shadow-md"
-                            >
-                                <span className="w-1.5 h-1.5 rounded-full bg-accent shadow-accent" />
-                                <span className="text-small font-bold">
-                                    No install required
-                                </span>
-                            </div>
-
-                            <div
-                                className="absolute -top-4 -right-4 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-(--bg) border border-(--border-default) shadow-md"
-                            >
-                                <span
-                                    className="text-lead font-semibold font-mono leading-none text-accent"
-                                >
-                                    60fps
-                                </span>
-                                <span className="text-small text-tertiary font-medium">
-                                    Timeline playback
-                                </span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.75, ease: 'easeOut', delay: 0.2 }}
+                    className="relative mt-14 lg:mt-0 lg:absolute lg:top-3/5 lg:-translate-y-1/2 lg:left-[52%] lg:w-[58vw] lg:z-10"
+                >
+                    <motion.div
+                        aria-hidden
+                        className="absolute -inset-[40%] -z-10 pointer-events-none"
+                        style={{
+                            background: 'radial-gradient(ellipse 55% 35% at 50% 50%, var(--accent-32) 0%, transparent 70%)',
+                            filter: 'blur(70px)',
+                        }}
+                        animate={{
+                            x: [-40, 40, -40],
+                            y: [-20, 20, -20],
+                            scale: [1, 1.1, 1],
+                            opacity: [0.6, 0.9, 0.6],
+                        }}
+                        transition={{
+                            duration: 8,
+                            repeat: Infinity,
+                            ease: 'easeInOut',
+                        }}
+                    />
+
+                    <div
+                        className="relative w-full aspect-video"
+                        style={{
+                            maskImage: 'radial-gradient(ellipse 85% 85% at 50% 50%, black 65%, transparent 100%)',
+                            WebkitMaskImage: 'radial-gradient(ellipse 85% 85% at 50% 50%, black 65%, transparent 100%)',
+                        }}
+                    >
+                        <Image
+                            src={desktop}
+                            alt="Frameflow Video Editor Interface"
+                            fill
+                            quality={82}
+                            priority
+                            sizes="(min-width: 1024px) 58vw, 100vw"
+                            className="w-full h-full object-contain block"
+                        />
+                    </div>
+                </motion.div>
             </div>
+
         </section>
     )
 }

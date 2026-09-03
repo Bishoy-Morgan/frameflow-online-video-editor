@@ -31,7 +31,7 @@
 @utility text-main {
   font-size: clamp(
     4.125rem,
-    5.076vw,
+    3.720rem + 1.228vw,
     5.275rem
   );
   line-height: 1.1;

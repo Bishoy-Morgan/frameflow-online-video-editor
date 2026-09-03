@@ -336,8 +336,6 @@ function ScriptToEdit({ projectId, onScenesUpdate }: { projectId: string; onScen
     )
 }
 
-// Main Sidebar
-
 const TABS: { id: AiTab; icon: React.ElementType; label: string }[] = [
     { id: 'chat',     icon: MessageSquare, label: 'Chat'     },
     { id: 'captions', icon: Captions,      label: 'Captions' },

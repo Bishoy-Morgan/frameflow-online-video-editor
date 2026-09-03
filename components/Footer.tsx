@@ -13,14 +13,13 @@ const footerLinks = {
         { name: 'Features', href: '/features' },
         { name: 'Templates', href: '/templates' },
         { name: 'Pricing', href: '/pricing' },
-        { name: 'Updates', href: '/updates' },
     ],
-    Resources: [
-        { name: 'Documentation', href: '/docs' },
-        { name: 'Tutorials', href: '/tutorials' },
-        { name: 'Blog', href: '/blog' },
-        { name: 'Support', href: '/support' },
-    ],
+    // Resources: [
+    //     { name: 'Documentation', href: '/docs' },
+    //     { name: 'Tutorials', href: '/tutorials' },
+    //     { name: 'Blog', href: '/blog' },
+    //     { name: 'Support', href: '/support' },
+    // ],
     Company: [
         { name: 'About', href: '/about' },
         { name: 'Careers', href: '/careers' },

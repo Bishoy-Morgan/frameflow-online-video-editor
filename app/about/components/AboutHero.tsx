@@ -1,68 +1,27 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import SectionGrid from '@/components/ui/SectionGrid'
 import Button from '@/components/ui/Button'
 
 const AboutHero = () => {
-  const h1Ref = useRef<HTMLHeadingElement>(null)
-  const subRef = useRef<HTMLParagraphElement>(null)
-  const ctaRef = useRef<HTMLDivElement>(null)
-  const statsRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const seq = [
-      { el: h1Ref.current, delay: 0 },
-      { el: subRef.current, delay: 120 },
-      { el: ctaRef.current, delay: 250 },
-      { el: statsRef.current, delay: 380 },
-    ]
-
-    seq.forEach(({ el, delay }) => {
-      if (!el) return
-      el.style.opacity = '0'
-      el.style.transform = 'translateY(18px)'
-      setTimeout(() => {
-        el.style.transition = 'opacity 0.65s ease, transform 0.65s ease'
-        el.style.opacity = '1'
-        el.style.transform = 'translateY(0)'
-      }, delay)
-    })
-  }, [])
-
   return (
-    <section className="relative w-full h-svh flex items-center overflow-hidden surface max-h-[1200px]">
+    <section className="relative w-full min-h-svh max-h-400 overflow-hidden ">
 
       <SectionGrid />
 
-      {/* Glows */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-[20%] -right-[10%] w-[600px] h-[600px] rounded-full bg-accent-16"
-        style={{ filter: 'blur(80px)' }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute bottom-[5%] -left-[8%] w-[400px] h-[400px] rounded-full bg-accent-8"
-        style={{ filter: 'blur(60px)' }}
-      />
-
-      <div className="container relative z-10 pt-64 pb-28">
-        <div className="max-w-[820px]">
-
-          {/* Headline */}
-          <h1
-            ref={h1Ref}
-            className="font-normal mb-7"
-            style={{
-              fontSize: 'clamp(2.75rem, 6vw, 5rem)',
-              lineHeight: 1.1,
-              letterSpacing: '-0.02em',
-            }}
+      <div className="container flex justify-center relative z-10 pt-40 pb-28">
+        <div className="w-full flex flex-col justify-center items-center ">
+          <motion.h1
+            className="text-main font-normal mb-7 text-center max-w-200"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, ease: 'easeOut', delay: 0 }}
           >
             Editing video should feel{' '}
-            <span className="relative inline-block italic text-accent">
+            <span className="relative inline-block italic text-(--accent-fg)">
               effortless
               <svg
                 aria-hidden
@@ -80,58 +39,83 @@ const AboutHero = () => {
                   opacity="0.6"
                 />
               </svg>
-            </span>{' '}
-            — not technical.
-          </h1>
+            </span><br/>
+            not technical.
+          </motion.h1>
 
-          {/* Sub */}
-          <p
-            ref={subRef}
-            className="text-lg leading-[1.75] max-w-[580px] mb-11 text-muted-62"
+          <motion.p
+            className="text-body 3xl:text-hero max-w-150 mb-11 text-(--text) text-center"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, ease: 'easeOut', delay: 0.12 }}
           >
             Frameflow was built to rethink video editing on the web — removing
             unnecessary complexity and delivering a fast, real-time workflow
             directly in the browser.
-          </p>
+          </motion.p>
 
-          {/* CTAs */}
-          <div ref={ctaRef} className="flex flex-wrap items-center gap-4">
+          <motion.div
+            className="flex flex-col md:flex-row items-center gap-4"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, ease: 'easeOut', delay: 0.25 }}
+          >
 
-            <Button variant="primary">
+            <Button 
+              variant="primary"
+              size='lg'
+            >
               Try Frameflow
             </Button>
 
             <Button
               variant="secondary"
+              size='lg'
               icon={<ArrowRight size={14} strokeWidth={2} />}
               iconPosition="right"
             >
               Why we built it
-            </Button>
+            </Button> 
 
-          </div>
+          </motion.div>
 
-          {/* Stats */}
-          <div
-            ref={statsRef}
-            className="flex flex-wrap items-center gap-8 mt-16 pt-8 border-t border-muted-10"
+          <motion.div
+            className="flex flex-col md:flex-row items-center justify-center gap-x-20 gap-y-4 mt-16 pt-8 "
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, ease: 'easeOut', delay: 0.38 }}
           >
-            {[
-              { value: '< 2s', label: 'Load time' },
-              { value: '60fps', label: 'Smooth playback' },
-              { value: '4K', label: 'High-quality export' },
-              { value: '100%', label: 'Runs in your browser' },
-            ].map(({ value, label }) => (
-              <div key={label} className="flex flex-col gap-0.5">
-                <span className="text-2xl font-normal leading-none text-accent">
-                  {value}
-                </span>
-                <span className="text-[0.7rem] font-semibold tracking-[0.06em] uppercase text-muted-48">
-                  {label}
-                </span>
-              </div>
-            ))}
-          </div>
+            <div className="flex items-center gap-3 my-3 md:my-0">
+              <span className="text-4xl font-normal text-(--accent)">60</span>
+              <span className="text-body leading-5 text-(--text)">
+                frames
+                <br />
+                per second
+              </span>
+            </div>
+
+            <span className="w-px h-8 bg-(--accent-fg) hidden md:block" />
+
+            <div className="flex items-center gap-3 my-3 md:my-0">
+              <span className="text-4xl font-normal text-(--accent)">4K</span>
+              <span className="text-body leading-5 text-(--text)">
+                export
+                <br />
+                quality
+              </span>
+            </div>
+
+            <span className="w-px h-8 bg-(--accent-fg) hidden md:block" />
+
+            <div className="flex items-center gap-3 my-3 md:my-0">
+              <span className="text-4xl font-normal text-(--accent)">0</span>
+              <span className="text-body leading-5 text-(--text)">
+                installs
+                <br />
+                required
+              </span>
+            </div>
+          </motion.div>
 
         </div>
       </div>
