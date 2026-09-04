@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { useTheme } from '@/hooks/useTheme'
 import Button from './ui/Button'
 import SectionGrid from './ui/SectionGrid'
@@ -92,7 +92,7 @@ const FEATURES = [
 
 const INTERVAL = 4800
 
-const fadeUp = {
+const fadeUp: Variants = {
     hidden: { opacity: 0, y: 16 },
     show: (delay: number) => ({
         opacity: 1,
