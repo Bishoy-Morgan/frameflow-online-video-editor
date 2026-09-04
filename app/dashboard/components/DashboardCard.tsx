@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Clock, MoreHorizontal, Play, Star, Copy, Pencil, Trash2, Check, X } from 'lucide-react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 export interface Project {
     id: string
@@ -24,8 +25,9 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
     const [starred, setStarred] = useState(project.starred ?? false)
     const [loading, setLoading] = useState<string | null>(null)
 
-    const menuRef  = useRef<HTMLDivElement>(null)
+    const menuRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
+    const router = useRouter()
 
     useEffect(() => {
         if (!menuOpen) return
@@ -116,7 +118,7 @@ export default function DashboardCard({ project, onUpdate }: DashboardCardProps)
 
     return (
         <div
-            onClick={() => !renaming && window.open(`/editor/${project.id}`)}
+            onClick={() => !renaming && router.push(`/editor/${project.id}`)}
             className="group flex flex-col rounded-xl overflow-hidden transition-all duration-200 cursor-pointer"
             style={{ boxShadow: '0 0 0 1px var(--border-default)', position: 'relative' }}
             onMouseEnter={e => {

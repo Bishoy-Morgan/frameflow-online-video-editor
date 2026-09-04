@@ -71,7 +71,7 @@ export default function Sidebar() {
             </>
         )
         const el = external ? (
-            <a href={href} target="_blank" rel="noopener noreferrer"
+            <a href={href} rel="noopener noreferrer"
                 className="flex items-center gap-3 p-3 rounded-lg transition-all duration-150 relative"
                 style={sharedStyle} onMouseEnter={sharedEnter} onMouseLeave={sharedLeave}>
                 {inner}

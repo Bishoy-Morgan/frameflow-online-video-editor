@@ -6,6 +6,7 @@ import Button from './ui/Button'
 import SectionGrid from './ui/SectionGrid'
 import man  from '@/public/images/features/man.jpg'
 import edit from '@/public/images/features/edit.jpg'
+import { useRouter } from 'next/navigation'
 
 const INTERVAL = 5000
 const FADE_MS = 280
@@ -40,6 +41,7 @@ const HowToUse = () => {
     const headerRef = useRef<HTMLDivElement>(null)
     const leftRef = useRef<HTMLDivElement>(null)
     const rightRef = useRef<HTMLDivElement>(null)
+    const router = useRouter()
 
     useEffect(() => {
         const els = [
@@ -149,7 +151,7 @@ const HowToUse = () => {
                         <div className="mt-10">
                             <Button
                                 variant="primary"
-                                onClick={() => window.open('/auth/signup', '_self')}
+                                onClick={() => router.push('/auth/signup')}
                             >
                                 Sign up for free
                             </Button>

@@ -22,6 +22,7 @@ import exportPresets from '@/public/images/features/text-edit.webp'
 import exportPresetsDark from '@/public/images/features/text-edit.webp'
 import musicMatch from '@/public/images/features/man.jpg'
 import musicMatchDark from '@/public/images/features/man.jpg'
+import { useRouter } from 'next/navigation'
 
 const FEATURES = [
     {
@@ -103,6 +104,7 @@ const fadeUp = {
 const HomepageFeatures = () => {
     const [current, setCurrent] = useState(0)
     const { isDark } = useTheme()
+    const router = useRouter()
 
     useEffect(() => {
         const id = setInterval(() => {
@@ -223,7 +225,7 @@ const HomepageFeatures = () => {
                             variant="primary"
                             icon={<ArrowRight size={22} strokeWidth={2} />}
                             iconPosition="right"
-                            onClick={() => window.open('/auth/signup', '_self')}
+                            onClick={() => router.push('/auth/signup')}
                             className="w-fit"
                         >
                             Sign up for free

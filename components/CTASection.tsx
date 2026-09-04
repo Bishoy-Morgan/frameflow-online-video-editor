@@ -4,11 +4,13 @@ import React, { useEffect, useRef } from 'react'
 import { Play, ArrowRight } from 'lucide-react'
 import Button from './ui/Button'
 import SectionGrid from './ui/SectionGrid'
+import { useRouter } from 'next/navigation'
 
 const CTASection = () => {
     const headlineRef = useRef<HTMLHeadingElement>(null)
     const subRef = useRef<HTMLParagraphElement>(null)
     const ctaRef = useRef<HTMLDivElement>(null)
+    const router = useRouter()
 
     useEffect(() => {
         const seq = [
@@ -53,7 +55,7 @@ const CTASection = () => {
                         size="lg"
                         icon={<ArrowRight size={22} strokeWidth={2} />}
                         iconPosition="right"
-                        onClick={() => window.open('/auth/signup', '_self')}
+                        onClick={() => router.push('/auth/signup')}
                     >
                         Sign up for free
                     </Button>

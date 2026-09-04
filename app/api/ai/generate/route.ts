@@ -20,7 +20,7 @@ type GenerateBody = {
     duration:    string
 }
 
-// ── Pexels ────────────────────────────────────────────────────────────────────
+// ── Pexels ─────────────────────────────────
 
 async function fetchPexelsVideo(
     query: string,

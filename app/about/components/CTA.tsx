@@ -4,12 +4,14 @@ import React, { useEffect, useRef } from 'react'
 import { ArrowRight, Play } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import SectionGrid from '@/components/ui/SectionGrid'
+import { useRouter } from 'next/navigation'
 
 const CTA = () => {
   const headlineRef = useRef<HTMLHeadingElement>(null)
   const subRef = useRef<HTMLParagraphElement>(null)
   const ctaRef = useRef<HTMLDivElement>(null)
   const noteRef = useRef<HTMLParagraphElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     const seq = [
@@ -107,7 +109,7 @@ const CTA = () => {
             size="lg"
             icon={<Play size={15} strokeWidth={2.5} />}
             iconPosition="left"
-            onClick={() => window.open('/editor', '_blank')}
+            onClick={() => router.push('/editor')}
           >
             Launch Editor
           </Button>
@@ -117,7 +119,7 @@ const CTA = () => {
             size="lg"
             icon={<ArrowRight size={15} strokeWidth={2} />}
             iconPosition="right"
-            onClick={() => window.open('/pricing', '_self')}
+            onClick={() => router.push('/pricing')}
           >
             Explore Plans
           </Button>

@@ -9,6 +9,7 @@ import {
     SortAsc, SortDesc, Clock, AlignLeft,
 } from 'lucide-react'
 import DashboardHeader from '../components/DashboardHeader'
+import { useRouter } from 'next/navigation'
 
 interface Scene {
     id: string
@@ -503,6 +504,8 @@ export default function ProjectsPage() {
     const [renaming, setRenaming] = useState<Project | null>(null)
     const [creating, setCreating] = useState(false)
 
+    const router = useRouter()
+
     const fetchProjects = useCallback(async () => {
         setLoading(true)
         try {
@@ -548,7 +551,7 @@ export default function ProjectsPage() {
 
     const handleOpen = (project: Project) => {
         if (project.deletedAt) return
-        window.open(`/editor/${project.id}`, '_blank')
+        router.push(`/editor/${project.id}`)
     }
 
     const handleNewProject = async () => {
@@ -560,7 +563,7 @@ export default function ProjectsPage() {
                 body: JSON.stringify({ name: 'Untitled Project', style: 'Modern', aspectRatio: '16:9' }),
             })
             const project = await res.json()
-            window.open(`/editor/${project.id}`, '_blank')
+            router.push(`/editor/${project.id}`)
         } catch (err) { console.error(err) } finally { setCreating(false) }
     }
 

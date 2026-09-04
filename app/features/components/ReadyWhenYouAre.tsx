@@ -4,19 +4,21 @@ import React, { useEffect, useRef } from 'react'
 import { ArrowRight, Play } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import SectionGrid from '@/components/ui/SectionGrid'
+import { useRouter } from 'next/navigation'
 
 const ReadyWhenYouAre = () => {
     const headlineRef = useRef<HTMLHeadingElement>(null)
-    const subRef      = useRef<HTMLParagraphElement>(null)
-    const ctaRef      = useRef<HTMLDivElement>(null)
-    const noteRef     = useRef<HTMLParagraphElement>(null)
+    const subRef = useRef<HTMLParagraphElement>(null)
+    const ctaRef = useRef<HTMLDivElement>(null)
+    const noteRef = useRef<HTMLParagraphElement>(null)
+    const router = useRouter()
 
     useEffect(() => {
         const seq = [
-            { el: headlineRef.current, delay: 0   },
-            { el: subRef.current,      delay: 120 },
-            { el: ctaRef.current,      delay: 240 },
-            { el: noteRef.current,     delay: 360 },
+            { el: headlineRef.current, delay: 0 },
+            { el: subRef.current, delay: 120 },
+            { el: ctaRef.current, delay: 240 },
+            { el: noteRef.current, delay: 360 },
         ]
         seq.forEach(({ el, delay }) => {
             if (!el) return
@@ -36,7 +38,6 @@ const ReadyWhenYouAre = () => {
             <div className="opacity-70"><SectionGrid /></div>
             <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-32 surface" />
 
-            {/* Large centered glow — full attention */}
             <div
                 aria-hidden
                 className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
@@ -46,12 +47,10 @@ const ReadyWhenYouAre = () => {
                 }}
             />
 
-            {/* Top separator */}
             <div aria-hidden className="absolute top-0 left-[10%] right-[10%] h-px line-accent" />
 
             <div className="container relative z-10 flex flex-col items-center text-center gap-10">
 
-                {/* Eyebrow */}
                 <div
                     className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge-accent"
                 >
@@ -61,7 +60,6 @@ const ReadyWhenYouAre = () => {
                     </span>
                 </div>
 
-                {/* Headline */}
                 <h2
                     ref={headlineRef}
                     className="font-normal m-0 max-w-[700px]"
@@ -72,7 +70,6 @@ const ReadyWhenYouAre = () => {
                     you are.
                 </h2>
 
-                {/* Sub */}
                 <p
                     ref={subRef}
                     className="m-0 text-lg leading-relaxed max-w-[480px] text-muted-60"
@@ -81,14 +78,13 @@ const ReadyWhenYouAre = () => {
                     No downloads, no setup, no waiting.
                 </p>
 
-                {/* CTAs */}
                 <div ref={ctaRef} className="flex flex-wrap items-center justify-center gap-4">
                     <Button
                         variant="primary"
                         size="lg"
                         icon={<Play size={15} strokeWidth={2.5} />}
                         iconPosition="left"
-                        onClick={() => window.open('/editor', '_blank')}
+                        onClick={() => router.push('/editor')}
                     >
                         Launch Editor
                     </Button>
@@ -97,13 +93,12 @@ const ReadyWhenYouAre = () => {
                         size="lg"
                         icon={<ArrowRight size={15} strokeWidth={2} />}
                         iconPosition="right"
-                        onClick={() => window.open('/pricing', '_self')}
+                        onClick={() => router.push('/pricing')}
                     >
                         Explore Plans
                     </Button>
                 </div>
 
-                {/* Fine print */}
                 <p ref={noteRef} className="m-0 text-small text-muted-35">
                     Free to start — no credit card required.
                 </p>
