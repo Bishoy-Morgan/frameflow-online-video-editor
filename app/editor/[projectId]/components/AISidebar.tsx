@@ -2,10 +2,20 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import {
-    Sparkles, MessageSquare, Captions, Scissors,
-    FileText, Loader2, Send, Copy, CheckCheck,
-    Wand2, RefreshCw,
+    Sparkles, 
+    MessageSquare, 
+    Captions, 
+    Scissors,
+    FileText, 
+    Loader2, 
+    Send, 
+    Copy, 
+    CheckCheck,
+    RefreshCw,
+    MoveRight,
+    WandSparkles,
 } from 'lucide-react'
+import Button from '@/components/ui/Button'
 
 type AiTab = 'chat' | 'captions' | 'scenes' | 'script'
 
@@ -25,7 +35,6 @@ interface AISidebarProps {
     onScenesUpdate: (scenes: Scene[]) => void
 }
 
-// AI Chat
 function AiChat({ projectName, prompt, scenes }: { projectName: string; prompt: string | null; scenes: Scene[] }) {
     const [messages, setMessages] = useState<Message[]>([{
         role: 'assistant',
@@ -66,23 +75,23 @@ function AiChat({ projectName, prompt, scenes }: { projectName: string; prompt: 
     }
 
     return (
-        <div className="flex flex-col h-full min-h-0">
-            <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 min-h-0">
+        <div className="flex flex-col h-full min-h-0 ">
+            <div className="flex-1 overflow-y-auto p-1 space-y-3 min-h-0">
                 {messages.map((msg, i) => (
-                    <div key={i} className={`flex flex-col gap-1 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                        <div className="relative max-w-[90%] px-3 py-2.5 rounded-xl text-xs leading-relaxed group"
-                            style={{
-                                backgroundColor: msg.role === 'user' ? 'var(--accent-8)'           : 'var(--surface-raised)',
-                                border:          msg.role === 'user' ? '1px solid var(--accent-22)' : '1px solid var(--border-default)',
-                                color:           msg.role === 'user' ? 'var(--accent)'              : 'var(--text-secondary)',
-                            }}>
-                            <span dangerouslySetInnerHTML={{ __html: msg.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                    <div key={i} className={`flex flex-col gap-1 shadow-accent-22 p-1.5 min-h-40 rounded-xl ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                        <div className={`relative max-w-4/5 p-2.5 rounded-xl text-small pr-6 group ${
+                            msg.role === 'user'
+                                ? 'bg-(accent-16) text-(--text)'
+                                : 'bg-(--accent-8) text-(--ghost) '
+                        }`}>
+                            <span
+                            dangerouslySetInnerHTML={{ __html: msg.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} 
+                            />
                             {msg.role === 'assistant' && (
                                 <button
                                     onClick={() => { navigator.clipboard.writeText(msg.content); setCopied(i); setTimeout(() => setCopied(null), 2000) }}
-                                    className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded"
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)' }}>
-                                    {copied === i ? <CheckCheck size={10} style={{ color: '#34d399' }} /> : <Copy size={10} />}
+                                    className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded bg-transparent border-0 cursor-pointer text-(--ghost) hover:text-(--accent) hover:bg-(--accent-10)">
+                                    {copied === i ? <CheckCheck size={12} className="text-(--accent)" /> : <Copy size={12} />}
                                 </button>
                             )}
                         </div>
@@ -90,8 +99,7 @@ function AiChat({ projectName, prompt, scenes }: { projectName: string; prompt: 
                 ))}
                 {loading && (
                     <div className="flex items-start">
-                        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs"
-                            style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', color: 'var(--text-tertiary)' }}>
+                        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-caption bg-raised border border-default text-tertiary">
                             <Loader2 size={10} className="animate-spin" /> Thinking…
                         </div>
                     </div>
@@ -99,34 +107,34 @@ function AiChat({ projectName, prompt, scenes }: { projectName: string; prompt: 
                 <div ref={bottomRef} />
             </div>
 
-            <div className="px-3 py-2 flex gap-1.5 flex-wrap" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+            <div className="px-3 py-2 flex gap-1.5 flex-wrap border-t border-subtle">
                 {['Improve scene descriptions', 'Suggest transitions', 'Write a hook'].map(q => (
                     <button key={q} onClick={() => setInput(q)}
-                        className="text-[10px] font-semibold px-2 py-1 rounded-md transition-colors"
-                        style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', color: 'var(--text-tertiary)', cursor: 'pointer' }}
-                        onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--accent-22)' }}
-                        onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.borderColor = 'var(--border-default)' }}>
+                        className="text-small font-semibold px-2.5 py-1 rounded-xl transition-colors bg-raised border border-default text-(--text) cursor-pointer hover:bg-(--accent-16) hover:border-(--accent-16) hover:shadow-md">
                         {q}
                     </button>
                 ))}
             </div>
 
-            <div className="px-3 pb-3 pt-1">
-                <div className="flex items-end gap-2 rounded-xl p-2"
-                    style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}>
-                    <textarea value={input} onChange={e => setInput(e.target.value)}
-                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
-                        placeholder="Ask anything about your video…" rows={2}
-                        className="flex-1 resize-none text-xs outline-none"
-                        style={{ backgroundColor: 'transparent', color: 'var(--text)', lineHeight: 1.5 }} />
-                    <button onClick={send} disabled={!input.trim() || loading}
-                        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                        style={{
-                            backgroundColor: input.trim() && !loading ? 'var(--accent)' : 'var(--bg)',
-                            border:          `1px solid ${input.trim() && !loading ? 'transparent' : 'var(--border-default)'}`,
-                            cursor:          input.trim() && !loading ? 'pointer' : 'not-allowed',
-                        }}>
-                        <Send size={11} style={{ color: input.trim() && !loading ? '#fff' : 'var(--text-tertiary)' }} />
+            <div className="px-3 pb-3 pt-2">
+                <div className="flex items-end gap-2 rounded-xl p-4 shadow-accent-22 border-(--accent-40)">
+                    <textarea 
+                    value={input} 
+                    onChange={e => setInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
+                    placeholder="Ask anything about your video…" rows={2}
+                    className="flex-1 resize-none text-caption font-medium outline-none bg-transparent text-(--text)" 
+                    />
+                    <button 
+                    onClick={send} 
+                    disabled={!input.trim() || loading}
+                    className={`p-2 rounded-xl flex items-center justify-center shrink-0 ${
+                        input.trim() && !loading
+                            ? 'bg-(--accent) border border-transparent cursor-pointer'
+                            : 'bg-(--bg) border border-default cursor-not-allowed'
+                    }`}
+                    >
+                        <Send size={18} className={input.trim() && !loading ? 'text-white' : 'text-(--tertiary)'} />
                     </button>
                 </div>
             </div>
@@ -134,7 +142,6 @@ function AiChat({ projectName, prompt, scenes }: { projectName: string; prompt: 
     )
 }
 
-// Auto Captions — Groq generates captions from scene descriptions (text-based)
 function AutoCaptions({ projectId, scenes }: { projectId: string; scenes: Scene[] }) {
     const [loading, setLoading] = useState(false)
     const [captions, setCaptions] = useState<{ time: string; text: string }[]>([])
@@ -162,26 +169,26 @@ function AutoCaptions({ projectId, scenes }: { projectId: string; scenes: Scene[
         <div className="flex flex-col gap-3 p-3">
             {captions.length === 0 ? (
                 <div className="flex flex-col items-center gap-3 py-4">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: 'var(--accent-8)', border: '1px solid var(--accent-22)' }}>
-                        <Captions size={18} style={{ color: 'var(--accent)' }} strokeWidth={1.5} />
+                    <div className="p-2 rounded-xl flex items-center justify-center bg-(--accent-10) shadow-md">
+                        <Captions size={28} strokeWidth={1.5} />
                     </div>
                     <div className="text-center">
-                        <p className="text-xs font-bold" style={{ color: 'var(--text)' }}>Auto-Captions</p>
-                        <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+                        <p className="text-caption font-semibold text-(--tertiary) ">Auto-Captions</p>
+                        <p className="text-caption mt-0.5">
                             Groq generates timestamped captions from your scene descriptions and durations.
                         </p>
                     </div>
-                    {error && <p className="text-[11px] text-red-400">{error}</p>}
-                    <button onClick={generate} disabled={loading}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold"
-                        style={{ backgroundColor: 'var(--accent)', color: '#fff', border: 'none', cursor: loading ? 'wait' : 'pointer' }}
-                        onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
-                        onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-                        {loading
-                            ? <><Loader2 size={11} className="animate-spin" /> Generating…</>
-                            : <><Sparkles size={11} /> Generate Captions</>}
-                    </button>
+                    
+                    {error && <p className="text-small text-(--error)">{error}</p>}
+                    
+                    <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={generate} 
+                    disabled={loading}
+                    >
+                        Generate Captions
+                    </Button>
                 </div>
             ) : (
                 <div className="flex flex-col gap-2">
@@ -210,8 +217,6 @@ function AutoCaptions({ projectId, scenes }: { projectId: string; scenes: Scene[
     )
 }
 
-// Scene Detect
-
 function SceneDetect({ projectId, scenes, onScenesUpdate }: {
     projectId: string; scenes: Scene[]; onScenesUpdate: (s: Scene[]) => void
 }) {
@@ -236,27 +241,25 @@ function SceneDetect({ projectId, scenes, onScenesUpdate }: {
     return (
         <div className="flex flex-col gap-3 p-3">
             <div className="flex flex-col items-center gap-3 py-4">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{ backgroundColor: 'var(--accent-8)', border: '1px solid var(--accent-22)' }}>
-                    <Scissors size={18} style={{ color: 'var(--accent)' }} strokeWidth={1.5} />
+                <div className="p-2 rounded-xl flex items-center justify-center bg-(--accent-10) shadow-md">
+                    <Scissors size={28} strokeWidth={1.5} />
                 </div>
                 <div className="text-center">
-                    <p className="text-xs font-bold" style={{ color: 'var(--text)' }}>Scene Detection</p>
-                    <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+                    <p className="text-caption font-semibold text-(--tertiary)">Scene Detection</p>
+                    <p className="text-caption mt-0.5">
                         Groq analyzes your project brief and generates an optimized scene breakdown.
                     </p>
                 </div>
-                {done  && <p className="text-[11px] text-green-400 font-semibold">✓ {scenes.length} scenes generated</p>}
-                {error && <p className="text-[11px] text-red-400">{error}</p>}
-                <button onClick={detect} disabled={loading}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold"
-                    style={{ backgroundColor: 'var(--accent)', color: '#fff', border: 'none', cursor: loading ? 'wait' : 'pointer' }}
-                    onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
-                    onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-                    {loading
-                        ? <><Loader2 size={11} className="animate-spin" /> Detecting…</>
-                        : <><Wand2 size={11} />{done ? 'Re-detect' : 'Detect Scenes'}</>}
-                </button>
+                {done  && <p className="text-[11px] text-(--success) font-semibold">✓ {scenes.length} scenes generated</p>}
+                {error && <p className="text-[11px] text-(--error)">{error}</p>}
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={detect} 
+                    disabled={loading}
+                    >
+                        Detect Scenes
+                    </Button>
             </div>
             {scenes.length > 0 && (
                 <div className="space-y-1.5">
@@ -275,13 +278,11 @@ function SceneDetect({ projectId, scenes, onScenesUpdate }: {
     )
 }
 
-// Script to Edit
-
 function ScriptToEdit({ projectId, onScenesUpdate }: { projectId: string; onScenesUpdate: (s: Scene[]) => void }) {
-    const [script,  setScript]  = useState('')
+    const [script, setScript] = useState('')
     const [loading, setLoading] = useState(false)
-    const [result,  setResult]  = useState('')
-    const [error,   setError]   = useState('')
+    const [result, setResult] = useState('')
+    const [error, setError] = useState('')
 
     const generate = async () => {
         if (!script.trim()) return
@@ -301,46 +302,40 @@ function ScriptToEdit({ projectId, onScenesUpdate }: { projectId: string; onScen
     return (
         <div className="flex flex-col gap-3 p-3">
             <div className="flex items-center gap-2">
-                <FileText size={14} style={{ color: 'var(--accent)' }} strokeWidth={1.75} />
-                <span className="text-xs font-bold" style={{ color: 'var(--text)' }}>Script → Edit Plan</span>
+                <FileText size={20} strokeWidth={1.75} />
+                <span className="text-caption font-semibold text-(--text)">
+                    Script <MoveRight size={16} className="inline-block m-x-1.5"/> Edit Plan
+                </span>
             </div>
-            <p className="text-[11px]" style={{ color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+            <p className="text-caption text-(--text) ">
                 Paste a script and Groq will create a full scene-by-scene edit plan with timings and music moods.
             </p>
             <textarea value={script} onChange={e => setScript(e.target.value.slice(0, 2000))} rows={6}
                 placeholder="Scene 1: Open with a close-up of the product on a dark surface…"
-                className="w-full resize-none text-xs rounded-xl p-3 outline-none"
-                style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', color: 'var(--text)', lineHeight: 1.6 }}
-                onFocus={e => e.currentTarget.style.borderColor = 'var(--accent-42)'}
-                onBlur={e => e.currentTarget.style.borderColor = 'var(--border-default)'} />
+                className="w-full resize-none text-caption rounded-xl p-3 outline-none shadow-accent-22"/>
             <div className="flex items-center justify-between">
-                <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>{script.length}/2000</span>
-                <button onClick={generate} disabled={!script.trim() || loading}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold"
-                    style={{
-                        backgroundColor: script.trim() ? 'var(--accent)' : 'var(--surface-raised)',
-                        border:          `1px solid ${script.trim() ? 'transparent' : 'var(--border-default)'}`,
-                        color:           script.trim() ? '#fff' : 'var(--text-tertiary)',
-                        cursor:          script.trim() && !loading ? 'pointer' : 'not-allowed',
-                    }}
-                    onMouseEnter={e => { if (script.trim()) e.currentTarget.style.opacity = '0.88' }}
-                    onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-                    {loading
-                        ? <><Loader2 size={10} className="animate-spin" /> Generating…</>
-                        : <><Sparkles size={10} /> Generate Plan</>}
-                </button>
+                <span className="text-small text-(--text)" >{script.length}/2000</span>
+                <Button
+                variant="secondary"
+                size="sm"
+                onClick={generate} 
+                disabled={loading || !script.trim()}
+                icon={loading ? <Loader2 size={12} className="animate-spin" /> : <WandSparkles size={20} />}
+                >
+                    Generate Plan
+                </Button>
             </div>
-            {result && <p className="text-[11px] text-green-400 font-semibold">{result}</p>}
-            {error  && <p className="text-[11px] text-red-400">{error}</p>}
+            {result && <p className="text-[11px] text-(--success) font-semibold">{result}</p>}
+            {error  && <p className="text-[11px] text-(--error)">{error}</p>}
         </div>
     )
 }
 
 const TABS: { id: AiTab; icon: React.ElementType; label: string }[] = [
-    { id: 'chat',     icon: MessageSquare, label: 'Chat'     },
-    { id: 'captions', icon: Captions,      label: 'Captions' },
-    { id: 'scenes',   icon: Scissors,      label: 'Scenes'   },
-    { id: 'script',   icon: FileText,      label: 'Script'   },
+    { id: 'chat', icon: MessageSquare, label: 'Chat' },
+    { id: 'captions', icon: Captions, label: 'Captions' },
+    { id: 'scenes', icon: Scissors, label: 'Scenes' },
+    { id: 'script', icon: FileText, label: 'Script' },
 ]
 
 export default function AISidebar({
@@ -349,49 +344,44 @@ export default function AISidebar({
     const [activeTab, setActiveTab] = useState<AiTab>('chat')
 
     return (
-        <div className="flex flex-col h-full"
-            style={{ width: '100%', backgroundColor: 'var(--bg)' }}>
+        <div className="flex flex-col h-full p-2 bg-(--bg)">
 
-            {/* Header */}
-            <div className="flex items-center gap-2 px-3 shrink-0"
-                style={{ height: '44px', borderBottom: '1px solid var(--border-default)' }}>
-                <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: 'var(--accent-8)', border: '1px solid var(--accent-22)' }}>
-                    <Sparkles size={12} style={{ color: 'var(--accent)' }} />
+            <div className="flex items-center gap-2 px-3 shrink-0 border-b border-(--accent) p-2 ">
+                <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0">
+                    <Sparkles size={18} className="text-(--accent)" />
                 </div>
-                <span className="text-xs font-bold" style={{ color: 'var(--text)' }}>AI Assistant</span>
-                <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-md"
-                    style={{ backgroundColor: 'var(--accent-8)', color: 'var(--accent)', border: '1px solid var(--accent-22)' }}>
-                    Groq
+                <span className="text-caption font-semibold">
+                    AI Assistant
                 </span>
             </div>
 
-            {/* Tabs */}
-            <div className="flex shrink-0" style={{ borderBottom: '1px solid var(--border-default)' }}>
+            <div className="flex shrink-0 p-4 gap-x-3">
                 {TABS.map(({ id, icon: Icon, label }) => {
                     const active = activeTab === id
                     return (
                         <button key={id} onClick={() => setActiveTab(id)}
-                            className="flex-1 flex flex-col items-center gap-0.5 py-2"
-                            style={{
-                                background:   'none',
-                                border:       'none',
-                                borderBottom: active ? '2px solid var(--accent)' : '2px solid transparent',
-                                cursor:       'pointer',
-                            }}>
-                            <Icon size={12} style={{ color: active ? 'var(--accent)' : 'var(--text-tertiary)' }} strokeWidth={active ? 2 : 1.75} />
-                            <span className="text-[9px] font-bold" style={{ color: active ? 'var(--accent)' : 'var(--text-tertiary)' }}>{label}</span>
+                            className={`flex-1 flex flex-col items-center px-1 py-2 rounded-xl transition-all duration-150 cursor-pointer hover:bg-(--accent-10) hover:shadow-md 
+                            ${active ? 'bg-(--accent-10) shadow-md' : ''}`}
+                        >
+                            <Icon 
+                            size={22} 
+                            className={active ? 'text-(--accent)' : 'text-(--text-tertiary)'} strokeWidth={active ? 2 : 1.75} 
+                            />
+                            <span 
+                            className={`text-tiny font-semibold ${active ? 'text-(--accent)' : 'text-(--text-tertiary)'}`}
+                            >
+                                {label}
+                            </span>
                         </button>
                     )
                 })}
             </div>
 
-            {/* Content */}
             <div className="flex-1 overflow-y-auto min-h-0">
-                {activeTab === 'chat'     && <AiChat        projectName={projectName} prompt={prompt} scenes={scenes} />}
-                {activeTab === 'captions' && <AutoCaptions  projectId={projectId} scenes={scenes} />}
-                {activeTab === 'scenes'   && <SceneDetect   projectId={projectId} scenes={scenes} onScenesUpdate={onScenesUpdate} />}
-                {activeTab === 'script'   && <ScriptToEdit  projectId={projectId} onScenesUpdate={onScenesUpdate} />}
+                {activeTab === 'chat' && <AiChat projectName={projectName} prompt={prompt} scenes={scenes} />}
+                {activeTab === 'captions' && <AutoCaptions projectId={projectId} scenes={scenes} />}
+                {activeTab === 'scenes' && <SceneDetect projectId={projectId} scenes={scenes} onScenesUpdate={onScenesUpdate} />}
+                {activeTab === 'script' && <ScriptToEdit  projectId={projectId} onScenesUpdate={onScenesUpdate} />}
             </div>
         </div>
     )

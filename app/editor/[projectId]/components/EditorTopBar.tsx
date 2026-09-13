@@ -1,37 +1,39 @@
 'use client'
 
 import React, { useState } from 'react'
-import { ArrowLeft, Save, Download, Loader2, CheckCheck, Pencil, Sparkles } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Pencil, House, Share2, Loader2, CheckCheck } from 'lucide-react'
 import { useUser } from '@/components/providers/UserContext'
 import Image from 'next/image'
+import Button from '@/components/ui/Button'
 
 interface EditorTopBarProps {
   projectId: string
   projectName: string
   saving: boolean
   saved: boolean
-  aiOpen: boolean
-  onToggleAi: () => void
-  onSave: () => void
-  onExport: () => void
+  onOpenShare: () => void
 }
 
 function UserAvatar() {
   const user = useUser()
 
   const initials = user.name
-    ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+    ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 1)
     : user.email[0].toUpperCase()
 
   return (
     <div className="flex items-center gap-2 shrink-0">
       <div className="flex flex-col items-end">
-        <span className="text-xs font-semibold leading-tight truncate max-w-30"
-          style={{ color: 'var(--text)' }}>
+        <span
+          className="text-small font-semibold max-w-30 "
+        >
           {user.name ?? user.email}
         </span>
-        <span className="text-[10px] leading-tight"
-          style={{ color: 'var(--text-tertiary)' }}>
+        <span
+          className="text-[10px] leading-tight"
+          style={{ color: 'var(--text-tertiary)' }}
+        >
           {user._count.projects} project{user._count.projects !== 1 ? 's' : ''}
         </span>
       </div>
@@ -43,16 +45,10 @@ function UserAvatar() {
           width={28}
           height={28}
           className="rounded-full object-cover shrink-0"
-          style={{ border: '1px solid var(--border-default)' }}
         />
       ) : (
         <div
-          className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold"
-          style={{
-            backgroundColor: 'var(--accent-16)',
-            border: '1px solid var(--accent-42)',
-            color: 'var(--accent)',
-          }}
+          className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-body font-semibold bg-(--accent-40) text-(--accent-fg) "
         >
           {initials}
         </div>
@@ -61,9 +57,37 @@ function UserAvatar() {
   )
 }
 
+function SaveStatus({ saving, saved }: { saving: boolean; saved: boolean }) {
+  if (saving) {
+    return (
+      <div
+        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold"
+        style={{ color: 'var(--text-tertiary)' }}
+      >
+        <Loader2 size={20} className="animate-spin" />
+        Saving…
+      </div>
+    )
+  }
+
+  if (saved) {
+    return (
+      <div
+        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-(--success)"
+      >
+        <CheckCheck size={20} />
+        Saved
+      </div>
+    )
+  }
+
+  return null
+}
+
 export default function EditorTopBar({
-  projectId, projectName, saving, saved, aiOpen, onToggleAi, onSave, onExport,
+  projectId, projectName, saving, saved, onOpenShare,
 }: EditorTopBarProps) {
+  const router = useRouter()
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(projectName)
 
@@ -79,28 +103,17 @@ export default function EditorTopBar({
 
   return (
     <div
-      className="flex items-center justify-between px-4 shrink-0 z-20"
-      style={{
-        height: '100%',
-        backgroundColor: 'var(--bg)',
-        borderBottom: '1px solid var(--border-default)',
-      }}
+      className="relative flex items-center justify-between py-2 px-4 shrink-0 w-[99%] rounded-2xl border border-(--accent-16) shadow-accent-40 "
     >
-      {/* Left — back + project title */}
-      <div className="flex items-center gap-3 min-w-0">
-        <button
-          onClick={() => window.history.back()}
-          className="flex items-center gap-1.5 text-xs font-semibold shrink-0 transition-colors"
-          style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer' }}
-          onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
-          onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}
-          title="Back to dashboard"
-        >
-          <ArrowLeft size={14} strokeWidth={2} />
-        </button>
+      <button
+        onClick={() => router.push('/dashboard')}
+        title="Go to dashboard"
+        className="cursor-pointer"
+      >
+        <House size={24} strokeWidth={2} className="inline-block text-(--accent)" />
+      </button>
 
-        <div className="w-px h-4 shrink-0" style={{ backgroundColor: 'var(--border-default)' }} />
-
+      <div>
         {editing ? (
           <input
             autoFocus
@@ -108,106 +121,44 @@ export default function EditorTopBar({
             onChange={e => setName(e.target.value)}
             onBlur={handleNameBlur}
             onKeyDown={e => e.key === 'Enter' && handleNameBlur()}
-            className="text-sm font-bold outline-none rounded-md px-2 py-0.5 min-w-0"
+            className="text-caption font-semibold outline-none rounded-xl px-2 py-0.5 min-w-0 max-w-65 border"
             style={{
               backgroundColor: 'var(--surface-raised)',
-              border: '1px solid var(--accent-42)',
+              borderColor: 'var(--accent-42)',
               color: 'var(--text)',
-              maxWidth: '260px',
             }}
           />
         ) : (
           <button
             onClick={() => setEditing(true)}
-            className="flex items-center gap-1.5 text-sm font-bold group"
-            style={{
-              background:  'none',
-              border: 'none',
-              color: 'var(--text)',
-              cursor: 'pointer',
-              padding: 0,
-              maxWidth: '280px',
-              overflow: 'hidden',
-            }}
+            className="flex items-center gap-1.5 text-caption font-semibold group bg-transparent border-none cursor-pointer p-0 max-w-70 overflow-hidden text-(--text) rounded-xl "
           >
-            <span className="truncate">{name}</span>
+            <span className="truncate">
+              {name}
+            </span>
             <Pencil
-              size={10} strokeWidth={2}
-              className="opacity-0 group-hover:opacity-40 shrink-0 transition-opacity"
-              style={{ color: 'var(--text-tertiary)' }}
+              size={20}
+              strokeWidth={2}
+              className="opacity-0 group-hover:opacity-40 shrink-0 transition-opacity text-(--accent-fg) "
             />
           </button>
         )}
       </div>
 
-      <div className="flex items-center gap-2">
-
-        <button
-          onClick={onToggleAi}
-          title={aiOpen ? 'Hide AI sidebar' : 'Show AI sidebar'}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
-          style={{
-            backgroundColor: aiOpen ? 'var(--accent-8)' : 'var(--surface-raised)',
-            border: aiOpen ? '1px solid var(--accent-42)' : '1px solid var(--border-default)',
-            color: aiOpen ? 'var(--accent)' : 'var(--text-tertiary)',
-            cursor: 'pointer',
-          }}
-          onMouseEnter={e => {
-            if (!aiOpen) {
-              e.currentTarget.style.color = 'var(--text)'
-              e.currentTarget.style.borderColor = 'var(--border-strong)'
-            }
-          }}
-          onMouseLeave={e => {
-            if (!aiOpen) {
-              e.currentTarget.style.color = 'var(--text-tertiary)'
-              e.currentTarget.style.borderColor = 'var(--border-default)'
-            }
-          }}
-        >
-          <Sparkles size={12} strokeWidth={2} />
-          AI
-        </button>
-
-        <div className="w-px h-4 shrink-0" style={{ backgroundColor: 'var(--border-default)' }} />
-
-        <button
-          onClick={onSave}
-          disabled={saving}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-          style={{
-            backgroundColor: saved ? 'rgba(52,211,153,0.1)' : 'var(--surface-raised)',
-            border: saved ? '1px solid rgba(52,211,153,0.3)' : '1px solid var(--border-default)',
-            color: saved ? '#34d399' : 'var(--text-tertiary)',
-            cursor: saving ? 'wait' : 'pointer',
-          }}
-          onMouseEnter={e => { if (!saved) { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--border-strong)' } }}
-          onMouseLeave={e => { if (!saved) { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.borderColor = 'var(--border-default)' } }}
-        >
-          {saving ? <Loader2 size={11} className="animate-spin" /> : saved ? <CheckCheck size={11} /> : <Save size={11} strokeWidth={2} />}
-          {saving ? 'Saving…' : saved ? 'Saved' : 'Save'}
-        </button>
-
-        {/* Export */}
-        <button
-          onClick={onExport}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-opacity"
-          style={{
-            backgroundColor: 'var(--accent)',
-            border: 'none',
-            color: '#fff',
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px var(--accent-22)',
-          }}
-          onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
-          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-        >
-          <Download size={11} strokeWidth={2.5} /> Export
-        </button>
-
-        <div className="w-px h-4 shrink-0" style={{ backgroundColor: 'var(--border-default)' }} />
+      <div className="flex items-center gap-3">
+        <SaveStatus saving={saving} saved={saved} />
 
         <UserAvatar />
+
+        <Button
+          variant="primary"
+          size="sm"
+          className="py-1! px-2.5!"
+          onClick={onOpenShare}
+          icon={<Share2 size={18} strokeWidth={2} className="inline-block" />}
+        >
+          Share
+        </Button>
       </div>
     </div>
   )

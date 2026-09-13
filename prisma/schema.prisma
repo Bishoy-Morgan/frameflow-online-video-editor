@@ -95,6 +95,14 @@ model Project {
   aspectRatio String?
   aiDuration  String?
 
+  musicUrl        String?
+  musicVolume     Float?           @default(0.5)
+  musicSource     MusicSource?
+
+  voiceoverUrl    String?
+  voiceoverVolume Float?           @default(1.0)
+  voiceoverSource VoiceoverSource?
+
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   assets      MediaAsset[]
   timelines   Timeline[]
@@ -121,6 +129,8 @@ model Scene {
   pexelsId    String? 
 
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  keepOriginalAudio Boolean @default(false)
 
   createdAt   DateTime @default(now())
 
@@ -237,3 +247,12 @@ enum RenderStatus {
   FAILED
 }
 
+enum MusicSource {
+  UPLOAD
+  PIXABAY
+}
+
+enum VoiceoverSource {
+  UPLOAD
+  RECORDING
+}

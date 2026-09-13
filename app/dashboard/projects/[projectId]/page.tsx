@@ -302,9 +302,9 @@ export default function ProjectDetailPage() {
         <div className="flex flex-col flex-1 min-h-0">
             <DashboardHeader title="Project" />
             <div className="flex-1 flex flex-col items-center justify-center gap-4">
-                <p className="text-sm font-bold" style={{ color: 'var(--text)' }}>Project not found</p>
-                <Link href="/dashboard/projects" className="text-xs flex items-center gap-1" style={{ color: 'var(--accent)' }}>
-                    <ArrowLeft size={12} strokeWidth={2} />
+                <p className="text-caption font-semibold text-(--text) ">Project not found</p>
+                <Link href="/dashboard/projects" className="text-caption flex items-center text-(--caption) gap-1">
+                    <ArrowLeft size={20} strokeWidth={2} />
                     <span>Back to Projects</span>
                 </Link>
             </div>

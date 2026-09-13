@@ -5,6 +5,7 @@ import React, {
     useImperativeHandle, forwardRef,
 } from 'react'
 import { Plus } from 'lucide-react'
+import Button from '@/components/ui/Button'
 
 export interface PreviewCanvasHandle {
     seekTo: (seconds: number) => void
@@ -19,6 +20,7 @@ interface PreviewCanvasProps {
     videoUrl: string | null
     aspectRatio: string
     clipDuration: number
+    seekOffset: number
     onTimeUpdate: (clipTime: number) => void
     onEnded?: () => void
     onPlayStateChange?: (playing: boolean) => void
@@ -26,7 +28,7 @@ interface PreviewCanvasProps {
 }
 
 const PreviewCanvas = forwardRef<PreviewCanvasHandle, PreviewCanvasProps>(
-    ({ videoUrl, aspectRatio, clipDuration, onTimeUpdate, onEnded, onPlayStateChange, onAddScene }, ref) => {
+    ({ videoUrl, aspectRatio, clipDuration, seekOffset, onTimeUpdate, onEnded, onPlayStateChange, onAddScene }, ref) => {
         const videoRef = useRef<HTMLVideoElement>(null)
         const rafRef = useRef<number>(0)
         const clipDurationRef = useRef(clipDuration)
@@ -72,7 +74,7 @@ const PreviewCanvas = forwardRef<PreviewCanvasHandle, PreviewCanvasProps>(
                 onTimeUpdate(clamped)
             },
             getCurrentTime: () => videoRef.current?.currentTime ?? 0,
-            getDuration: () => videoRef.current?.duration    ?? 0,
+            getDuration: () => videoRef.current?.duration ?? 0,
             play: () => {
                 const v = videoRef.current
                 if (!v) return
@@ -114,14 +116,21 @@ const PreviewCanvas = forwardRef<PreviewCanvasHandle, PreviewCanvasProps>(
             v.load()
 
             const onLoaded = () => {
-                v.currentTime = 0
-                v.play()
-                    .then(() => { startRaf(); onPlayStateChange?.(true) })
-                    .catch(() => {})
+                v.currentTime = Math.max(0, Math.min(seekOffset, clipDurationRef.current))
             }
             v.addEventListener('loadedmetadata', onLoaded, { once: true })
             return () => v.removeEventListener('loadedmetadata', onLoaded)
-        }, [videoUrl, startRaf, stopRaf, onPlayStateChange])
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [videoUrl, stopRaf, onPlayStateChange])
+
+        useEffect(() => {
+            const v = videoRef.current
+            if (!v || !videoUrl) return
+            if (v.paused) {
+                v.currentTime = Math.max(0, Math.min(seekOffset, clipDurationRef.current))
+            }
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [seekOffset])
 
         useEffect(() => () => stopRaf(), [stopRaf])
 
@@ -131,59 +140,38 @@ const PreviewCanvas = forwardRef<PreviewCanvasHandle, PreviewCanvasProps>(
             onEnded?.()
         }, [stopRaf, onEnded, onPlayStateChange])
 
-        const paddingMap: Record<string, string> = {
-            '9:16': '177.78%', '16:9': '56.25%', '1:1': '100%',
+        const aspectClassMap: Record<string, string> = {
+            '9:16': 'aspect-[9/16]',
+            '16:9': 'aspect-video',
+            '1:1': 'aspect-square',
         }
-        const paddingBottom = paddingMap[aspectRatio] ?? '56.25%'
+        const aspectClass = aspectClassMap[aspectRatio] ?? 'aspect-video'
 
         return (
-            <div className="flex items-center justify-center h-full w-full p-4 bg-accent! transition-colors duration-200">
-                <div
-                    className="relative w-full"
-                    style={{
-                        maxWidth: aspectRatio === '9:16' ? '240px' : aspectRatio === '1:1' ? '360px' : '100%',
-                        paddingBottom,
-                        height: 0,
-                        borderRadius: '10px',
-                        overflow: 'hidden',
-                        backgroundColor: 'var(--bg)',
-                        border: '1px solid var(--border-default)',
-                        boxShadow: '0 8px 40px rgba(0,0,0,0.3)',
-                    }}
-                >
-                    <div className="absolute inset-0">
-                        {videoUrl ? (
-                            <video
-                                ref={videoRef}
-                                className="w-full h-full object-contain"
-                                onEnded={handleNativeEnded}
-                                style={{ backgroundColor: '#000' }}
-                                muted
-                            />
-                        ) : (
-                            <div className="group/scene absolute inset-0 flex flex-col items-center justify-center gap-3">
-                                <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-(--accent)/20 to-transparent opacity-0 transition-opacity duration-1000 ease-in-out group-hover/scene:opacity-100" />
-
-                                <div
-                                    className="group/button relative z-10 flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-(--border-default) bg-(--surface-raised) transition-all duration-500"
-                                    onClick={onAddScene}
-                                >
-                                    <Plus
-                                        size={30}
-                                        className="opacity-60 group-hover/button:text-(--accent) group-hover/button:opacity-100 transition-colors duration-200"
-                                    />
-                                </div>
-
-                                <span
-                                    className="relative z-10 text-xs font-bold"
-                                    style={{ color: 'var(--text-secondary)' }}
-                                >
-                                    Click to add a scene
-                                </span>
-                            </div>
-                        )}
+            <div className={`relative h-full overflow-hidden border border-transparent hover:border-(--accent-22) shadow-accent-22 hover:bg-(--accent-4) transition-all duration-300 ease-in-out ${aspectClass} ${videoUrl ? 'w-fit px-1.5' : 'w-full rounded-xl'}`}>
+                {videoUrl ? (
+                    <video
+                        ref={videoRef}
+                        className="w-full h-full object-contain"
+                        onEnded={handleNativeEnded}
+                        muted
+                    />
+                ) : (
+                    <div className="relative w-full h-full flex flex-col items-center justify-center">
+                        <Button
+                            size="md"
+                            variant="primary"
+                            onClick={onAddScene}
+                            className="p-2!"
+                        >
+                            <Plus size={28} strokeWidth={4} />
+                        </Button>
+                        <p className="text-caption font-semibold text-(--text) text-center mt-4">
+                            Click to add a scene<br />
+                            Or search in video stock library
+                        </p>
                     </div>
-                </div>
+                )}
             </div>
         )
     }

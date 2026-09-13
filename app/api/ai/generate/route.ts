@@ -3,24 +3,22 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-const GROQ_API_URL   = 'https://api.groq.com/openai/v1/chat/completions'
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 const PEXELS_API_URL = 'https://api.pexels.com/videos/search'
 
 type Scene = {
-    title:       string
+    title: string
     description: string
-    musicMood:   string
-    duration:    number
+    musicMood: string
+    duration: number
 }
 
 type GenerateBody = {
-    prompt:      string
-    style:       string
+    prompt: string
+    style: string
     aspectRatio: string
-    duration:    string
+    duration: string
 }
-
-// ── Pexels ─────────────────────────────────
 
 async function fetchPexelsVideo(
     query: string,
@@ -31,7 +29,7 @@ async function fetchPexelsVideo(
 
     const orientation =
         aspectRatio === '9:16' ? 'portrait' :
-        aspectRatio === '1:1'  ? 'square'   : 'landscape'
+        aspectRatio === '1:1' ? 'square' : 'landscape'
 
     try {
         const res = await fetch(
@@ -66,8 +64,6 @@ async function fetchPexelsVideo(
     }
 }
 
-// ── Prompt ────────────────────────────────────────────────────────────────────
-
 function buildPrompt(body: GenerateBody): string {
     const totalSeconds = parseInt(body.duration)
     return `You are a professional video director and creative AI assistant.
@@ -100,8 +96,6 @@ Respond ONLY with a valid JSON object in this exact format, no markdown, no expl
 }`
 }
 
-// ── Route ─────────────────────────────────────────────────────────────────────
-
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -119,20 +113,19 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Groq API key not configured' }, { status: 500 })
     }
 
-    // ── Step 1: Generate scene briefs with Groq ──
     let groqData: { projectName: string; scenes: Scene[] }
 
     try {
         const res = await fetch(GROQ_API_URL, {
-            method:  'POST',
+            method: 'POST',
             headers: {
-                'Content-Type':  'application/json',
+                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${groqKey}`,
             },
             body: JSON.stringify({
-                model:       'llama-3.3-70b-versatile',
+                model: 'llama-3.3-70b-versatile',
                 temperature: 0.7,
-                max_tokens:  2048,
+                max_tokens: 2048,
                 messages: [{ role: 'user', content: buildPrompt(body) }],
             }),
         })
@@ -143,7 +136,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Groq API error', details: err }, { status: 502 })
         }
 
-        const raw  = await res.json()
+        const raw = await res.json()
         const text = raw?.choices?.[0]?.message?.content ?? ''
 
         const jsonMatch = text.match(/\{[\s\S]*\}/)
@@ -164,31 +157,29 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Failed to parse Groq response' }, { status: 500 })
     }
 
-    // ── Step 2: Fetch a matching Pexels video for each scene in parallel ──
     const pexelsResults = await Promise.all(
         groqData.scenes.map(scene =>
             fetchPexelsVideo(`${scene.title} ${body.style}`, body.aspectRatio)
         )
     )
 
-    // ── Step 3: Save project + scenes to DB ──
     const project = await prisma.project.create({
         data: {
-            name:        groqData.projectName ?? body.prompt.slice(0, 60),
-            userId:      session.user.id,
-            prompt:      body.prompt,
-            style:       body.style,
+            name: groqData.projectName ?? body.prompt.slice(0, 60),
+            userId: session.user.id,
+            prompt: body.prompt,
+            style: body.style,
             aspectRatio: body.aspectRatio,
-            aiDuration:  body.duration,
+            aiDuration: body.duration,
             scenes: {
                 create: groqData.scenes.map((s, i) => ({
-                    title:       s.title,
+                    title: s.title,
                     description: s.description,
-                    musicMood:   s.musicMood,
-                    duration:    s.duration,
-                    order:       i,
-                    videoUrl:    pexelsResults[i]?.videoUrl ?? null,
-                    pexelsId:    pexelsResults[i]?.pexelsId ?? null,
+                    musicMood: s.musicMood,
+                    duration: s.duration,
+                    order: i,
+                    videoUrl: pexelsResults[i]?.videoUrl ?? null,
+                    pexelsId: pexelsResults[i]?.pexelsId ?? null,
                 })),
             },
         },

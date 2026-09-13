@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
-import { Loader2, Monitor, Smartphone, Square } from 'lucide-react'
+import { Loader2, Monitor, Smartphone, Square, Sparkles, X } from 'lucide-react'
 import Link from 'next/link'
 
 import EditorTopBar from './components/EditorTopBar'
@@ -11,6 +11,7 @@ import SceneTimeline from './components/SceneTimeline'
 import LeftToolsPanel, { type ToolId } from './components/LeftToolsPanel'
 import AISidebar from './components/AISidebar'
 import AddSceneModal from './components/AddSceneModal'
+import SharePanel from './components/SharePanel'
 
 interface Scene {
     id: string
@@ -37,15 +38,15 @@ interface Project {
 type AspectRatio = '16:9' | '9:16' | '1:1'
 
 const RATIO_OPTIONS: { label: AspectRatio; icon: React.ElementType; hint: string }[] = [
-    { label: '16:9', icon: Monitor, hint: 'YouTube / Web'  },
-    { label: '9:16', icon: Smartphone, hint: 'Reels / TikTok' },
-    { label: '1:1',  icon: Square, hint: 'Feed / Square'  },
+    { label: '16:9', icon: Monitor, hint: 'YouTube Web' },
+    { label: '9:16', icon: Smartphone, hint: 'Reels TikTok' },
+    { label: '1:1', icon: Square, hint: 'Feed Square' },
 ]
 
 function buildStartTimes(scenes: Scene[]): Map<string, number> {
     const sorted = [...scenes].sort((a, b) => a.order - b.order)
-    const map    = new Map<string, number>()
-    let   offset = 0
+    const map = new Map<string, number>()
+    let offset = 0
     for (const s of sorted) {
         map.set(s.id, offset)
         offset += s.duration
@@ -64,11 +65,12 @@ export default function EditorPage() {
     const [aspectRatio, setAspectRatio] = useState<AspectRatio>('16:9')
     const [ratioOpen, setRatioOpen] = useState(false)
     const [activeTool, setActiveTool] = useState<ToolId | null>(null)
-    const [aiOpen, setAiOpen] = useState(true)
+    const [aiOpen, setAiOpen] = useState(false)
     const [saving, setSaving] = useState(false)
     const [saved, setSaved] = useState(false)
     const [playing, setPlaying] = useState(false)
     const [addSceneOpen, setAddSceneOpen] = useState(false)
+    const [shareOpen, setShareOpen] = useState(false)
 
     const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
     const canvasRef = useRef<PreviewCanvasHandle>(null)
@@ -89,7 +91,11 @@ export default function EditorPage() {
 
     const activeClipDuration = project?.scenes.find(s => s.id === activeSceneId)?.duration ?? 0
 
-    // Fetch project 
+    // The playhead's position translated into the active clip's own local time.
+    const seekOffset = activeSceneId
+        ? Math.max(0, globalTime - (startTimesRef.current.get(activeSceneId) ?? 0))
+        : 0
+
     useEffect(() => {
         if (!projectId) return
         const scenesParam = searchParams.get('scenes')
@@ -106,7 +112,7 @@ export default function EditorPage() {
                 const proj = { ...data, scenes: filtered }
                 setProject(proj)
 
-                if (data.aspectRatio && ['16:9','9:16','1:1'].includes(data.aspectRatio))
+                if (data.aspectRatio && ['16:9', '9:16', '1:1'].includes(data.aspectRatio))
                     setAspectRatio(data.aspectRatio as AspectRatio)
 
                 startTimesRef.current = buildStartTimes(filtered)
@@ -126,14 +132,13 @@ export default function EditorPage() {
         startTimesRef.current = buildStartTimes(project.scenes)
     }, [project])
 
-    // Time update 
+    // Only fires while actively playing — advances the playhead forward.
     const handleTimeUpdate = useCallback((clipTime: number) => {
         if (!activeSceneId) return
         const sceneStart = startTimesRef.current.get(activeSceneId) ?? 0
         setGlobalTime(sceneStart + clipTime)
     }, [activeSceneId])
 
-    // Clip ended
     const handleClipEnded = useCallback(() => {
         if (!project) return
         const sorted = getSortedScenes(project.scenes)
@@ -142,6 +147,7 @@ export default function EditorPage() {
         if (next) {
             setActiveSceneId(next.id)
             setCurrentVideoUrl(next.videoUrl ?? null)
+            setGlobalTime(startTimesRef.current.get(next.id) ?? 0)
         } else {
             setPlaying(false)
             const last = sorted[sorted.length - 1]
@@ -149,29 +155,49 @@ export default function EditorPage() {
         }
     }, [project, activeSceneId, getSortedScenes])
 
-    // Scene click
+    // Click a scene block: move the playhead there, show the paused frame. Never plays.
     const handleSceneClick = useCallback((scene: Scene, seekTime: number) => {
-        const sceneStart  = startTimesRef.current.get(scene.id) ?? 0
-        const localOffset = Math.max(0, seekTime - sceneStart)
+        if (playing) {
+            canvasRef.current?.pause()
+            setPlaying(false)
+        }
         setActiveSceneId(scene.id)
         setGlobalTime(seekTime)
         if (scene.videoUrl !== currentVideoUrl) {
             setCurrentVideoUrl(scene.videoUrl ?? null)
-        } else {
-            canvasRef.current?.seekTo(localOffset)
         }
-    }, [currentVideoUrl])
+    }, [currentVideoUrl, playing])
 
-    // next video pre-render
+    // Dragging the playhead: same idea as a click, but continuous — may cross into a different scene.
+    const handlePlayheadDrag = useCallback((time: number) => {
+        if (!project) return
+        if (playing) {
+            canvasRef.current?.pause()
+            setPlaying(false)
+        }
+        const sorted = getSortedScenes(project.scenes)
+        const scene = sorted.find(s => {
+            const start = startTimesRef.current.get(s.id) ?? 0
+            return time >= start && time < start + s.duration
+        }) ?? sorted[sorted.length - 1]
+
+        if (!scene) return
+
+        setGlobalTime(time)
+        if (scene.id !== activeSceneId) {
+            setActiveSceneId(scene.id)
+            setCurrentVideoUrl(scene.videoUrl ?? null)
+        }
+    }, [project, activeSceneId, playing, getSortedScenes])
+
     const nextVideo = useMemo(() => {
-        if(!project) return
+        if (!project) return
         const sorted = getSortedScenes(project.scenes)
         const idx = sorted.findIndex(s => s.id === activeSceneId)
         const nextVideoUrl = sorted[idx + 1]?.videoUrl
         return nextVideoUrl
     }, [project, activeSceneId, getSortedScenes])
 
-    // Transport
     const handlePlay = useCallback(() => {
         canvasRef.current?.play()
         setPlaying(true)
@@ -192,53 +218,67 @@ export default function EditorPage() {
         }
         setGlobalTime(0)
         setPlaying(false)
-        setTimeout(() => canvasRef.current?.seekTo(0), 50)
     }, [project, getSortedScenes])
 
     const handlePlayStateChange = useCallback((isPlaying: boolean) => {
         setPlaying(isPlaying)
     }, [])
 
-    // Save
-    const handleSave = useCallback(async () => {
-        if (!project) return
-        setSaving(true)
-        try {
-            await fetch(`/api/projects/${projectId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'save', scenes: project.scenes }),
-            })
-            setSaved(true)
-            setTimeout(() => setSaved(false), 3000)
-        } finally { setSaving(false) }
-    }, [project, projectId])
-
     const persistScenes = useCallback((scenes: Scene[]) => {
         if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
         autoSaveTimer.current = setTimeout(async () => {
+            setSaving(true)
             try {
                 await fetch(`/api/projects/${projectId}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'save', scenes }),
                 })
-            } catch (err) { console.error('Auto-save failed:', err) }
+                setSaved(true)
+                setTimeout(() => setSaved(false), 3000)
+            } catch (err) {
+                console.error('Auto-save failed:', err)
+            } finally {
+                setSaving(false)
+            }
         }, 800)
     }, [projectId])
 
     const handleExport = useCallback(async () => {
+        if (!project) return
+
+        if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
         try {
-            await fetch('/api/render', {
+            await fetch(`/api/projects/${projectId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'save', scenes: project.scenes }),
+            })
+        } catch (err) {
+            console.error('Pre-export save failed:', err)
+            alert('Could not save your latest changes. Please try again before exporting.')
+            return
+        }
+
+        try {
+            const res = await fetch('/api/render', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ projectId, aspectRatio }),
             })
-            alert("Export queued! You'll be notified when ready.")
-        } catch { alert('Export failed. Please try again.') }
-    }, [projectId, aspectRatio])
 
-    // Add scene
+            if (!res.ok) {
+                alert('Export isn\u2019t available yet. This feature is still being built.')
+                return
+            }
+
+            alert("Export queued! You'll be notified when ready.")
+        } catch (err) {
+            console.error('Export request failed:', err)
+            alert('Export isn\u2019t available yet. This feature is still being built.')
+        }
+    }, [project, projectId, aspectRatio])
+
     const handleSceneAdded = useCallback((scene: Scene) => {
         if (!project) return
         const updated = [...project.scenes, scene]
@@ -257,31 +297,26 @@ export default function EditorPage() {
             if (sorted.length > 0) {
                 setActiveSceneId(sorted[0].id)
                 setCurrentVideoUrl(sorted[0].videoUrl ?? null)
+            } else {
+                setActiveSceneId(null)
+                setCurrentVideoUrl(null)
             }
         }
     }, [getSortedScenes, persistScenes, activeSceneId])
 
     const toolPanels: Partial<Record<ToolId, React.ReactNode>> = {
-        trim: (
-            <div className="p-4 flex flex-col gap-3">
-                <p className="text-xs font-bold" style={{ color: 'var(--text)' }}>Trim & Cut</p>
-                <p className="text-[11px]" style={{ color: 'var(--text-tertiary)', lineHeight: 1.7 }}>
-                    Drag the left or right edge of any clip in the timeline to trim it.
-                </p>
-            </div>
-        ),
         text: (
             <div className="p-4 flex flex-col gap-3">
-                <p className="text-xs font-bold" style={{ color: 'var(--text)' }}>Text Overlays</p>
-                <p className="text-[11px]" style={{ color: 'var(--text-tertiary)', lineHeight: 1.7 }}>
+                <p className="text-caption font-semibold text-(--text)">Text Overlays</p>
+                <p className="text-small leading-[1.7] text-tertiary">
                     Add titles, lower thirds, and captions.
                 </p>
             </div>
         ),
         audio: (
             <div className="p-4 flex flex-col gap-3">
-                <p className="text-xs font-bold" style={{ color: 'var(--text)' }}>Audio Tracks</p>
-                <p className="text-[11px]" style={{ color: 'var(--text-tertiary)', lineHeight: 1.7 }}>
+                <p className="text-caption font-semibold text-(--text)">Audio Tracks</p>
+                <p className="text-small leading-[1.7] text-tertiary">
                     Background music and voiceover tracks. Coming in v2.
                 </p>
             </div>
@@ -289,19 +324,19 @@ export default function EditorPage() {
     }
 
     if (loading) return (
-        <div className="flex items-center justify-center" style={{ height: '100dvh', backgroundColor: 'var(--bg)' }}>
+        <div className="flex items-center justify-center h-dvh surface">
             <div className="flex flex-col items-center gap-3">
-                <Loader2 size={28} className="animate-spin" style={{ color: 'var(--accent)' }} />
-                <p className="text-sm font-semibold" style={{ color: 'var(--text-tertiary)' }}>Loading editor…</p>
+                <Loader2 size={40} className="animate-spin text-(--accent)" />
+                <p className="text-body font-semibold text-tertiary">Loading editor…</p>
             </div>
         </div>
     )
 
     if (error || !project) return (
-        <div className="flex items-center justify-center" style={{ height: '100dvh', backgroundColor: 'var(--bg)' }}>
+        <div className="flex items-center justify-center h-dvh surface">
             <div className="flex flex-col items-center gap-3">
-                <p className="text-sm font-bold" style={{ color: 'var(--text)' }}>Project not found</p>
-                <Link href="/dashboard" className="text-xs" style={{ color: 'var(--accent)' }}>← Back to Dashboard</Link>
+                <p className="text-caption font-bold text-(--text)">Project not found</p>
+                <Link href="/dashboard" className="text-small text-(--accent)">← Back to Dashboard</Link>
             </div>
         </div>
     )
@@ -309,121 +344,81 @@ export default function EditorPage() {
     const totalDuration = getTotalDuration(project.scenes)
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100dvh', overflow: 'hidden', backgroundColor: 'var(--bg)' }}>
+        <div className="relative flex flex-col w-screen h-dvh overflow-hidden">
 
-            <div 
-                style={{ flexShrink: 0 }} 
-                className="w-full h-[10%] "
-            >
+            <div className="shrink-0 w-full h-16 flex justify-center items-center">
                 <EditorTopBar
                     projectId={projectId}
                     projectName={project.name}
-                    saving={saving} saved={saved}
-                    aiOpen={aiOpen}
-                    onToggleAi={() => setAiOpen(v => !v)}
-                    onSave={handleSave}
-                    onExport={handleExport}
+                    saving={saving}
+                    saved={saved}
+                    onOpenShare={() => setShareOpen(v => !v)}
                 />
             </div>
 
-            <div 
-                style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}
-                className="w-full h-3/5 "
-            >
-                <div 
-                    style={{ flexShrink: 0 }}
-                    className="w-[4%] max-w-[4.5%]"
-                >
+            <div className="relative flex flex-1 min-h-0 overflow-hidden w-full">
+                <div className="relative z-50! shrink-0 p-2">
                     <LeftToolsPanel
                         activeTool={activeTool}
                         onToolClick={id => setActiveTool(prev => prev === id ? null : id)}
                     />
+                    {activeTool && toolPanels[activeTool] && (
+                        <div className="absolute top-2 left-[calc(100%+0.5rem)] w-50 h-fit shrink-0 overflow-y-scroll scrollbar-hide bg-(--accent-40) rounded-xl shadow-lg">
+                            {toolPanels[activeTool]}
+                        </div>
+                    )}
                 </div>
 
-                {activeTool && toolPanels[activeTool] && (
-                    <div style={{ width: '200px', flexShrink: 0, overflowY: 'auto', backgroundColor: 'var(--bg)', borderRight: '1px solid var(--border-default)' }}>
-                        {toolPanels[activeTool]}
-                    </div>
-                )}
-
-                <div
-                    className="relative"
-                    style={{ flex: '1 1 0', minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: 'var(--surface-raised)' }}
-                >
+                <div className="relative flex-1 min-w-0 flex items-center justify-center overflow-hidden bg-transparent p-2">
                     <PreviewCanvas
                         ref={canvasRef}
                         videoUrl={currentVideoUrl}
                         aspectRatio={aspectRatio}
                         clipDuration={activeClipDuration}
+                        seekOffset={seekOffset}
                         onTimeUpdate={handleTimeUpdate}
                         onEnded={handleClipEnded}
                         onPlayStateChange={handlePlayStateChange}
                         onAddScene={() => setAddSceneOpen(true)}
                     />
 
-                    <div className="absolute bottom-4 right-4 flex flex-col items-end gap-1" style={{ zIndex: 20 }}>
+                    <div className="absolute bottom-4 right-4 flex flex-col items-end gap-1 z-20">
                         <button
                             onClick={() => setRatioOpen(o => !o)}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold"
-                            style={{
-                                backgroundColor: ratioOpen ? 'var(--accent)' : 'rgba(0,0,0,0.6)',
-                                backdropFilter:  'blur(8px)',
-                                border:          `1px solid ${ratioOpen ? 'transparent' : 'rgba(255,255,255,0.12)'}`,
-                                color:           ratioOpen ? '#020202' : 'white',
-                            }}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-caption font-semibold text-(--text) shadow transition-all duration-300 ease-out ${
+                                ratioOpen
+                                    ? 'bg-(--accent-40) border border-transparent'
+                                    : 'bg-(--surface-overlay) border border-(--accent-40)'
+                            }`}
                         >
                             {React.createElement(
                                 RATIO_OPTIONS.find(r => r.label === aspectRatio)?.icon ?? Monitor,
-                                { size: 12, strokeWidth: 2 }
+                                { size: 20, strokeWidth: 2 }
                             )}
                             {aspectRatio}
                         </button>
                         {ratioOpen && (
-                            <div className="flex flex-col gap-1 p-1.5 rounded-xl"
-                                style={{ backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            <div className="absolute bottom-10 right-1/2 flex flex-col gap-2 p-2 rounded-xl bg-(--surface-overlay) shadow-accent-40 text-(--text)">
                                 {RATIO_OPTIONS.map(({ label, icon: Icon, hint }) => (
-                                    <button key={label}
+                                    <button
+                                        key={label}
                                         onClick={() => { setAspectRatio(label); setRatioOpen(false) }}
-                                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left"
-                                        style={{
-                                            backgroundColor: aspectRatio === label ? 'var(--accent-16)' : 'transparent',
-                                            color:           aspectRatio === label ? 'var(--accent)'    : 'rgba(255,255,255,0.8)',
-                                            border:          `1px solid ${aspectRatio === label ? 'var(--accent-42)' : 'transparent'}`,
-                                            cursor:          'pointer',
-                                        }}
-                                        onMouseEnter={e => { if (aspectRatio !== label) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)' }}
-                                        onMouseLeave={e => { if (aspectRatio !== label) e.currentTarget.style.backgroundColor = 'transparent' }}
+                                        className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-small font-semibold text-left transition-colors hover:bg-(--accent-8) ${
+                                            aspectRatio === label ? 'bg-(--accent-16)' : ''
+                                        }`}
                                     >
-                                        <Icon size={13} strokeWidth={1.75} />
-                                        <span>{label}</span>
-                                        <span style={{ opacity: 0.5, fontSize: '10px' }}>{hint}</span>
+                                        <Icon size={28} strokeWidth={2} />
+                                        <span className="text-caption">{label}</span>
+                                        <span className="text-small">{hint}</span>
                                     </button>
                                 ))}
                             </div>
                         )}
                     </div>
                 </div>
-
-                <div 
-                    style={{ width: aiOpen ? '30%' : '0%', flexShrink: 0, overflow: 'hidden', transition: 'width 0.25s cubic-bezier(0.4,0,0.2,1)', borderLeft: aiOpen ? '1px solid var(--border-default)' : 'none' }}
-                >
-                    <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
-                        <AISidebar
-                            projectId={projectId}
-                            projectName={project.name}
-                            prompt={project.prompt}
-                            scenes={project.scenes}
-                            videoUrl={currentVideoUrl}
-                            onScenesUpdate={handleScenesUpdate}
-                        />
-                    </div>
-                </div>
             </div>
 
-            <div 
-                style={{ flexShrink: 0 }}
-                className="w-full h-[30%] "
-            >
+            <div className="shrink-0 w-full h-64 shadow-accent-40 p-2 rounded-xl m-2 mt-0">
                 <SceneTimeline
                     scenes={project.scenes}
                     activeSceneId={activeSceneId}
@@ -431,6 +426,7 @@ export default function EditorPage() {
                     totalDuration={totalDuration}
                     playing={playing}
                     onSceneClick={handleSceneClick}
+                    onPlayheadDrag={handlePlayheadDrag}
                     onAddScene={() => setAddSceneOpen(true)}
                     onScenesChange={handleScenesUpdate}
                     onPlay={handlePlay}
@@ -438,9 +434,41 @@ export default function EditorPage() {
                     onStop={handleStop}
                 />
                 {nextVideo && (
-                    <video preload='auto' src={nextVideo} style={{ display: 'none' }} />
+                    <video preload="auto" src={nextVideo} className="hidden" />
                 )}
             </div>
+
+            <button
+                onClick={() => setAiOpen(v => !v)}
+                title={aiOpen ? 'Hide AI assistant' : 'Show AI assistant'}
+                className={`absolute top-22 right-6 flex items-center justify-center w-10 h-10 rounded-full cursor-pointer text-(--text) z-50 shadow-md shadow-[#00D9AA] border border-transparent hover:border-(--accent-65) transition-all duration-500 hover:scale-110 ${
+                    aiOpen ? 'bg-(--accent-16) scale-110' : 'bg-(--overlay)'
+                }`}
+            >
+                {aiOpen ? <X size={20} strokeWidth={2} className="text-(--text)" /> : <Sparkles size={16} strokeWidth={2} className="text-(--accent)" />}
+            </button>
+
+            {aiOpen && (
+                <div className="absolute top-36 right-6 w-100 shadow-accent-40 rounded-xl overflow-hidden z-30">
+                    <AISidebar
+                        projectId={projectId}
+                        projectName={project.name}
+                        prompt={project.prompt}
+                        scenes={project.scenes}
+                        videoUrl={currentVideoUrl}
+                        onScenesUpdate={handleScenesUpdate}
+                    />
+                </div>
+            )}
+
+            {shareOpen && (
+                <SharePanel
+                    projectId={projectId}
+                    totalDuration={totalDuration}
+                    onExport={handleExport}
+                    onClose={() => setShareOpen(false)}
+                />
+            )}
 
             {addSceneOpen && (
                 <AddSceneModal

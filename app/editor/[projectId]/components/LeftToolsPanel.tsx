@@ -2,11 +2,11 @@
 
 import React from 'react'
 import {
-  Scissors, Type, Music2, Image, Wand2,
+  Type, Music2, Image, Wand2,
   SlidersHorizontal, Layers,
 } from 'lucide-react'
 
-export type ToolId = 'trim' | 'text' | 'audio' | 'media' | 'effects' | 'adjust' | 'layers'
+export type ToolId = 'text' | 'audio' | 'media' | 'effects' | 'adjust' | 'layers'
 
 interface Tool {
   id:    ToolId
@@ -15,7 +15,6 @@ interface Tool {
 }
 
 const TOOLS: Tool[] = [
-  { id: 'trim', icon: Scissors, label: 'Trim' },
   { id: 'text', icon: Type, label: 'Text' },
   { id: 'audio', icon: Music2, label: 'Audio' },
   { id: 'media', icon: Image, label: 'Media' },
@@ -32,13 +31,7 @@ interface LeftToolsPanelProps {
 export default function LeftToolsPanel({ activeTool, onToolClick }: LeftToolsPanelProps) {
   return (
     <div
-      className="flex flex-col items-center py-3 gap-1.5 shrink-0 overflow-x-hidden"
-      style={{
-        width: '100%',
-        backgroundColor: 'var(--bg)',
-        borderRight: '1px solid var(--border-default)',
-        overflowY: 'auto',
-      }}
+      className="flex w-full flex-col items-center shrink-0 overflow-x-hidden overflow-y-scroll scrollbar-hide shadow-accent-40 rounded-xl p-1.5 gap-y-1.5"
     >
       {TOOLS.map(({ id, icon: Icon, label }) => {
         const active = activeTool === id
@@ -47,51 +40,15 @@ export default function LeftToolsPanel({ activeTool, onToolClick }: LeftToolsPan
             key={id}
             onClick={() => onToolClick(id)}
             title={label}
-            className="relative flex flex-col items-center justify-center gap-1.5 rounded-xl transition-all duration-150 group"
-            style={{
-              width: '52px',
-              height: '52px',
-              backgroundColor: active ? 'var(--accent-8)' : 'transparent',
-              border: active ? '1px solid var(--accent-22)' : '1px solid transparent',
-              cursor: 'pointer',
-            }}
-            onMouseEnter={e => {
-              if (!active) {
-                e.currentTarget.style.backgroundColor = 'var(--surface-raised)'
-                e.currentTarget.style.borderColor = 'var(--border-default)'
-              }
-            }}
-            onMouseLeave={e => {
-              if (!active) {
-                e.currentTarget.style.backgroundColor = 'transparent'
-                e.currentTarget.style.borderColor = 'transparent'
-              }
-            }}
+            className="relative flex flex-col items-center justify-center gap-1.5 rounded-xl transition-all duration-150 group w-12 h-12 cursor-pointer hover:bg-(--accent-8) hover:shadow-lg focus:bg-(--accent-10) focus:shadow-lg"
           >
             <Icon
-              size={20}
-              strokeWidth={active ? 2 : 1.75}
-              style={{ color: active ? 'var(--accent)' : 'var(--text-tertiary)' }}
+              size={24}
+              strokeWidth={active ? 2.25 : 1.75}
+              className={`transition-all duration-150 ${active ? 'text-(--accent)' : 'text-(--tertiary)'}`}
             />
-            <span
-              className="font-bold leading-none"
-              style={{
-                fontSize: '10px',
-                color: active ? 'var(--accent)' : 'var(--text-tertiary)',
-                opacity: active ? 1 : 0.7,
-              }}
-            >
-              {label}
-            </span>
-
             <div
-              className="absolute left-full ml-2 px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50"
-              style={{
-                backgroundColor: 'var(--bg)',
-                border: '1px solid var(--border-default)',
-                color: 'var(--text)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              }}
+              className="absolute top-0 bg-black left-full ml-2 w-4 h-4 rounded-lg text-caption font-semibold whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50 "
             >
               {label}
             </div>
