@@ -13,7 +13,7 @@ export async function GET(_req: Request, { params }: Params) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const project = await prisma.project.findFirst({
-        where:   { id: projectId, userId: session.user.id },
+        where: { id: projectId, userId: session.user.id },
         include: {
             scenes: { orderBy: { order: 'asc' } },
             _count: { select: { assets: true, timelines: true, renders: true } },
@@ -62,36 +62,49 @@ export async function PATCH(req: Request, { params }: Params) {
         return NextResponse.json({ saved: true })
     }
 
-    // Rename
+    if (action === 'update') {
+        const { musicUrl, musicSource, voiceoverUrl, voiceoverSource } = result.data
+        const data: Record<string, unknown> = {}
+
+        if (musicUrl !== undefined) data.musicUrl = musicUrl
+        if (musicSource !== undefined) data.musicSource = musicSource
+        if (voiceoverUrl !== undefined) data.voiceoverUrl = voiceoverUrl
+        if (voiceoverSource !== undefined) data.voiceoverSource = voiceoverSource
+
+        const updated = await prisma.project.update({
+            where: { id: projectId },
+            data,
+        })
+
+        return NextResponse.json(updated)
+    }
+
     if (typeof name === 'string') {
         const updated = await prisma.project.update({
             where: { id: projectId },
-            data:  { name: name.trim() },
+            data: { name: name.trim() },
         })
         return NextResponse.json(updated)
     }
 
-    // Star / unstar
     if (typeof starred === 'boolean') {
         const updated = await prisma.project.update({
             where: { id: projectId },
-            data:  { starred },
+            data: { starred },
         })
         return NextResponse.json(updated)
     }
 
-    // Soft delete
     if (deletedAt !== undefined) {
         const updated = await prisma.project.update({
             where: { id: projectId },
-            data:  { deletedAt: deletedAt ? new Date(deletedAt) : null },
+            data: { deletedAt: deletedAt ? new Date(deletedAt) : null },
         })
         return NextResponse.json(updated)
     }
 
-    // Legacy action strings
-    if (action === 'star')    return NextResponse.json(await prisma.project.update({ where: { id: projectId }, data: { starred: true } }))
-    if (action === 'unstar')  return NextResponse.json(await prisma.project.update({ where: { id: projectId }, data: { starred: false } }))
+    if (action === 'star') return NextResponse.json(await prisma.project.update({ where: { id: projectId }, data: { starred: true } }))
+    if (action === 'unstar') return NextResponse.json(await prisma.project.update({ where: { id: projectId }, data: { starred: false } }))
     if (action === 'restore') return NextResponse.json(await prisma.project.update({ where: { id: projectId }, data: { deletedAt: null } }))
 
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
@@ -120,7 +133,7 @@ export async function DELETE(_req: Request, { params }: Params) {
 
     const updated = await prisma.project.update({
         where: { id: projectId },
-        data:  { deletedAt: new Date() },
+        data: { deletedAt: new Date() },
     })
     return NextResponse.json(updated)
 }

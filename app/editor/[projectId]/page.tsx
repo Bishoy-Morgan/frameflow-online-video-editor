@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
-import { Loader2, Monitor, Smartphone, Square, Sparkles, X } from 'lucide-react'
+import { Loader2, Monitor, Smartphone, Square, Sparkles, X, ArrowLeftFromLineIcon } from 'lucide-react'
 import Link from 'next/link'
 
 import EditorTopBar from './components/EditorTopBar'
@@ -12,6 +12,7 @@ import LeftToolsPanel, { type ToolId } from './components/LeftToolsPanel'
 import AISidebar from './components/AISidebar'
 import AddSceneModal from './components/AddSceneModal'
 import SharePanel from './components/SharePanel'
+import { useFileUpload } from '@/hooks/useFileUpload'
 
 interface Scene {
     id: string
@@ -31,6 +32,10 @@ interface Project {
     prompt: string | null
     style: string | null
     aspectRatio: string | null
+    musicUrl: string | null
+    musicSource: string | null
+    voiceoverUrl: string | null
+    voiceoverSource: string | null
     scenes: Scene[]
     _count: { assets: number; timelines: number; renders: number }
 }
@@ -74,6 +79,7 @@ export default function EditorPage() {
 
     const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
     const canvasRef = useRef<PreviewCanvasHandle>(null)
+    const initialScenesRef = useRef<string | null>(null)
 
     const [globalTime, setGlobalTime] = useState(0)
     const [activeSceneId, setActiveSceneId] = useState<string | null>(null)
@@ -91,7 +97,6 @@ export default function EditorPage() {
 
     const activeClipDuration = project?.scenes.find(s => s.id === activeSceneId)?.duration ?? 0
 
-    // The playhead's position translated into the active clip's own local time.
     const seekOffset = activeSceneId
         ? Math.max(0, globalTime - (startTimesRef.current.get(activeSceneId) ?? 0))
         : 0
@@ -111,6 +116,7 @@ export default function EditorPage() {
                     : allScenes
                 const proj = { ...data, scenes: filtered }
                 setProject(proj)
+                initialScenesRef.current = JSON.stringify(filtered)
 
                 if (data.aspectRatio && ['16:9', '9:16', '1:1'].includes(data.aspectRatio))
                     setAspectRatio(data.aspectRatio as AspectRatio)
@@ -132,7 +138,6 @@ export default function EditorPage() {
         startTimesRef.current = buildStartTimes(project.scenes)
     }, [project])
 
-    // Only fires while actively playing — advances the playhead forward.
     const handleTimeUpdate = useCallback((clipTime: number) => {
         if (!activeSceneId) return
         const sceneStart = startTimesRef.current.get(activeSceneId) ?? 0
@@ -155,7 +160,6 @@ export default function EditorPage() {
         }
     }, [project, activeSceneId, getSortedScenes])
 
-    // Click a scene block: move the playhead there, show the paused frame. Never plays.
     const handleSceneClick = useCallback((scene: Scene, seekTime: number) => {
         if (playing) {
             canvasRef.current?.pause()
@@ -168,7 +172,6 @@ export default function EditorPage() {
         }
     }, [currentVideoUrl, playing])
 
-    // Dragging the playhead: same idea as a click, but continuous — may cross into a different scene.
     const handlePlayheadDrag = useCallback((time: number) => {
         if (!project) return
         if (playing) {
@@ -225,6 +228,9 @@ export default function EditorPage() {
     }, [])
 
     const persistScenes = useCallback((scenes: Scene[]) => {
+        console.trace('persistScenes called', scenes)
+        if (JSON.stringify(scenes) === initialScenesRef.current) return
+
         if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
         autoSaveTimer.current = setTimeout(async () => {
             setSaving(true)
@@ -234,6 +240,7 @@ export default function EditorPage() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'save', scenes }),
                 })
+                initialScenesRef.current = JSON.stringify(scenes)
                 setSaved(true)
                 setTimeout(() => setSaved(false), 3000)
             } catch (err) {
@@ -304,6 +311,50 @@ export default function EditorPage() {
         }
     }, [getSortedScenes, persistScenes, activeSceneId])
 
+    const patchProjectAudio = useCallback(async (
+        field: 'musicUrl' | 'voiceoverUrl',
+        url: string | null,
+        sourceField: 'musicSource' | 'voiceoverSource',
+        source: string | null,
+    ) => {
+        setProject(p => p ? { ...p, [field]: url, [sourceField]: source } : p)
+        try {
+            await fetch(`/api/projects/${projectId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'update', [field]: url, [sourceField]: source }),
+            })
+        } catch (err) {
+            console.error('Failed to save audio field:', err)
+        }
+    }, [projectId])
+
+    const musicUpload = useFileUpload({
+        accept: 'audio/*',
+        onUploaded: url => patchProjectAudio('musicUrl', url, 'musicSource', 'UPLOAD'),
+    })
+
+    const voiceoverUpload = useFileUpload({
+        accept: 'audio/*',
+        onUploaded: url => patchProjectAudio('voiceoverUrl', url, 'voiceoverSource', 'UPLOAD'),
+    })
+
+    const handleAddMusic = useCallback(() => {
+        musicUpload.trigger('/api/upload/music', projectId)
+    }, [musicUpload, projectId])
+
+    const handleRemoveMusic = useCallback(() => {
+        patchProjectAudio('musicUrl', null, 'musicSource', null)
+    }, [patchProjectAudio])
+
+    const handleAddVoiceover = useCallback(() => {
+        voiceoverUpload.trigger('/api/upload/voiceover', projectId)
+    }, [voiceoverUpload, projectId])
+
+    const handleRemoveVoiceover = useCallback(() => {
+        patchProjectAudio('voiceoverUrl', null, 'voiceoverSource', null)
+    }, [patchProjectAudio])
+
     const toolPanels: Partial<Record<ToolId, React.ReactNode>> = {
         text: (
             <div className="p-4 flex flex-col gap-3">
@@ -317,7 +368,7 @@ export default function EditorPage() {
             <div className="p-4 flex flex-col gap-3">
                 <p className="text-caption font-semibold text-(--text)">Audio Tracks</p>
                 <p className="text-small leading-[1.7] text-tertiary">
-                    Background music and voiceover tracks. Coming in v2.
+                    Background music and voiceover tracks are managed from the timeline below.
                 </p>
             </div>
         ),
@@ -335,8 +386,11 @@ export default function EditorPage() {
     if (error || !project) return (
         <div className="flex items-center justify-center h-dvh surface">
             <div className="flex flex-col items-center gap-3">
-                <p className="text-caption font-bold text-(--text)">Project not found</p>
-                <Link href="/dashboard" className="text-small text-(--accent)">← Back to Dashboard</Link>
+                <p className="text-body font-bold text-(--text)">Project not found</p>
+                <Link href="/dashboard" className="flex items-center gap-3 text-caption text-(--accent)">
+                    <ArrowLeftFromLineIcon size={30} strokeWidth={2} className='text-(--text)'/>
+                    Back to Dashboard
+                </Link>
             </div>
         </div>
     )
@@ -432,6 +486,12 @@ export default function EditorPage() {
                     onPlay={handlePlay}
                     onPause={handlePause}
                     onStop={handleStop}
+                    musicUrl={project.musicUrl}
+                    onAddMusic={handleAddMusic}
+                    onRemoveMusic={handleRemoveMusic}
+                    voiceoverUrl={project.voiceoverUrl}
+                    onAddVoiceover={handleAddVoiceover}
+                    onRemoveVoiceover={handleRemoveVoiceover}
                 />
                 {nextVideo && (
                     <video preload="auto" src={nextVideo} className="hidden" />

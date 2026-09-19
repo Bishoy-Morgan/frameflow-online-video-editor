@@ -228,6 +228,7 @@ export default function SceneTimeline({
     document.addEventListener('mouseup', onUp)
   }, [scenes, pxPerSec, onScenesChange])
 
+  
   const xToTime = (clientX: number) => {
     const rect = scrollRef.current?.getBoundingClientRect()
     if (!rect) return 0

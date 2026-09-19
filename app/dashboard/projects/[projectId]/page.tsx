@@ -9,7 +9,6 @@ import {
     Clapperboard, Settings, Loader2,
     Play
 } from 'lucide-react'
-import DashboardHeader from '../../components/DashboardHeader'
 import { getMoodColor } from '@/lib/constants/moods'
 
 type Scene = {
@@ -291,7 +290,6 @@ export default function ProjectDetailPage() {
 
     if (loading) return (
         <div className="flex flex-col flex-1 min-h-0">
-            <DashboardHeader title="Project" />
             <div className="flex-1 flex items-center justify-center">
                 <Loader2 size={24} className="animate-spin" style={{ color: 'var(--text-tertiary)' }} />
             </div>
@@ -300,7 +298,6 @@ export default function ProjectDetailPage() {
 
     if (error || !project) return (
         <div className="flex flex-col flex-1 min-h-0">
-            <DashboardHeader title="Project" />
             <div className="flex-1 flex flex-col items-center justify-center gap-4">
                 <p className="text-caption font-semibold text-(--text) ">Project not found</p>
                 <Link href="/dashboard/projects" className="text-caption flex items-center text-(--caption) gap-1">
@@ -316,7 +313,6 @@ export default function ProjectDetailPage() {
 
     return (
         <div className="relative flex flex-col flex-1 min-h-0 overflow-auto">
-            <DashboardHeader title={project.name} subtitle="Project overview" />
 
             <DeleteConfirmModal
                 open={deleteConfirmOpen}

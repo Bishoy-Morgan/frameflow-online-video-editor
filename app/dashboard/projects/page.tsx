@@ -1,15 +1,13 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import {
-    Search, Grid3X3, List, SlidersHorizontal,
-    Star, Trash2, FolderPlus, FolderOpen,
-    MoreVertical, Pencil, Copy, ExternalLink,
-    ChevronDown, X, Loader2, Film,
-    SortAsc, SortDesc, Clock, AlignLeft,
+    Search, FolderPlus, FolderOpen, Star, Trash2,
+    ChevronDown, X, Loader2, SortAsc, SortDesc, Clock, AlignLeft,
 } from 'lucide-react'
-import DashboardHeader from '../components/DashboardHeader'
 import { useRouter } from 'next/navigation'
+import DashboardCard, { Project as CardProject } from '../components/DashboardCard'
+import Button from '@/components/ui/Button'
 
 interface Scene {
     id: string
@@ -18,6 +16,7 @@ interface Scene {
     musicMood: string
     duration: number
     order: number
+    videoUrl?: string | null
 }
 
 interface Project {
@@ -31,13 +30,11 @@ interface Project {
     deletedAt: string | null
     thumbnail: string | null
     scenes: Scene[]
-    _count?: { scenes: number }
 }
 
 type SortField = 'updatedAt' | 'createdAt' | 'name'
 type SortDir = 'asc' | 'desc'
 type Filter = 'all' | 'starred' | 'trash'
-type ViewMode = 'grid' | 'list'
 
 function formatRelative(dateStr: string): string {
     const diff = Date.now() - new Date(dateStr).getTime()
@@ -52,409 +49,54 @@ function formatRelative(dateStr: string): string {
     return new Date(dateStr).toLocaleDateString()
 }
 
-function totalDuration(scenes: Scene[]): string {
-    const secs = scenes.reduce((a, s) => a + s.duration, 0)
-    if (secs < 60) return `${secs}s`
-    return `${Math.floor(secs / 60)}m ${secs % 60}s`
+function toCardProject(p: Project): CardProject {
+    return {
+        id: p.id,
+        name: p.name,
+        lastEdited: formatRelative(p.updatedAt),
+        thumbnail: p.thumbnail ?? undefined,
+        previewVideoUrl: p.scenes?.[0]?.videoUrl ?? null,
+        starred: p.starred,
+        deletedAt: p.deletedAt,
+        aspectRatio: p.aspectRatio,
+        style: p.style,
+        sceneCount: p.scenes?.length,
+        totalDuration: p.scenes?.reduce((sum, s) => sum + s.duration, 0),
+    }
 }
 
-function ProjectThumbnail({ project, size = 'md' }: { project: Project; size?: 'sm' | 'md' }) {
-    return (
-        <div
-            className="relative w-full h-full flex items-center justify-center overflow-hidden"
-            style={{ background: 'linear-gradient(135deg, var(--accent-10) 0%, var(--accent-8) 100%)' }}
-        >
-            <div
-                className="absolute inset-0"
-                style={{
-                    backgroundImage: 'radial-gradient(circle, var(--accent-22) 1px, transparent 1px)',
-                    backgroundSize: size === 'sm' ? '14px 14px' : '22px 22px',
-                    opacity: 0.5,
-                }}
-            />
-            {/* Glow */}
-            <div
-                className="absolute rounded-full blur-2xl"
-                style={{
-                    width: size === 'sm' ? 48 : 80,
-                    height: size === 'sm' ? 48 : 80,
-                    backgroundColor: 'var(--accent-22)',
-                }}
-            />
-
-            <Film
-                size={size === 'sm' ? 16 : 24}
-                style={{ color: 'var(--accent)', opacity: 0.8, position: 'relative', zIndex: 1 }}
-                strokeWidth={1.5}
-            />
-
-            <div
-                className="absolute bottom-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded"
-                style={{ backgroundColor: 'var(--accent-8)', color: 'var(--accent)', border: '1px solid var(--accent-22)' }}
-            >
-                {project.aspectRatio ?? '16:9'}
-            </div>
-        </div>
-    )
-}
-
-function ContextMenu({
-    project,
-    onRename,
-    onDuplicate,
-    onToggleStar,
-    onTrash,
-    onRestore,
-    onClose,
-    anchorRef,
-}: {
-    project:      Project
-    onRename: () => void
-    onDuplicate: () => void
-    onToggleStar: () => void
-    onTrash: () => void
-    onRestore: () => void
-    onClose: () => void
-    anchorRef: React.RefObject<HTMLButtonElement | null>
+function StatBadge({ icon: Icon, count, label, active, onClick }: {
+    icon: React.ElementType
+    count: number
+    label: string
+    active: boolean
+    onClick: () => void
 }) {
-    const menuRef = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        const handler = (e: MouseEvent) => {
-            if (!menuRef.current?.contains(e.target as Node) && !anchorRef.current?.contains(e.target as Node))
-                onClose()
-        }
-        document.addEventListener('mousedown', handler)
-        return () => document.removeEventListener('mousedown', handler)
-    }, [onClose, anchorRef])
-
-    const items = project.deletedAt
-        ? [{ label: 'Restore',   icon: FolderOpen, action: onRestore, danger: false }]
-        : [
-            { label: 'Rename', icon: Pencil, action: onRename, danger: false },
-            { label: 'Duplicate',icon: Copy, action: onDuplicate, danger: false },
-            { label: project.starred ? 'Unstar' : 'Star', icon: Star, action: onToggleStar, danger: false },
-            { label: 'Move to Trash', icon: Trash2, action: onTrash, danger: true  },
-        ]
-
     return (
-        <div
-            ref={menuRef}
-            className="fixed right-0 top-12 z-50 rounded-xl overflow-hidden py-1 min-w-40"
-            style={{
-                backgroundColor: 'var(--surface-raised)',
-                border: '1px solid var(--border-default)',
-                boxShadow: '0 12px 40px rgba(0,0,0,0.18)',
-            }}
+        <button
+            onClick={onClick}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-caption font-semibold transition-all duration-150 border cursor-pointer ${
+                active
+                    ? 'bg-(--accent-8) border-(--accent-42) text-(--accent)'
+                    : 'bg-(--surface-overlay) border-(--border-default) text-(--text-tertiary) hover:border-(--border-strong) hover:text-(--text)'
+            }`}
         >
-            {items.map(({ label, icon: Icon, action, danger }) => (
-                <button
-                    key={label}
-                    onClick={(e) => { e.stopPropagation(); action(); onClose() }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-medium transition-colors duration-100 text-left"
-                    style={{ color: danger ? '#ef4444' : 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer' }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = danger ? 'rgba(239,68,68,0.06)' : 'var(--bg)'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                    <Icon size={13} strokeWidth={2} />
-                    {label}
-                </button>
-            ))}
-        </div>
-    )
-}
-
-function ProjectCard({
-    project,
-    onOpen,
-    onRename,
-    onDuplicate,
-    onToggleStar,
-    onTrash,
-    onRestore,
-}: {
-    project:      Project
-    onOpen: () => void
-    onRename: () => void
-    onDuplicate: () => void
-    onToggleStar: () => void
-    onTrash: () => void
-    onRestore: () => void
-}) {
-    const [menuOpen, setMenuOpen] = useState(false)
-    const [hovered,  setHovered]  = useState(false)
-    const menuBtnRef = useRef<HTMLButtonElement>(null)
-
-    return (
-        <div
-            className="group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200"
-            style={{
-                border:     `1px solid ${hovered ? 'var(--border-strong)' : 'var(--border-default)'}`,
-                boxShadow:  hovered ? '0 8px 32px rgba(0,0,0,0.10)' : '0 2px 8px rgba(0,0,0,0.04)',
-                transform:  hovered ? 'translateY(-2px)' : 'translateY(0)',
-                opacity:    project.deletedAt ? 0.65 : 1,
-            }}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            onClick={onOpen}
-        >
-            {/* Thumbnail */}
-            <div className="aspect-video w-full relative" style={{ backgroundColor: 'var(--surface-raised)' }}>
-                <ProjectThumbnail project={project} />
-
-                {/* Star badge */}
-                {project.starred && (
-                    <div
-                        className="absolute top-2 left-2 w-6 h-6 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
-                    >
-                        <Star size={11} fill="#fbbf24" color="#fbbf24" />
-                    </div>
-                )}
-
-                {/* Hover overlay */}
-                <div
-                    className="absolute inset-0 flex items-center justify-center transition-all duration-200"
-                    style={{
-                        backgroundColor: hovered ? 'rgba(0,0,0,0.55)' : 'rgba(0,0,0,0)',
-                        opacity:         hovered ? 1 : 0,
-                        backdropFilter:  hovered ? 'blur(2px)' : 'none',
-                    }}
-                >
-                    <div
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white transition-transform duration-200"
-                        style={{
-                            backgroundColor: 'var(--accent)',
-                            boxShadow:       '0 0 0 2px rgba(255,255,255,0.15), 0 8px 24px rgba(0,0,0,0.4)',
-                            transform:       hovered ? 'scale(1)' : 'scale(0.92)',
-                            border:          '1px solid rgba(255,255,255,0.2)',
-                        }}
-                    >
-                        <ExternalLink size={12} strokeWidth={2.5} />
-                        {project.deletedAt ? 'View' : 'Open Editor'}
-                    </div>
-                </div>
-            </div>
-
-            {/* Info bar */}
-            <div
-                className="px-3 py-3 flex items-center gap-2"
-                style={{ backgroundColor: 'var(--bg)', borderTop: '1px solid var(--border-subtle)' }}
-            >
-                <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold truncate" style={{ color: 'var(--text)' }}>
-                        {project.name}
-                    </p>
-                    <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
-                        {formatRelative(project.updatedAt)} · {project.scenes?.length ?? 0} scenes
-                        {project.scenes?.length > 0 && ` · ${totalDuration(project.scenes)}`}
-                    </p>
-                </div>
-
-                {/* Menu button */}
-                <div className="relative" onClick={e => e.stopPropagation()}>
-                    <button
-                        ref={menuBtnRef}
-                        onClick={() => setMenuOpen(v => !v)}
-                        className="w-6 h-6 rounded-md flex items-center justify-center transition-colors duration-100"
-                        style={{ color: 'var(--text-tertiary)' }}
-                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--surface-raised)'; e.currentTarget.style.color = 'var(--text)' }}
-                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)' }}
-                    >
-                        <MoreVertical size={13} strokeWidth={2} />
-                    </button>
-                    {menuOpen && (
-                        <ContextMenu
-                            project={project}
-                            onRename={onRename}
-                            onDuplicate={onDuplicate}
-                            onToggleStar={onToggleStar}
-                            onTrash={onTrash}
-                            onRestore={onRestore}
-                            onClose={() => setMenuOpen(false)}
-                            anchorRef={menuBtnRef}
-                        />
-                    )}
-                </div>
-            </div>
-        </div>
-    )
-}
-
-// Project Row (List)
-
-function ProjectRow({
-    project,
-    onOpen,
-    onRename,
-    onDuplicate,
-    onToggleStar,
-    onTrash,
-    onRestore,
-}: {
-    project:      Project
-    onOpen:       () => void
-    onRename:     () => void
-    onDuplicate:  () => void
-    onToggleStar: () => void
-    onTrash:      () => void
-    onRestore:    () => void
-}) {
-    const [menuOpen, setMenuOpen] = useState(false)
-    const [hovered,  setHovered]  = useState(false)
-    const menuBtnRef = useRef<HTMLButtonElement>(null)
-
-    return (
-        <div
-            className="flex items-center gap-4 px-4 py-3 rounded-xl cursor-pointer transition-all duration-150"
-            style={{
-                backgroundColor: hovered ? 'var(--surface-raised)' : 'transparent',
-                border:          `1px solid ${hovered ? 'var(--border-default)' : 'transparent'}`,
-                opacity:         project.deletedAt ? 0.65 : 1,
-            }}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            onClick={onOpen}
-        >
-            {/* Mini thumbnail */}
-            <div className="w-16 h-10 rounded-lg overflow-hidden shrink-0" style={{ backgroundColor: 'var(--surface-raised)' }}>
-                <ProjectThumbnail project={project} size="sm" />
-            </div>
-
-            {/* Name + meta */}
-            <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold truncate" style={{ color: 'var(--text)' }}>
-                        {project.name}
-                    </p>
-                    {project.starred && <Star size={11} fill="#fbbf24" color="#fbbf24" />}
-                    {project.deletedAt && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}>
-                            TRASH
-                        </span>
-                    )}
-                </div>
-                <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
-                    {project.scenes?.length ?? 0} scenes
-                    {project.scenes?.length > 0 && ` · ${totalDuration(project.scenes)}`}
-                    {project.style && ` · ${project.style}`}
-                </p>
-            </div>
-
-            {/* Aspect ratio */}
-            <span className="text-[11px] font-bold shrink-0 hidden sm:block" style={{ color: 'var(--text-tertiary)', width: 40 }}>
-                {project.aspectRatio ?? '—'}
+            <Icon size={16} strokeWidth={2} />
+            {label}
+            <span className={`text-tiny font-bold px-1.5 py-0.5 rounded-full ${active ? 'bg-(--accent-16) text-(--accent)' : 'bg-(--surface-raised) text-(--text-tertiary)'}`}>
+                {count}
             </span>
-
-            {/* Updated */}
-            <span className="text-[11px] shrink-0 hidden md:block" style={{ color: 'var(--text-tertiary)', width: 80 }}>
-                {formatRelative(project.updatedAt)}
-            </span>
-
-            {/* Created */}
-            <span className="text-[11px] shrink-0 hidden lg:block" style={{ color: 'var(--text-tertiary)', width: 80 }}>
-                {new Date(project.createdAt).toLocaleDateString()}
-            </span>
-
-            {/* Actions */}
-            <div className="relative shrink-0" onClick={e => e.stopPropagation()}>
-                <button
-                    ref={menuBtnRef}
-                    onClick={() => setMenuOpen(v => !v)}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors duration-100"
-                    style={{ color: 'var(--text-tertiary)' }}
-                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--bg)'; e.currentTarget.style.color = 'var(--text)' }}
-                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)' }}
-                >
-                    <MoreVertical size={14} strokeWidth={2} />
-                </button>
-                {menuOpen && (
-                    <ContextMenu
-                        project={project}
-                        onRename={onRename}
-                        onDuplicate={onDuplicate}
-                        onToggleStar={onToggleStar}
-                        onTrash={onTrash}
-                        onRestore={onRestore}
-                        onClose={() => setMenuOpen(false)}
-                        anchorRef={menuBtnRef}
-                    />
-                )}
-            </div>
-        </div>
+        </button>
     )
 }
 
-// Rename Modal
-
-function RenameModal({ project, onSave, onClose }: { project: Project; onSave: (name: string) => void; onClose: () => void }) {
-    const [name, setName] = useState(project.name)
-    const inputRef = useRef<HTMLInputElement>(null)
-
-    useEffect(() => { inputRef.current?.focus(); inputRef.current?.select() }, [])
-
-    return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
-            onClick={onClose}
-        >
-            <div
-                className="rounded-2xl p-6 w-full max-w-sm flex flex-col gap-4"
-                style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', boxShadow: '0 24px 64px rgba(0,0,0,0.24)' }}
-                onClick={e => e.stopPropagation()}
-            >
-                <div>
-                    <h3 className="text-sm font-bold" style={{ color: 'var(--text)' }}>Rename project</h3>
-                    <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>Enter a new name for this project.</p>
-                </div>
-                <input
-                    ref={inputRef}
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') onSave(name); if (e.key === 'Escape') onClose() }}
-                    className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
-                    style={{
-                        backgroundColor: 'var(--bg)',
-                        border:          '1px solid var(--border-default)',
-                        color:           'var(--text)',
-                    }}
-                    onFocus={e => e.currentTarget.style.borderColor = 'var(--accent-42)'}
-                    onBlur={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
-                />
-                <div className="flex gap-2 justify-end">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 rounded-lg text-xs font-semibold"
-                        style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={() => onSave(name)}
-                        disabled={!name.trim()}
-                        className="px-4 py-2 rounded-lg text-xs font-semibold text-white"
-                        style={{ backgroundColor: 'var(--accent)', opacity: name.trim() ? 1 : 0.5 }}
-                    >
-                        Save
-                    </button>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-// ─── Sort Dropdown ────────────────────────────────────────────────────────────
-
-function SortDropdown({
-    field, dir, onChange, onClose,
-}: {
-    field:    SortField
-    dir:      SortDir
+function SortDropdown({ field, dir, onChange, onClose }: {
+    field: SortField
+    dir: SortDir
     onChange: (f: SortField, d: SortDir) => void
-    onClose:  () => void
+    onClose: () => void
 }) {
-    const ref = useRef<HTMLDivElement>(null)
+    const ref = React.useRef<HTMLDivElement>(null)
     useEffect(() => {
         const h = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) onClose() }
         document.addEventListener('mousedown', h)
@@ -462,32 +104,119 @@ function SortDropdown({
     }, [onClose])
 
     const options: { label: string; field: SortField; icon: React.ElementType }[] = [
-        { label: 'Last modified', field: 'updatedAt', icon: Clock    },
-        { label: 'Date created',  field: 'createdAt', icon: Clock    },
-        { label: 'Name',          field: 'name',      icon: AlignLeft },
+        { label: 'Last modified', field: 'updatedAt', icon: Clock },
+        { label: 'Date created', field: 'createdAt', icon: Clock },
+        { label: 'Name', field: 'name', icon: AlignLeft },
     ]
 
     return (
-        <div
-            ref={ref}
-            className="absolute right-0 top-10 z-50 rounded-xl overflow-hidden py-1 min-w-45"
-            style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', boxShadow: '0 12px 40px rgba(0,0,0,0.18)' }}
-        >
+        <div ref={ref} className="absolute right-0 top-11 z-50 rounded-xl overflow-hidden py-1 min-w-45 bg-(--surface-overlay) border border-(--border-default) shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
             {options.map(({ label, field: f, icon: Icon }) => (
-                <div key={f} className="flex items-center gap-2">
-                    <button
-                        onClick={() => { onChange(f, f === field ? (dir === 'asc' ? 'desc' : 'asc') : 'desc'); onClose() }}
-                        className="flex-1 flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-left transition-colors"
-                        style={{ color: f === field ? 'var(--accent)' : 'var(--text-secondary)' }}
-                        onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--bg)'}
-                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                <button
+                    key={f}
+                    onClick={() => { onChange(f, f === field ? (dir === 'asc' ? 'desc' : 'asc') : 'desc'); onClose() }}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-caption font-medium text-left transition-colors bg-transparent border-none cursor-pointer hover:bg-(--surface-raised) ${
+                        f === field ? 'text-(--accent)' : 'text-(--text-secondary)'
+                    }`}
+                >
+                    <Icon size={16} />
+                    {label}
+                    {f === field && (dir === 'asc' ? <SortAsc size={16} className="ml-auto" /> : <SortDesc size={16} className="ml-auto" />)}
+                </button>
+            ))}
+        </div>
+    )
+}
+
+function RenameModal({ project, onSave, onClose }: { project: Project; onSave: (name: string) => void; onClose: () => void }) {
+    const [name, setName] = useState(project.name)
+    const inputRef = React.useRef<HTMLInputElement>(null)
+
+    useEffect(() => { inputRef.current?.focus(); inputRef.current?.select() }, [])
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xs" onClick={onClose}>
+            <div
+                className="rounded-xl p-8 w-full max-w-sm flex flex-col gap-4 bg-(--surface-overlay) border border-(--accent-16) shadow-accent-40"
+                onClick={e => e.stopPropagation()}
+            >
+                <div>
+                    <h4 className="text-(--text) font-semibold">Rename project</h4>
+                    <p className="text-caption mt-1 text-(--text-tertiary)">Enter a new name for this project.</p>
+                </div>
+                <input
+                    ref={inputRef}
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') onSave(name); if (e.key === 'Escape') onClose() }}
+                    className="w-full px-3 py-2.5 rounded-xl text-caption font-medium outline-none bg-(--bg) border border-(--border-default) text-(--text) focus:border-(--accent) focus:shadow-lg"
+                />
+                <div className="flex gap-2 justify-end">
+                    <Button
+                        variant='ghost'
+                        size='sm'
+                        onClick={onClose}
                     >
-                        <Icon size={12} />
-                        {label}
-                        {f === field && (dir === 'asc' ? <SortAsc size={11} className="ml-auto" /> : <SortDesc size={11} className="ml-auto" />)}
+                        Cancel
+                    </Button>
+                    <Button
+                        variant='primary'
+                        size='sm'
+                        onClick={() => onSave(name)}
+                        disabled={!name.trim()}
+                    >
+                        Save
+                    </Button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function ConfirmDeleteModal({ project, onConfirm, onClose }: {
+    project: { id: string; name: string }
+    onConfirm: () => void
+    onClose: () => void
+}) {
+    const [input, setInput] = useState('')
+    const matches = input.trim() === project.name
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xs" onClick={onClose}>
+            <div
+                className="rounded-xl p-8 w-full max-w-sm flex flex-col gap-4 bg-(--surface-overlay) border border-(--accent-16) shadow-accent-40"
+                onClick={e => e.stopPropagation()}
+            >
+                <div>
+                    <h4 className="text-(--text) font-semibold">Delete permanently</h4>
+                    <p className="text-caption mt-1 text-(--text-tertiary)">
+                        This can&apos;t be undone. Type <span className="font-bold text-(--text-secondary)">{project.name}</span> to confirm.
+                    </p>
+                </div>
+                <input
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    placeholder={project.name}
+                    autoFocus
+                    className="w-full px-3 py-2.5 rounded-xl text-caption font-medium outline-none bg-(--bg) border border-(--border-default) text-(--text) focus:border-(--accent) focus:shadow-lg"
+                />
+                <div className="flex gap-2 justify-end">
+                    <Button
+                        variant='ghost'
+                        size='sm'
+                        onClick={onClose}
+                    >
+                        Cancel
+                    </Button>
+                    <button
+                        onClick={onConfirm}
+                        disabled={!matches}
+                        className={`px-4 py-2 rounded-xl text-caption font-semibold text-white bg-(--error) ${matches ? 'opacity-100 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
+                    >
+                        Delete Permanently
                     </button>
                 </div>
-            ))}
+            </div>
         </div>
     )
 }
@@ -496,20 +225,20 @@ export default function ProjectsPage() {
     const [projects, setProjects] = useState<Project[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
-    const [viewMode, setViewMode] = useState<ViewMode>('grid')
     const [filter, setFilter] = useState<Filter>('all')
     const [sortField, setSortField] = useState<SortField>('updatedAt')
     const [sortDir, setSortDir] = useState<SortDir>('desc')
     const [sortOpen, setSortOpen] = useState(false)
     const [renaming, setRenaming] = useState<Project | null>(null)
     const [creating, setCreating] = useState(false)
+    const [deletingPermanently, setDeletingPermanently] = useState<Project | null>(null)
 
     const router = useRouter()
 
     const fetchProjects = useCallback(async () => {
         setLoading(true)
         try {
-            const res  = await fetch('/api/projects?includeDeleted=true')
+            const res = await fetch('/api/projects?includeDeleted=true')
             const data = await res.json()
             setProjects(Array.isArray(data) ? data : [])
         } catch (err) {
@@ -541,18 +270,13 @@ export default function ProjectsPage() {
             let av: string | number = a[sortField]
             let bv: string | number = b[sortField]
             if (sortField !== 'name') { av = new Date(av).getTime(); bv = new Date(bv).getTime() }
-            if (av < bv) return sortDir === 'asc' ? -1 :  1
-            if (av > bv) return sortDir === 'asc' ?  1 : -1
+            if (av < bv) return sortDir === 'asc' ? -1 : 1
+            if (av > bv) return sortDir === 'asc' ? 1 : -1
             return 0
         })
 
         return list
     }, [projects, filter, search, sortField, sortDir])
-
-    const handleOpen = (project: Project) => {
-        if (project.deletedAt) return
-        router.push(`/editor/${project.id}`)
-    }
 
     const handleNewProject = async () => {
         setCreating(true)
@@ -560,7 +284,7 @@ export default function ProjectsPage() {
             const res = await fetch('/api/projects', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: 'Untitled Project', style: 'Modern', aspectRatio: '16:9' }),
+                body: JSON.stringify({ name: 'Untitled Project', style: 'Cinematic', aspectRatio: '16:9' }),
             })
             const project = await res.json()
             router.push(`/editor/${project.id}`)
@@ -578,21 +302,26 @@ export default function ProjectsPage() {
         })
     }
 
-    const handleDuplicate = async (project: Project) => {
-        const res = await fetch('/api/projects', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name: `${project.name} (copy)`,
-                style: project.style,
-                aspectRatio: project.aspectRatio,
-                scenes: project.scenes?.map(({ title, description, musicMood, duration, order }) =>
-                    ({ title, description, musicMood, duration, order })),
-            }),
-        })
-        const dup = await res.json()
-        setProjects(ps => [dup, ...ps])
+const handleDuplicate = async (project: Project) => {
+    const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            name: `${project.name} (copy)`,
+            style: project.style ?? undefined,
+            aspectRatio: project.aspectRatio ?? undefined,
+            scenes: project.scenes?.map(({ title, description, musicMood, duration, order, videoUrl }) =>
+                ({ title, description, musicMood, duration, order, videoUrl: videoUrl ?? undefined })),
+        }),
+    })
+
+    if (!res.ok) {
+        console.error('Duplicate failed:', await res.json())
+        return
     }
+
+    await fetchProjects()
+}
 
     const handleToggleStar = async (project: Project) => {
         const starred = !project.starred
@@ -609,7 +338,7 @@ export default function ProjectsPage() {
         await fetch(`/api/projects/${project.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'trash' }),
+            body: JSON.stringify({ deletedAt: new Date().toISOString() }),
         })
     }
 
@@ -618,8 +347,14 @@ export default function ProjectsPage() {
         await fetch(`/api/projects/${project.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'restore' }),
+            body: JSON.stringify({ deletedAt: null }),
         })
+    }
+
+    const handlePermanentDelete = async (project: Project) => {
+        setProjects(ps => ps.filter(p => p.id !== project.id))
+        await fetch(`/api/projects/${project.id}`, { method: 'DELETE' })
+        setDeletingPermanently(null)
     }
 
     const counts = useMemo(() => ({
@@ -628,66 +363,36 @@ export default function ProjectsPage() {
         trash: projects.filter(p => !!p.deletedAt).length,
     }), [projects])
 
-
-    const FILTERS: { key: Filter; label: string; icon: React.ElementType }[] = [
-        { key: 'all', label: 'All', icon: FolderOpen },
-        { key: 'starred', label: 'Starred', icon: Star },
-        { key: 'trash', label: 'Trash', icon: Trash2 },
-    ]
-
     return (
-        <div className="relative flex flex-col flex-1 min-h-0 overflow-auto">
-            <DashboardHeader title="Projects" subtitle="Your video library" />
+        <div className="relative flex flex-col flex-1 min-h-0 overflow-auto p-2 ">
+            <div className="flex flex-col rounded-xl overflow-hidden bg-(--surface-overlay) border border-(--border-default) shadow-accent-22">
 
-            <main className="flex-1 p-8 flex flex-col gap-6">
+                <div className="flex flex-col gap-4 px-10 pt-8 ">
+                    <div className="flex items-end justify-between flex-wrap gap-4">
+                        <div className="flex flex-col gap-0.5">
+                            <h3 className="font-semibold text-(--text)">Projects</h3>
+                            <span className="text-caption text-(--text-tertiary)">All your videos in one place</span>
+                        </div>
 
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
-                    <div className="flex items-center gap-1 p-1 rounded-xl" style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-subtle)' }}>
-                        {FILTERS.map(({ key, label, icon: Icon }) => (
-                            <button
-                                key={key}
-                                onClick={() => setFilter(key)}
-                                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-150"
-                                style={{
-                                    backgroundColor: filter === key ? 'var(--bg)' : 'transparent',
-                                    color: filter === key ? 'var(--text)' : 'var(--text-tertiary)',
-                                    border: filter === key ? '1px solid var(--border-default)' : '1px solid transparent',
-                                    boxShadow: filter === key ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
-                                }}
-                            >
-                                <Icon size={12} strokeWidth={2} />
-                                {label}
-                                <span
-                                    className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                                    style={{
-                                        backgroundColor: filter === key ? 'var(--accent-8)' : 'var(--surface-raised)',
-                                        color: filter === key ? 'var(--accent)' : 'var(--text-tertiary)',
-                                    }}
-                                >
-                                    {counts[key]}
-                                </span>
-                            </button>
-                        ))}
+                        <div className="flex items-center gap-2">
+                            <StatBadge icon={FolderOpen} count={counts.all} label="All" active={filter === 'all'} onClick={() => setFilter('all')} />
+                            <StatBadge icon={Star} count={counts.starred} label="Starred" active={filter === 'starred'} onClick={() => setFilter('starred')} />
+                            <StatBadge icon={Trash2} count={counts.trash} label="Trash" active={filter === 'trash'} onClick={() => setFilter('trash')} />
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-
-                        <div
-                            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
-                            style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)', minWidth: 200 }}
-                        >
-                            <Search size={13} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-caption bg-(--surface-raised) border border-(--border-default) min-w-50 flex-1 max-w-80">
+                            <Search size={16} className="text-(--text-tertiary) shrink-0" />
                             <input
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search projects…"
-                                className="bg-transparent outline-none flex-1 text-xs"
-                                style={{ color: 'var(--text)' }}
+                                className="bg-transparent outline-none flex-1 text-caption text-(--text)"
                             />
                             {search && (
-                                <button onClick={() => setSearch('')}>
-                                    <X size={12} style={{ color: 'var(--text-tertiary)' }} />
+                                <button onClick={() => setSearch('')} className="bg-transparent border-none cursor-pointer">
+                                    <X size={12} className="text-(--text-tertiary)" />
                                 </button>
                             )}
                         </div>
@@ -695,16 +400,13 @@ export default function ProjectsPage() {
                         <div className="relative">
                             <button
                                 onClick={() => setSortOpen(v => !v)}
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150"
-                                style={{
-                                    backgroundColor: sortOpen ? 'var(--bg)' : 'var(--surface-raised)',
-                                    border: '1px solid var(--border-default)',
-                                    color: 'var(--text-secondary)',
-                                }}
+                                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-caption font-semibold transition-all duration-150 border cursor-pointer ${
+                                    sortOpen ? 'bg-(--surface-raised) border-(--border-strong)' : 'bg-(--surface-raised) border-(--border-default)'
+                                } text-(--text-secondary)`}
                             >
-                                <SlidersHorizontal size={12} strokeWidth={2} />
+                                {sortDir === 'asc' ? <SortAsc size={16} strokeWidth={2} /> : <SortDesc size={12} strokeWidth={2} />}
                                 Sort
-                                <ChevronDown size={11} style={{ transform: sortOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                                <ChevronDown size={14} className={`transition-transform duration-150 ${sortOpen ? 'rotate-180' : ''}`} />
                             </button>
                             {sortOpen && (
                                 <SortDropdown
@@ -716,171 +418,101 @@ export default function ProjectsPage() {
                             )}
                         </div>
 
-                        <div className="flex items-center rounded-lg overflow-hidden" style={{ border: '1px solid var(--border-default)' }}>
-                            {([['grid', Grid3X3], ['list', List]] as const).map(([mode, Icon]) => (
-                                <button
-                                    key={mode}
-                                    onClick={() => setViewMode(mode)}
-                                    className="w-8 h-8 flex items-center justify-center transition-colors duration-150"
-                                    style={{
-                                        backgroundColor: viewMode === mode ? 'var(--accent-8)' : 'var(--surface-raised)',
-                                        color: viewMode === mode ? 'var(--accent)' : 'var(--text-tertiary)',
-                                    }}
-                                >
-                                    <Icon size={13} strokeWidth={2} />
-                                </button>
-                            ))}
-                        </div>
-
-                        <button
-                            onClick={handleNewProject}
-                            disabled={creating}
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all duration-150"
-                            style={{ backgroundColor: 'var(--accent)', boxShadow: '0 4px 12px var(--accent-22)' }}
-                            onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
-                            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-                        >
+                        <Button size="sm" variant="primary" onClick={handleNewProject} disabled={creating}>
                             {creating
-                                ? <Loader2 size={12} className="animate-spin" />
-                                : <FolderPlus size={12} strokeWidth={2.5} />}
-                            New Project
-                        </button>
+                                ? <><Loader2 size={16} className="animate-spin inline-block mr-2" />Creating…</>
+                                : <><FolderPlus size={16} strokeWidth={2.5} className="inline-block mr-2" />New Project</>}
+                        </Button>
                     </div>
                 </div>
 
-                {viewMode === 'list' && displayed.length > 0 && (
-                    <div
-                        className="flex items-center gap-4 px-4 py-2"
-                        style={{ borderBottom: '1px solid var(--border-subtle)' }}
-                    >
-                        <div className="w-16 shrink-0" />
-                        <span className="flex-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>Name</span>
-                        <span className="text-[10px] font-bold uppercase tracking-widest shrink-0 hidden sm:block" style={{ color: 'var(--text-tertiary)', width: 40 }}>Format</span>
-                        <span className="text-[10px] font-bold uppercase tracking-widest shrink-0 hidden md:block" style={{ color: 'var(--text-tertiary)', width: 80 }}>Modified</span>
-                        <span className="text-[10px] font-bold uppercase tracking-widest shrink-0 hidden lg:block" style={{ color: 'var(--text-tertiary)', width: 80 }}>Created</span>
-                        <div className="w-7 shrink-0" />
-                    </div>
-                )}
-
-                {loading ? (
-                    <div className={viewMode === 'grid'
-                        ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4'
-                        : 'flex flex-col gap-1'
-                    }>
-                        {Array.from({ length: 8 }).map((_, i) => (
-                            viewMode === 'grid' ? (
-                                <div key={i} className="rounded-xl overflow-hidden animate-pulse" style={{ border: '1px solid var(--border-default)' }}>
-                                    <div className="aspect-video" style={{ backgroundColor: 'var(--surface-raised)' }} />
-                                    <div className="px-3 py-3 flex flex-col gap-2" style={{ backgroundColor: 'var(--bg)' }}>
-                                        <div className="h-3 w-3/4 rounded" style={{ backgroundColor: 'var(--surface-raised)' }} />
-                                        <div className="h-2 w-1/2 rounded" style={{ backgroundColor: 'var(--surface-raised)' }} />
+                <main className="flex-1 px-12 pb-8 ">
+                    {loading ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pt-10">
+                            {Array.from({ length: 8 }).map((_, i) => (
+                                <div key={i} className="rounded-2xl overflow-hidden animate-pulse ring-1 ring-(--border-default)">
+                                    <div className="aspect-video bg-(--surface-sunken)" />
+                                    <div className="px-3 py-2 flex flex-col gap-1.5 bg-(--surface-overlay)">
+                                        <div className="h-2.5 w-1/2 rounded-xl bg-(--surface-sunken)" />
                                     </div>
                                 </div>
-                            ) : (
-                                <div key={i} className="flex items-center gap-4 px-4 py-3 rounded-xl animate-pulse">
-                                    <div className="w-16 h-10 rounded-lg" style={{ backgroundColor: 'var(--surface-raised)' }} />
-                                    <div className="flex-1 flex flex-col gap-1.5">
-                                        <div className="h-3 w-48 rounded" style={{ backgroundColor: 'var(--surface-raised)' }} />
-                                        <div className="h-2 w-24 rounded" style={{ backgroundColor: 'var(--surface-raised)' }} />
-                                    </div>
-                                </div>
-                            )
-                        ))}
-                    </div>
-
-                ) : displayed.length === 0 ? (
-                    <div
-                        className="flex flex-col items-center justify-center py-20 gap-4 rounded-2xl"
-                        style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}
-                    >
-                        <div
-                            className="w-14 h-14 rounded-2xl flex items-center justify-center"
-                            style={{ backgroundColor: 'var(--accent-8)', border: '1px solid var(--accent-22)' }}
-                        >
-                            {filter === 'trash'
-                                ? <Trash2 size={24} style={{ color: 'var(--accent)' }} />
-                                : filter === 'starred'
-                                ? <Star size={24} style={{ color: 'var(--accent)' }} />
-                                : <FolderOpen size={24} style={{ color: 'var(--accent)' }} />}
+                            ))}
                         </div>
-                        <div className="flex flex-col items-center gap-1 text-center">
-                            <span className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>
-                                {search
-                                    ? 'No projects match your search'
-                                    : filter === 'trash'
-                                    ? 'Trash is empty'
+                    ) : displayed.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-20 gap-4 rounded-xl bg-(--surface-raised) ">
+                            <div className="w-14 h-14 flex items-center justify-center ">
+                                {filter === 'trash'
+                                    ? <Trash2 size={36} className="text-(--accent)" />
                                     : filter === 'starred'
-                                    ? 'No starred projects'
-                                    : 'No projects yet'}
-                            </span>
-                            <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                                {search
-                                    ? 'Try a different search term'
-                                    : filter === 'all'
-                                    ? 'Create your first project to get started'
-                                    : filter === 'starred'
-                                    ? 'Star projects to pin them here'
-                                    : 'Deleted projects will appear here'}
-                            </span>
+                                        ? <Star size={24} className="text-(--accent)" />
+                                        : <FolderOpen size={24} className="text-(--accent)" />}
+                            </div>
+                            <div className="flex flex-col items-center gap-1 text-center">
+                                <span className="text-lead font-bold text-(--text-secondary)">
+                                    {search
+                                        ? 'No projects match your search'
+                                        : filter === 'trash'
+                                            ? 'Trash is empty'
+                                            : filter === 'starred'
+                                                ? 'No starred projects'
+                                                : 'No projects yet'}
+                                </span>
+                                <span className="text-small text-(--text-tertiary)">
+                                    {search
+                                        ? 'Try a different search term'
+                                        : filter === 'all'
+                                            ? 'Create your first project to get started'
+                                            : filter === 'starred'
+                                                ? 'Star projects to pin them here'
+                                                : 'Deleted projects will appear here'}
+                                </span>
+                            </div>
+                            {filter === 'all' && !search && (
+                                <Button size="sm" variant="primary" onClick={handleNewProject}>
+                                    <FolderPlus size={13} strokeWidth={2.5} className="inline-block mr-2" />
+                                    New Project
+                                </Button>
+                            )}
                         </div>
-                        {filter === 'all' && !search && (
-                            <button
-                                onClick={handleNewProject}
-                                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold text-white mt-2"
-                                style={{ backgroundColor: 'var(--accent)', boxShadow: '0 4px 12px var(--accent-22)' }}
-                            >
-                                <FolderPlus size={13} strokeWidth={2.5} />
-                                New Project
-                            </button>
-                        )}
-                    </div>
+                    ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pt-10">
+                            {displayed.map(p => (
+                                <DashboardCard
+                                    key={p.id}
+                                    project={toCardProject(p)}
+                                    onRename={p.deletedAt ? undefined : () => setRenaming(p)}
+                                    onDuplicate={p.deletedAt ? undefined : () => handleDuplicate(p)}
+                                    onToggleStar={p.deletedAt ? undefined : () => handleToggleStar(p)}
+                                    onTrash={p.deletedAt ? undefined : () => handleTrash(p)}
+                                    onRestore={p.deletedAt ? () => handleRestore(p) : undefined}
+                                    onPermanentDelete={p.deletedAt ? () => setDeletingPermanently(p) : undefined}
+                                />
+                            ))}
+                        </div>
+                    )}
 
-                ) : viewMode === 'grid' ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {displayed.map(p => (
-                            <ProjectCard
-                                key={p.id}
-                                project={p}
-                                onOpen={() => handleOpen(p)}
-                                onRename={() => setRenaming(p)}
-                                onDuplicate={() => handleDuplicate(p)}
-                                onToggleStar={() => handleToggleStar(p)}
-                                onTrash={() => handleTrash(p)}
-                                onRestore={() => handleRestore(p)}
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="flex flex-col gap-1">
-                        {displayed.map(p => (
-                            <ProjectRow
-                                key={p.id}
-                                project={p}
-                                onOpen={() => handleOpen(p)}
-                                onRename={() => setRenaming(p)}
-                                onDuplicate={() => handleDuplicate(p)}
-                                onToggleStar={() => handleToggleStar(p)}
-                                onTrash={() => handleTrash(p)}
-                                onRestore={() => handleRestore(p)}
-                            />
-                        ))}
-                    </div>
-                )}
-
-                {!loading && displayed.length > 0 && (
-                    <p className="text-[11px] text-center" style={{ color: 'var(--text-tertiary)' }}>
-                        {displayed.length} {displayed.length === 1 ? 'project' : 'projects'}
-                        {search && ` matching "${search}"`}
-                    </p>
-                )}
-
-            </main>
+                    {!loading && displayed.length > 0 && (
+                        <p className="text-small font-medium text-center mt-6 text-(--text-tertiary)">
+                            {displayed.length} {displayed.length === 1 ? 'project' : 'projects'}
+                            {search && ` matching "${search}"`}
+                        </p>
+                    )}
+                </main>
+            </div>
 
             {renaming && (
                 <RenameModal
                     project={renaming}
                     onSave={name => handleRename(renaming, name)}
                     onClose={() => setRenaming(null)}
+                />
+            )}
+
+            {deletingPermanently && (
+                <ConfirmDeleteModal
+                    project={deletingPermanently}
+                    onConfirm={() => handlePermanentDelete(deletingPermanently)}
+                    onClose={() => setDeletingPermanently(null)}
                 />
             )}
         </div>

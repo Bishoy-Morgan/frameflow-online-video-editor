@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
-import { Clock, MoreHorizontal, Play, Star, Copy, Pencil, Trash2, Check, X } from 'lucide-react'
+import React, { useRef, useEffect, useState } from 'react'
+import { Clock, Star, Monitor, Smartphone, Square, Film, Pencil, Copy, Trash2, FolderOpen, Cog } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
@@ -10,260 +10,210 @@ export interface Project {
     name: string
     lastEdited: string
     thumbnail?: string
+    previewVideoUrl?: string | null
     starred?: boolean
+    deletedAt?: string | null
+    aspectRatio?: string | null
+    style?: string | null
+    sceneCount?: number
+    totalDuration?: number
 }
 
 interface DashboardCardProps {
     project: Project
-    onUpdate?: () => void
+    onRename?: () => void
+    onDuplicate?: () => void
+    onToggleStar?: () => void
+    onTrash?: () => void
+    onRestore?: () => void
+    onPermanentDelete?: () => void
 }
 
-export default function DashboardCard({ project, onUpdate }: DashboardCardProps) {
-    const [menuOpen, setMenuOpen] = useState(false)
-    const [renaming, setRenaming] = useState(false)
-    const [nameVal, setNameVal] = useState(project.name)
-    const [starred, setStarred] = useState(project.starred ?? false)
-    const [loading, setLoading] = useState<string | null>(null)
+const RATIO_ICON: Record<string, React.ElementType> = {
+    '16:9': Monitor,
+    '9:16': Smartphone,
+    '1:1': Square,
+}
 
-    const menuRef = useRef<HTMLDivElement>(null)
-    const inputRef = useRef<HTMLInputElement>(null)
+function formatDuration(seconds?: number) {
+    if (!seconds) return null
+    if (seconds < 60) return `${seconds}s`
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return s === 0 ? `${m}m` : `${m}m ${s}s`
+}
+
+function RailButton({ icon: Icon, label, onClick, active, danger }: {
+    icon: React.ElementType
+    label: string
+    onClick: () => void
+    active?: boolean
+    danger?: boolean
+}) {
+    return (
+        <div className="relative group/rail">
+            <button
+                onClick={e => { e.stopPropagation(); onClick() }}
+                className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors duration-150 border-none ${
+                    danger
+                        ? 'bg-(--error-8) text-(--error) hover:bg-(--error) hover:text-white'
+                        : active
+                            ? 'bg-(--accent-16) text-(--accent)'
+                            : 'bg-(--surface-raised) text-(--text-secondary) hover:bg-(--accent-8) hover:text-(--accent)'
+                }`}
+            >
+                <Icon size={18} strokeWidth={2} />
+            </button>
+            <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 px-2 py-1 rounded-xl text-small font-semibold whitespace-nowrap pointer-events-none opacity-0 group-hover/rail:opacity-100 transition-opacity z-100 bg-(--text) text-white">
+                {label}
+            </div>
+        </div>
+    )
+}
+
+export default function DashboardCard({ project, onRename, onDuplicate, onToggleStar, onTrash, onRestore, onPermanentDelete }: DashboardCardProps) {
+    const [hovering, setHovering] = useState(false)
+    const [railOpen, setRailOpen] = useState(false)
+    const videoRef = useRef<HTMLVideoElement>(null)
+    const railRef = useRef<HTMLDivElement>(null)
     const router = useRouter()
 
+    const hasMenu = !!(onRename || onDuplicate || onToggleStar || onTrash || onRestore || onPermanentDelete)
+    const isTrashed = !!project.deletedAt
+
     useEffect(() => {
-        if (!menuOpen) return
+        const v = videoRef.current
+        if (!v) return
+        if (hovering) {
+            v.play().catch(() => {})
+        } else {
+            v.pause()
+            v.currentTime = 0
+        }
+    }, [hovering])
+
+    useEffect(() => {
+        if (!railOpen) return
         const handler = (e: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
+            if (railRef.current && !railRef.current.contains(e.target as Node)) setRailOpen(false)
         }
         document.addEventListener('mousedown', handler)
         return () => document.removeEventListener('mousedown', handler)
-    }, [menuOpen])
+    }, [railOpen])
 
-    useEffect(() => {
-        if (renaming) setTimeout(() => inputRef.current?.select(), 50)
-    }, [renaming])
-
-    const handleRename = async () => {
-        const trimmed = nameVal.trim()
-        if (!trimmed || trimmed === project.name) { setRenaming(false); setNameVal(project.name); return }
-        setLoading('rename')
-        await fetch(`/api/projects/${project.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: trimmed }),
-        })
-        setLoading(null)
-        setRenaming(false)
-        onUpdate?.()
-    }
-
-    const handleStar = async () => {
-        setStarred(s => !s)
-        setMenuOpen(false)
-        await fetch(`/api/projects/${project.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ starred: !starred }),
-        })
-        onUpdate?.()
-    }
-
-    const handleDuplicate = async () => {
-        setLoading('duplicate')
-        setMenuOpen(false)
-        await fetch(`/api/projects/${project.id}/duplicate`, { method: 'POST' })
-        setLoading(null)
-        onUpdate?.()
-    }
-
-    const handleDelete = async () => {
-        setLoading('delete')
-        setMenuOpen(false)
-        await fetch(`/api/projects/${project.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ deletedAt: new Date().toISOString() }),
-        })
-        setLoading(null)
-        onUpdate?.()
-    }
-
-    const menuItems = [
-        {
-            id: 'rename',
-            label: 'Rename',
-            icon: Pencil,
-            action: () => { setMenuOpen(false); setRenaming(true) },
-        },
-        {
-            id: 'star',
-            label: starred ? 'Unstar' : 'Star',
-            icon: Star,
-            action: handleStar,
-            active: starred,
-        },
-        {
-            id: 'duplicate',
-            label: 'Duplicate',
-            icon: Copy,
-            action: handleDuplicate,
-        },
-        {
-            id: 'delete',
-            label: 'Move to Trash',
-            icon: Trash2,
-            action: handleDelete,
-            danger: true,
-        },
-    ]
+    const RatioIcon = project.aspectRatio ? RATIO_ICON[project.aspectRatio] : null
+    const durationLabel = formatDuration(project.totalDuration)
 
     return (
         <div
-            onClick={() => !renaming && router.push(`/editor/${project.id}`)}
-            className="group flex flex-col rounded-xl overflow-hidden transition-all duration-200 cursor-pointer"
-            style={{ boxShadow: '0 0 0 1px var(--border-default)', position: 'relative' }}
-            onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.1), 0 0 0 1px var(--accent-22)'
-            }}
-            onMouseLeave={e => {
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 0 0 1px var(--border-default)'
-            }}
-        >
-            {/* Thumbnail */}
-            <div className="relative w-full aspect-video overflow-hidden" style={{ backgroundColor: 'var(--surface-raised)' }}>
-                {project.thumbnail ? (
-                    <Image src={project.thumbnail} alt={project.name} className="w-full h-full object-cover" />
-                ) : (
-                    <div
-                        className="w-full h-full flex items-center justify-center"
-                        style={{ background: 'linear-gradient(135deg, var(--accent-10) 0%, var(--accent-22) 100%)' }}
-                    >
-                        <div
-                            className="w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
-                            style={{ backgroundColor: 'var(--accent-22)', border: '1px solid var(--accent-40)' }}
-                        >
-                            <Play size={16} strokeWidth={0} fill="var(--accent)" style={{ marginLeft: 2 }} />
-                        </div>
-                    </div>
-                )}
-
-                {starred && (
-                    <div className="absolute top-2 left-2">
-                        <Star size={12} fill="var(--accent)" style={{ color: 'var(--accent)' }} />
-                    </div>
-                )}
-
-                <div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center"
-                    style={{ backgroundColor: 'rgba(2,2,2,0.3)' }}
-                >
-                    <span className="text-[0.9rem] font-bold tracking-widest uppercase text-white">
-                        Open in Editor
-                    </span>
+        onClick={() => !isTrashed && router.push(`/editor/${project.id}`)}
+        onMouseEnter={() => setHovering(true)}
+        onMouseLeave={() => { setHovering(false); setRailOpen(false) }}
+        className={`group relative flex flex-col rounded-2xl overflow-visible transition-all duration-300 ring-1 ring-(--border-default) hover:ring-(--accent-42) hover:-translate-y-0.5 ${
+            isTrashed ? 'cursor-default' : 'cursor-pointer'
+        }`}
+    >
+        <div className={`relative w-full aspect-video rounded-2xl overflow-hidden bg-(--surface-sunken) ${isTrashed ? 'grayscale' : ''}`}>
+            {project.previewVideoUrl ? (
+                <video
+                    ref={videoRef}
+                    src={project.previewVideoUrl}
+                    poster={project.thumbnail}
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    className="absolute inset-0 w-full h-full object-cover"
+                />
+            ) : project.thumbnail ? (
+                <Image src={project.thumbnail} alt={project.name} fill className="object-cover" />
+            ) : (
+                <div className="w-full h-full flex items-center justify-center bg-(--surface-sunken)">
+                    <Film size={26} className="text-(--text-tertiary)" />
                 </div>
+            )}
 
-                <div ref={menuRef} style={{ position: 'absolute', top: 8, right: 8, zIndex: 30 }}>
-                    <button
-                        onClick={e => { e.preventDefault(); e.stopPropagation(); setMenuOpen(o => !o) }}
-                        className="w-6 h-6 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:outline-none focus:opacity-100"
-                        style={{
-                            backgroundColor: menuOpen ? 'var(--accent)' : 'rgba(2,2,2,0.55)',
-                            backdropFilter: 'blur(4px)',
-                            border: 'none',
-                            color: menuOpen ? '#020202' : '#fefefe',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        <MoreHorizontal size={13} />
-                    </button>
+            {isTrashed && (
+                <div className="absolute inset-0 bg-black/35" />
+            )}
 
-                    {menuOpen && (
-                        <div
-                            onClick={e => e.stopPropagation()}
-                            className="absolute right-0 flex flex-col p-1 rounded-xl"
-                            style={{
-                                top: 'calc(100% + 6px)',
-                                width: '168px',
-                                backgroundColor: 'var(--bg)',
-                                border: '1px solid var(--border-default)',
-                                boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-                                zIndex: 50,
-                            }}
-                        >
-                            {menuItems.map(item => (
-                                <button
-                                    key={item.id}
-                                    onClick={item.action}
-                                    disabled={loading === item.id}
-                                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-left w-full transition-colors duration-100"
-                                    style={{
-                                        fontSize: '12px',
-                                        fontWeight: 600,
-                                        color: item.danger ? '#ef4444' : item.active ? 'var(--accent)' : 'var(--text-secondary)',
-                                        backgroundColor: 'transparent',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        opacity: loading === item.id ? 0.5 : 1,
-                                    }}
-                                    onMouseEnter={e => {
-                                        e.currentTarget.style.backgroundColor = item.danger
-                                            ? 'rgba(239,68,68,0.08)'
-                                            : 'var(--surface-raised)'
-                                    }}
-                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
-                                >
-                                    <item.icon size={13} strokeWidth={item.active ? 2.5 : 1.75} />
-                                    {item.label}
-                                </button>
-                            ))}
+            {isTrashed && (
+                <div className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full text-tiny font-bold text-white bg-(--error) shadow-md">
+                    Trashed
+                </div>
+            )}
+
+            {project.starred && !isTrashed && (
+                <div className="absolute top-3 left-3 z-10 w-7 h-7 rounded-full flex items-center justify-center bg-(--surface-overlay) shadow-md shadow-[#00D9AA]">
+                    <Star size={16} fill="var(--accent)" className="text-(--accent)" />
+                </div>
+            )}
+
+            {hasMenu && (
+                <button
+                    onClick={e => { e.preventDefault(); e.stopPropagation(); setRailOpen(o => !o) }}
+                    className={`absolute top-3 right-3 z-20 p-1.5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 focus:outline-none focus:opacity-100 border-transparent cursor-pointer text-(--text) ${
+                        railOpen ? 'bg-(--accent) opacity-100' : 'bg-(--surface-sunken)'
+                    }`}
+                >
+                    <Cog size={18} className="hover:rotate-90 transition-transform duration-300" />
+                </button>
+            )}
+
+            <div className="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-2">
+                <p className="text-caption font-bold leading-snug text-white line-clamp-1 shadow w-fit px-2 py-1 rounded-xl backdrop-blur-xs">
+                    {project.name}
+                </p>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                    {RatioIcon && (
+                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-tiny font-bold text-white bg-(--accent-40) backdrop-blur-md">
+                            <RatioIcon size={9} />
+                            {project.aspectRatio}
+                        </div>
+                    )}
+                    {project.sceneCount !== undefined && (
+                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-tiny font-bold text-white bg-(--accent-40) backdrop-blur-md">
+                            <Film size={9} />
+                            {project.sceneCount}
+                        </div>
+                    )}
+                    {durationLabel && (
+                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-tiny font-bold text-white bg-(--accent-40) backdrop-blur-md">
+                            <Clock size={9} />
+                            {durationLabel}
                         </div>
                     )}
                 </div>
             </div>
+        </div>
 
-            <div
-                className="flex flex-col gap-1 px-4 py-3"
-                style={{ backgroundColor: 'var(--bg)', borderTop: '1px solid var(--border-subtle)' }}
-            >
-                {renaming ? (
-                    <div
-                        className="flex items-center gap-1"
-                        onClick={e => e.stopPropagation()}
-                    >
-                        <input
-                            ref={inputRef}
-                            value={nameVal}
-                            onChange={e => setNameVal(e.target.value)}
-                            onKeyDown={e => {
-                                if (e.key === 'Enter') handleRename()
-                                if (e.key === 'Escape') { setRenaming(false); setNameVal(project.name) }
-                            }}
-                            className="flex-1 rounded-md px-2 py-0.5 text-sm font-bold"
-                            style={{
-                                backgroundColor: 'var(--surface-raised)',
-                                border: '1px solid var(--accent-42)',
-                                color: 'var(--text)',
-                                outline: 'none',
-                                minWidth: 0,
-                            }}
-                        />
-                        <button onClick={handleRename} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--accent)', padding: 2 }}>
-                            <Check size={13} />
-                        </button>
-                        <button onClick={() => { setRenaming(false); setNameVal(project.name) }} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 2 }}>
-                            <X size={13} />
-                        </button>
-                    </div>
-                ) : (
-                    <span className="text-sm font-bold truncate" style={{ color: 'var(--text-secondary)' }}>
-                        {nameVal}
-                    </span>
-                )}
-                <div className="flex items-center gap-1.5">
-                    <Clock size={11} strokeWidth={1.75} style={{ color: 'var(--text-tertiary)' }} />
-                    <span className="text-[0.68rem] font-medium" style={{ color: 'var(--text-tertiary)' }}>{project.lastEdited}</span>
+            {hasMenu && railOpen && (
+                <div
+                    ref={railRef}
+                    onClick={e => e.stopPropagation()}
+                    className="absolute top-1/2 -translate-y-1/2 right-12 z-100 flex flex-col gap-1.5 p-2 rounded-full bg-(--surface-overlay) border border-(--border-default) shadow-accent-40 "
+                >
+                    {isTrashed ? (
+                        <>
+                            {onRestore && <RailButton icon={FolderOpen} label="Restore" onClick={onRestore} />}
+                            {onPermanentDelete && <RailButton icon={Trash2} label="Delete Permanently" onClick={onPermanentDelete} danger />}
+                        </>
+                    ) : (
+                        <>
+                            {onRename && <RailButton icon={Pencil} label="Rename" onClick={onRename} />}
+                            {onToggleStar && <RailButton icon={Star} label={project.starred ? 'Unstar' : 'Star'} onClick={onToggleStar} active={project.starred} />}
+                            {onDuplicate && <RailButton icon={Copy} label="Duplicate" onClick={onDuplicate} />}
+                            {onTrash && <RailButton icon={Trash2} label="Move to Trash" onClick={onTrash} danger />}
+                        </>
+                    )}
                 </div>
+            )}
+
+            <div className="flex items-center justify-between px-3 py-2 rounded-b-2xl bg-(--surface-overlay) border border-t-0 border-(--border-default)">
+                <span className="text-tiny font-medium text-(--text-tertiary)">{project.lastEdited}</span>
+                {project.style && (
+                    <span className="text-tiny font-semibold text-(--accent)">{project.style}</span>
+                )}
             </div>
         </div>
     )

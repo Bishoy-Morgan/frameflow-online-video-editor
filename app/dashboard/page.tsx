@@ -2,18 +2,16 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import {
-    Wand2, FolderPlus, FolderOpen, Star, Trash2, Upload,
-    Monitor, Smartphone, Square, Film, Zap, Megaphone,
-    Loader2, ArrowRight, Clock, Check, RefreshCw,
+    Wand2, FolderPlus, FolderOpen, Monitor, Smartphone, Square,
+    Film, Zap, Megaphone, Loader2, ArrowRight, Clock, Check, RefreshCw,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import DashboardHeader from './components/DashboardHeader'
 import DashboardCard, { Project } from './components/DashboardCard'
-import StatsCard from './components/StatsCard'
 import { getMoodColor } from '@/lib/constants/moods'
+import Button from '@/components/ui/Button'
 
-type AspectRatio = '9:16' | '16:9' | '1:1'
-type Duration = '15s'  | '30s'  | '60s'
+type AspectRatio = '16:9' | '9:16' | '1:1'
+type Duration = '15s' | '30s' | '60s'
 type Style = 'Cinematic' | 'Viral' | 'Minimal' | 'Bold'
 
 interface Scene {
@@ -33,12 +31,6 @@ interface GeneratedProject {
     scenes: Scene[]
 }
 
-interface Stats {
-    total: number
-    starred: number
-    trash: number
-}
-
 const STYLES: { label: Style; icon: React.ElementType }[] = [
     { label: 'Cinematic', icon: Film },
     { label: 'Viral', icon: Zap },
@@ -47,8 +39,8 @@ const STYLES: { label: Style; icon: React.ElementType }[] = [
 ]
 
 const RATIOS: { label: AspectRatio; icon: React.ElementType; hint: string }[] = [
-    { label: '9:16', icon: Smartphone, hint: 'Reels / TikTok' },
     { label: '16:9', icon: Monitor, hint: 'YouTube / Web' },
+    { label: '9:16', icon: Smartphone, hint: 'Reels / TikTok' },
     { label: '1:1', icon: Square, hint: 'Feed / Square' },
 ]
 
@@ -84,48 +76,25 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
     return (
         <button
             onClick={onClick}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150"
-            style={{
-                backgroundColor: active ? 'var(--accent-8)' : 'var(--bg)',
-                border: active ? '1px solid var(--accent-42)' : '1px solid var(--border-subtle)',
-                color: active ? 'var(--accent)' : 'var(--text-tertiary)',
-            }}
-            onMouseEnter={e => { if (!active) { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text)' } }}
-            onMouseLeave={e => { if (!active) { e.currentTarget.style.borderColor = 'var(--border-subtle)';  e.currentTarget.style.color = 'var(--text-tertiary)' } }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-caption font-semibold transition-all duration-150 border cursor-pointer ${
+                active
+                    ? 'bg-(--accent-8) border-(--accent-42) text-(--accent)'
+                    : 'bg-(--surface-overlay) border-(--border-default) text-(--text-tertiary) hover:border-(--border-strong) hover:text-(--text)'
+            }`}
         >
             {children}
         </button>
     )
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-    return (
-        <div className="flex items-center gap-3">
-            <div className="w-5 h-px" style={{ backgroundColor: 'var(--accent)' }} />
-            <span className="text-[0.68rem] font-bold tracking-[0.12em] uppercase" style={{ color: 'var(--accent)' }}>
-                {children}
-            </span>
-        </div>
-    )
-}
-
 function SkeletonCard() {
     return (
-        <div className="rounded-xl overflow-hidden animate-pulse" style={{ border: '1px solid var(--border-default)' }}>
-            <div className="aspect-video w-full" style={{ backgroundColor: 'var(--surface-raised)' }} />
-            <div className="px-4 py-3 flex flex-col gap-2" style={{ backgroundColor: 'var(--bg)', borderTop: '1px solid var(--border-subtle)' }}>
-                <div className="h-3 w-3/4 rounded-md" style={{ backgroundColor: 'var(--surface-raised)' }} />
-                <div className="h-2.5 w-1/2 rounded-md" style={{ backgroundColor: 'var(--surface-raised)' }} />
+        <div className="rounded-xl overflow-hidden animate-pulse border border-(--border-default)">
+            <div className="aspect-video w-full bg-(--surface-sunken)" />
+            <div className="px-4 py-3 flex flex-col gap-2 bg-(--surface-overlay) border-t border-(--border-subtle)">
+                <div className="h-3 w-3/4 rounded-xl bg-(--surface-sunken)" />
+                <div className="h-2.5 w-1/2 rounded-xl bg-(--surface-sunken)" />
             </div>
-        </div>
-    )
-}
-
-function SkeletonStat() {
-    return (
-        <div className="p-5 rounded-xl animate-pulse" style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}>
-            <div className="h-2.5 w-1/2 rounded-md mb-3" style={{ backgroundColor: 'var(--bg)' }} />
-            <div className="h-8 w-1/3 rounded-md" style={{ backgroundColor: 'var(--bg)' }} />
         </div>
     )
 }
@@ -138,109 +107,65 @@ function SceneCard({ scene, index, selected, onToggle }: {
 }) {
     const mood = getMoodColor(scene.musicMood)
     const videoRef = React.useRef<HTMLVideoElement>(null)
-    const playingRef = React.useRef(false)
 
-    const handleMouseEnter = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        if (!selected) e.currentTarget.style.borderColor = 'var(--border-strong)'
-        const video = videoRef.current
-        if (!video) return
-        try {
-            playingRef.current = true
-            await video.play()
-        } catch {
-            // Interrupted — ignore
-        }
+    const handleMouseEnter = () => {
+        videoRef.current?.play().catch(() => {})
     }
 
-    const handleMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
-        if (!selected) e.currentTarget.style.borderColor = 'var(--border-default)'
-        const video = videoRef.current
-        if (!video) return
-        playingRef.current = false
-        video.pause()
-        video.currentTime = 0
+    const handleMouseLeave = () => {
+        const v = videoRef.current
+        if (!v) return
+        v.pause()
+        v.currentTime = 0
     }
 
     return (
         <button
             onClick={onToggle}
-            className="relative flex flex-col rounded-xl overflow-hidden text-left w-full transition-all duration-200 group"
-            style={{
-                backgroundColor: selected ? 'var(--accent-8)' : 'var(--surface-raised)',
-                border: selected ? '1px solid var(--accent-42)' : '1px solid var(--border-default)',
-                boxShadow: selected ? '0 0 0 3px var(--accent-8)' : 'none',
-            }}
+            className={`group relative flex flex-col rounded-2xl overflow-hidden text-left w-full transition-all duration-300 ${
+                selected ? 'ring-2 ring-(--accent) scale-[0.98]' : 'ring-1 ring-(--border-default) hover:ring-(--accent-42)'
+            }`}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
-            <div
-                className="absolute top-2.5 right-2.5 z-10 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200"
-                style={{
-                    backgroundColor: selected ? 'var(--accent)' : 'rgba(0,0,0,0.5)',
-                    border: selected ? 'none' : '1px solid rgba(255,255,255,0.3)',
-                    backdropFilter: 'blur(4px)',
-                }}
-            >
-                {selected && <Check size={11} strokeWidth={3} color="#020202" />}
-            </div>
-
-            <div className="relative w-full aspect-video overflow-hidden" style={{ backgroundColor: 'var(--surface-sunken)' }}>
+            <div className="relative w-full aspect-video overflow-hidden bg-(--surface-sunken)">
                 {scene.videoUrl ? (
-                    <>
-                        <video
-                            ref={videoRef}
-                            src={scene.videoUrl}
-                            muted
-                            loop
-                            playsInline
-                            preload="metadata"
-                            className="w-full h-full object-cover"
-                        />
-                        <div
-                            className="absolute inset-0 flex flex-col justify-end p-3"
-                            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }}
-                        >
-                            <div className="flex items-center justify-between">
-                                <span
-                                    className="text-[10px] font-black tracking-widest uppercase px-2 py-0.5 rounded-md"
-                                    style={{ backgroundColor: 'var(--accent-22)', color: 'var(--accent)' }}
-                                >
-                                    Scene {index + 1}
-                                </span>
-                                <span className="flex items-center gap-1 text-[11px] font-medium text-white">
-                                    <Clock size={10} />
-                                    {scene.duration}s
-                                </span>
-                            </div>
-                        </div>
-                        <div
-                            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                        >
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center"
-                                style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
-                                <Film size={14} color="white" />
-                            </div>
-                        </div>
-                    </>
+                    <video
+                        ref={videoRef}
+                        src={scene.videoUrl}
+                        muted
+                        loop
+                        playsInline
+                        preload="metadata"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
                 ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-2"
-                        style={{ background: 'linear-gradient(135deg, var(--accent-8) 0%, var(--surface-raised) 100%)' }}>
-                        <Film size={20} style={{ color: 'var(--accent-65)' }} />
-                        <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>No preview</span>
+                    <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-(--accent-8) to-(--surface-sunken)">
+                        <Film size={22} className="text-(--accent-65)" />
                     </div>
                 )}
-            </div>
 
-            <div className="flex flex-col gap-2 p-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                <p className="text-xs font-bold leading-snug pr-2" style={{ color: 'var(--text-secondary)' }}>
-                    {scene.title}
-                </p>
-                <div
-                    className="flex items-center gap-1.5 w-fit px-2 py-1 rounded-md text-[10px] font-bold"
-                    style={{ backgroundColor: mood.bg, color: mood.text }}
-                >
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: mood.text }} />
-                    {scene.musicMood}
+                <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/10 to-transparent" />
+
+                <div className={`absolute top-3 left-3 flex items-center justify-center w-7 h-7 rounded-full text-tiny font-black backdrop-blur-md transition-all duration-300 ${
+                    selected ? 'bg-(--accent) text-[#020202]' : 'bg-white/15 text-white border border-white/25'
+                }`}>
+                    {selected ? <Check size={13} strokeWidth={3} /> : index + 1}
+                </div>
+
+                <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full text-tiny font-bold text-white bg-black/40 backdrop-blur-md">
+                    <Clock size={9} />
+                    {scene.duration}s
+                </div>
+
+                <div className="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-1.5">
+                    <p className="text-caption font-bold leading-snug text-white line-clamp-1">
+                        {scene.title}
+                    </p>
+                    <div className="flex items-center gap-1.5 w-fit px-2 py-0.5 rounded-full text-tiny font-bold backdrop-blur-md bg-white/15" style={{ color: mood.text }}>
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: mood.text }} />
+                        {scene.musicMood}
+                    </div>
                 </div>
             </div>
         </button>
@@ -252,7 +177,7 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
 
     const [prompt, setPrompt] = useState('')
     const [style, setStyle] = useState<Style>('Cinematic')
-    const [ratio, setRatio] = useState<AspectRatio>('9:16')
+    const [ratio, setRatio] = useState<AspectRatio>('16:9')
     const [duration, setDuration] = useState<Duration>('30s')
     const [generating, setGenerating] = useState(false)
     const [focused, setFocused] = useState(false)
@@ -326,15 +251,7 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
         : 0
 
     return (
-        <div
-            className="relative rounded-2xl overflow-hidden"
-            style={{
-                background: 'linear-gradient(160deg, var(--surface-raised) 0%, var(--bg) 100%)',
-                border: `1px solid ${focused ? 'var(--accent-42)' : 'var(--border-default)'}`,
-                boxShadow: focused ? '0 0 0 3px var(--accent-8), 0 16px 48px rgba(0,0,0,0.06)' : '0 4px 24px rgba(0,0,0,0.04)',
-                transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
-            }}
-        >
+        <div className="relative">
             <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-40"
                 style={{ background: 'radial-gradient(ellipse 90% 100% at 50% 0%, var(--accent-10) 0%, transparent 100%)' }} />
             <div aria-hidden className="pointer-events-none absolute inset-0"
@@ -346,26 +263,24 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                     WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%)',
                 }} />
 
-            <div className="relative flex flex-col gap-6 px-8 pt-8 pb-7">
+            <div className="relative flex flex-col gap-6 px-8 pt-28 pb-7">
 
                 <div className="flex flex-col items-center text-center gap-2">
-                    <h1
-                        className="font-bold leading-tight"
-                        style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', color: 'var(--text)', fontFamily: 'var(--font-dm-serif-display), serif', letterSpacing: '-0.01em' }}
-                    >
-                        What video do you want{' '}
-                        <span style={{ color: 'var(--accent)', textShadow: '0 0 32px var(--accent-42)' }}>
+                    <h1 className="text-(--text)">
+                        What video do you want<br />
+                        <span className="text-(--accent)">
                             to create?
                         </span>
                     </h1>
-                    <p className="text-sm max-w-md" style={{ color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+                    <p className="text-lead leading-7 max-w-md text-(--text-tertiary)">
                         Describe your idea — AI generates a scene breakdown you can pick from and edit.
                     </p>
                 </div>
 
                 <div className="max-w-2xl w-full mx-auto">
-                    <div className="relative rounded-xl overflow-hidden"
-                        style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border-default)' }}>
+                    <div className={`relative rounded-xl overflow-hidden bg-(--surface-overlay) border transition-all duration-200 ${
+                        focused ? 'border-(--accent) shadow-accent-40' : 'shadow-accent-22 border-(--accent-10)'
+                    }`}>
                         <textarea
                             value={prompt}
                             onChange={e => { setPrompt(e.target.value.slice(0, 500)); setError('') }}
@@ -373,41 +288,32 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                             onBlur={() => setFocused(false)}
                             onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleGenerate() }}
                             rows={3}
-                            className="w-full resize-none px-5 pt-4 pb-14 text-sm outline-none"
-                            style={{ backgroundColor: 'transparent', color: 'var(--text)', lineHeight: '1.7' }}
+                            className="w-full resize-none px-5 pt-4 pb-14 text-caption outline-none bg-transparent text-(--text) placeholder:font-medium font-medium "
                             placeholder={placeholder + '|'}
                         />
-                        <div
-                            className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2.5"
-                            style={{ backgroundColor: 'var(--surface-raised)', borderTop: '1px solid var(--border-subtle)' }}
-                        >
-                            <span className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+                        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2.5 bg-(--surface-raised) border-t border-(--accent-20)">
+                            <span className="text-small text-(--text-tertiary)">
                                 {prompt.length > 0 ? `${prompt.length} / 500 · ⌘Enter to generate` : 'Be descriptive for best results'}
                             </span>
-                            <button
+                            <Button
+                                size='sm'
+                                variant='secondary'
                                 onClick={handleGenerate}
                                 disabled={!prompt.trim() || generating}
-                                className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200"
-                                style={{
-                                    backgroundColor: prompt.trim() && !generating ? 'var(--accent)' : 'var(--surface-raised)',
-                                    color: prompt.trim() && !generating ? '#020202' : 'var(--text-tertiary)',
-                                    border: `1px solid ${prompt.trim() && !generating ? 'transparent' : 'var(--border-default)'}`,
-                                    cursor: prompt.trim() && !generating ? 'pointer' : 'not-allowed',
-                                    boxShadow: prompt.trim() && !generating ? '0 4px 12px var(--accent-22)' : 'none',
-                                }}
+                                className={`${prompt.trim() && !generating ? 'cursor-pointer' : 'cursor-not-allowed'}`}
                             >
                                 {generating
-                                    ? <><Loader2 size={12} className="animate-spin" />Generating…</>
-                                    : <><Wand2 size={12} strokeWidth={2.5} />Generate</>}
-                            </button>
+                                    ? <><Loader2 size={18} className="animate-spin inline-block mr-2" />Generating…</>
+                                    : <><Wand2 size={18} strokeWidth={2.5} className='inline-block mr-2' />Generate</>}
+                            </Button>
                         </div>
                     </div>
-                    {error && <p className="text-xs mt-2 px-1" style={{ color: 'var(--error-fg)' }}>{error}</p>}
+                    {error && <p className="text-caption mt-2 px-1 text-(--error-fg)">{error}</p>}
                 </div>
 
                 <div className="flex flex-wrap justify-center gap-8">
                     <div className="flex flex-col gap-2 items-center">
-                        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>Style</span>
+                        <span className="text-tiny font-bold uppercase tracking-widest text-(--text-tertiary)">Style</span>
                         <div className="flex gap-1.5">
                             {STYLES.map(({ label, icon: Icon }) => (
                                 <Pill key={label} active={style === label} onClick={() => setStyle(label)}>
@@ -417,7 +323,7 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                         </div>
                     </div>
                     <div className="flex flex-col gap-2 items-center">
-                        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>Format</span>
+                        <span className="text-tiny font-bold uppercase tracking-widest text-(--text-tertiary)">Format</span>
                         <div className="flex gap-1.5">
                             {RATIOS.map(({ label, icon: Icon, hint }) => (
                                 <Pill key={label} active={ratio === label} onClick={() => setRatio(label)}>
@@ -427,7 +333,7 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                         </div>
                     </div>
                     <div className="flex flex-col gap-2 items-center">
-                        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>Duration</span>
+                        <span className="text-tiny font-bold uppercase tracking-widest text-(--text-tertiary)">Duration</span>
                         <div className="flex gap-1.5">
                             {DURATIONS.map(d => <Pill key={d} active={duration === d} onClick={() => setDuration(d)}>{d}</Pill>)}
                         </div>
@@ -438,30 +344,24 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                     <div ref={scenesRef} className="flex flex-col gap-4 pt-2">
                         <div className="flex items-center justify-between">
                             <div className="flex flex-col gap-0.5">
-                                <p className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>
+                                <p className="text-caption font-bold text-(--text-secondary)">
                                     {generatedProject.name}
                                 </p>
-                                <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                                <p className="text-tiny text-(--text-tertiary)">
                                     {selectedScenes.size === 0
-                                    ? 'Click clips to select them for your video'
-                                    : `${selectedScenes.size} of ${generatedProject.scenes.length} clips selected · ${totalDuration}s total`}
+                                        ? 'Click clips to select them for your video'
+                                        : `${selectedScenes.size} of ${generatedProject.scenes.length} clips selected · ${totalDuration}s total`}
                                 </p>
                             </div>
-                            <button
+                            <Button
+                                variant='secondary'
+                                size='sm'
                                 onClick={handleGenerate}
                                 disabled={generating}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150"
-                                style={{
-                                    backgroundColor: 'var(--surface-raised)',
-                                    border: '1px solid var(--border-default)',
-                                    color: 'var(--text-tertiary)',
-                                    cursor: generating ? 'wait' : 'pointer',
-                                }}
-                                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.color = 'var(--text)' }}
-                                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text-tertiary)' }}
+                                className={`${generating ? 'cursor-wait' : 'cursor-pointer'}`}
                             >
-                                <RefreshCw size={11} />Regenerate
-                            </button>
+                                <RefreshCw size={18} className='inline-block mr-2' />Regenerate
+                            </Button>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -480,14 +380,11 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                             <button
                                 onClick={handleOpenEditor}
                                 disabled={selectedScenes.size === 0}
-                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200"
-                                style={{
-                                    backgroundColor: selectedScenes.size > 0 ? 'var(--accent)' : 'var(--surface-raised)',
-                                    color: selectedScenes.size > 0 ? '#020202' : 'var(--text-tertiary)',
-                                    border: `1px solid ${selectedScenes.size > 0 ? 'transparent' : 'var(--border-default)'}`,
-                                    cursor: selectedScenes.size > 0 ? 'pointer' : 'not-allowed',
-                                    boxShadow: selectedScenes.size > 0 ? '0 4px 16px var(--accent-32)' : 'none',
-                                }}
+                                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-caption font-bold transition-all duration-200 border ${
+                                    selectedScenes.size > 0
+                                        ? 'bg-(--accent) text-[#020202] border-transparent shadow-accent-40 cursor-pointer'
+                                        : 'bg-(--surface-raised) text-(--text-tertiary) border-(--border-default) cursor-not-allowed'
+                                }`}
                             >
                                 Open Editor <ArrowRight size={13} strokeWidth={2.5} />
                             </button>
@@ -503,43 +400,41 @@ export default function DashboardPage() {
     const router = useRouter()
 
     const [projects, setProjects] = useState<Project[]>([])
-    const [stats, setStats] = useState<Stats | null>(null)
     const [projectsLoading, setProjectsLoading] = useState(true)
-    const [statsLoading, setStatsLoading] = useState(true)
     const [creatingProject, setCreatingProject] = useState(false)
 
     const fetchProjects = useCallback(() => {
         setProjectsLoading(true)
         fetch('/api/projects')
             .then(r => r.json())
-            .then((data: Array<{ id: string; name: string; updatedAt: string; thumbnail?: string; starred?: boolean }>) => {
+            .then((data: Array<{
+                id: string
+                name: string
+                updatedAt: string
+                thumbnail?: string
+                starred?: boolean
+                aspectRatio?: string | null
+                style?: string | null
+                scenes?: { videoUrl: string | null; duration: number }[]
+            }>) => {
                 setProjects(data.slice(0, 4).map(p => ({
                     id: p.id,
                     name: p.name,
                     lastEdited: formatRelative(p.updatedAt),
                     thumbnail: p.thumbnail,
                     starred: p.starred,
+                    previewVideoUrl: p.scenes?.[0]?.videoUrl ?? null,
+                    aspectRatio: p.aspectRatio,
+                    style: p.style,
+                    sceneCount: p.scenes?.length,
+                    totalDuration: p.scenes?.reduce((sum, s) => sum + s.duration, 0),
                 })))
             })
             .catch(console.error)
             .finally(() => setProjectsLoading(false))
     }, [])
 
-    const fetchStats = useCallback(() => {
-        fetch('/api/projects/stats')
-            .then(r => r.json())
-            .then(setStats)
-            .catch(console.error)
-            .finally(() => setStatsLoading(false))
-    }, [])
-
     useEffect(() => { fetchProjects() }, [fetchProjects])
-    useEffect(() => { fetchStats() }, [fetchStats])
-
-    const handleProjectCreated = useCallback(() => {
-        fetchProjects()
-        fetchStats()
-    }, [fetchProjects, fetchStats])
 
     const handleNewProject = useCallback(async () => {
         if (creatingProject) return
@@ -548,122 +443,89 @@ export default function DashboardPage() {
             const res = await fetch('/api/projects', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: 'Untitled Project', style: 'Modern', aspectRatio: '16:9' }),
+                body: JSON.stringify({ name: 'Untitled Project', style: 'Cinematic', aspectRatio: '16:9' }),
             })
             if (res.status === 401) { router.push('/auth/signin?callbackUrl=/dashboard'); return }
             if (!res.ok) throw new Error('Failed')
             const project = await res.json()
             router.push(`/editor/${project.id}`)
-            handleProjectCreated()
+            fetchProjects()
         } catch (err) {
             console.error(err)
         } finally {
             setCreatingProject(false)
         }
-    }, [creatingProject, router, handleProjectCreated])
+    }, [creatingProject, router, fetchProjects])
 
     return (
-        <div className="relative flex flex-col flex-1 min-h-0 overflow-auto">
+        <div className="relative flex flex-col flex-1 min-h-0 overflow-auto p-2">
+            <div className="flex flex-col rounded-t-xl bg-(--surface-overlay) border border-(--accent-20) shadow-accent-40">
 
-            <DashboardHeader title="Overview" subtitle="Welcome back" />
+                <AIHero onProjectCreated={fetchProjects} />
 
-            <main className="flex-1 px-8 py-8 flex flex-col gap-10">
-
-                <AIHero
-                    onProjectCreated={handleProjectCreated}
-                />
-
-                <div>
-                    <div className="flex items-center justify-between mb-5">
-                        <SectionLabel>Recent Projects</SectionLabel>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => router.push('/dashboard/projects')}
-                                className="text-xs font-semibold transition-colors duration-150"
-                                style={{ color: 'var(--text-tertiary)', background: 'none', border: 'none', cursor: 'pointer' }}
-                                onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
-                                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}
-                            >
-                                View all →
-                            </button>
-                            <button
-                                onClick={handleNewProject}
-                                disabled={creatingProject}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
-                                style={{
-                                    backgroundColor: 'var(--accent)',
-                                    color: '#020202',
-                                    border: 'none',
-                                    cursor: creatingProject ? 'wait' : 'pointer',
-                                    boxShadow: '0 2px 8px var(--accent-22)',
-                                    opacity: creatingProject ? 0.7 : 1,
-                                }}
-                                onMouseEnter={e => { if (!creatingProject) e.currentTarget.style.opacity = '0.88' }}
-                                onMouseLeave={e => { e.currentTarget.style.opacity = creatingProject ? '0.7' : '1' }}
-                            >
-                                {creatingProject
-                                    ? <><Loader2 size={11} className="animate-spin" />Creating…</>
-                                    : <><FolderPlus size={11} strokeWidth={2.5} />New Project</>}
-                            </button>
-                        </div>
-                    </div>
-
-                    {projectsLoading ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
-                        </div>
-                    ) : projects.length === 0 ? (
-                        <div
-                            className="flex flex-col items-center justify-center py-14 gap-4 rounded-2xl"
-                            style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}
-                        >
-                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                                style={{ backgroundColor: 'var(--accent-8)', border: '1px solid var(--accent-22)' }}>
-                                <FolderOpen size={22} style={{ color: 'var(--accent)' }} />
+                <main className="flex-1 px-20 pb-12 flex flex-col gap-6">
+                    <div className='pt-8'>
+                        <div className="flex items-end justify-between mb-6 pt-10 border-t border-(--accent-20)">
+                            <div className="flex flex-col">
+                                <h3 className="font-semibold text-(--text) leading-5">Recent Projects</h3>
+                                <span className="text-caption text-(--text-tertiary)">Pick up where you left off</span>
                             </div>
-                            <div className="flex flex-col items-center gap-1 text-center">
-                                <span className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>
-                                    No projects yet
-                                </span>
-                                <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                                    Generate with AI above or start a new blank project
-                                </span>
+                            <div className="flex items-center gap-2 pt-6">
+                                <Button
+                                    size='sm'
+                                    variant='ghost'
+                                    onClick={() => router.push('/dashboard/projects')}
+                                >
+                                    Manage my projects
+                                </Button>
+                                <Button
+                                    size='sm'
+                                    variant='primary'
+                                    onClick={handleNewProject}
+                                    disabled={creatingProject}
+                                    className='flex items-center'
+                                >
+                                    {creatingProject
+                                        ? <><Loader2 size={18} className="animate-spin inline-block mr-2" />Creating…</>
+                                        : <><FolderPlus size={18} strokeWidth={2.5} className='inline-block mr-2' />New Project</>}
+                                </Button>
                             </div>
-                            <button
-                                onClick={handleNewProject}
-                                className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200"
-                                style={{ backgroundColor: 'var(--accent)', color: '#020202', border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px var(--accent-22)' }}
-                            >
-                                <FolderPlus size={13} strokeWidth={2.5} />
-                                Start a project
-                            </button>
                         </div>
-                    ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {projects.map(p => <DashboardCard key={p.id} project={p} onUpdate={fetchProjects} />)}
-                        </div>
-                    )}
-                </div>
 
-                <div>
-                    <div className="mb-5">
-                        <SectionLabel>Your Activity</SectionLabel>
+                        {projectsLoading ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-10">
+                                {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
+                            </div>
+                        ) : projects.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-14 gap-4 rounded-xl bg-(--surface-raised) border border-(--border-default)">
+                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-(--accent-8) border border-(--accent-22)">
+                                    <FolderOpen size={22} className="text-(--accent)" />
+                                </div>
+                                <div className="flex flex-col items-center gap-1 text-center">
+                                    <span className="text-lead font-bold text-(--text-secondary)">
+                                        No projects yet
+                                    </span>
+                                    <span className="text-caption text-(--text-tertiary)">
+                                        Generate with AI above or start a new blank project
+                                    </span>
+                                </div>
+                                <Button
+                                    onClick={handleNewProject}
+                                    size='md'
+                                    variant='primary'
+                                >
+                                    <FolderPlus size={13} strokeWidth={2.5} className='inline-block mr-2' />
+                                    Start a project
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-10">
+                                {projects.map(p => <DashboardCard key={p.id} project={p} />)}
+                            </div>
+                        )}
                     </div>
-                    {statsLoading ? (
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            {Array.from({ length: 4 }).map((_, i) => <SkeletonStat key={i} />)}
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            <StatsCard label="Total Projects" value={stats?.total ?? 0} sub="All time" icon={FolderOpen} accent />
-                            <StatsCard label="Starred" value={stats?.starred ?? 0} sub="Pinned projects" icon={Star} />
-                            <StatsCard label="In Trash" value={stats?.trash ?? 0} sub="Soft deleted" icon={Trash2} />
-                            <StatsCard label="Storage Used" value="—" sub="Coming soon" icon={Upload} />
-                        </div>
-                    )}
-                </div>
-
-            </main>
+                </main>
+            </div>
         </div>
     )
 }

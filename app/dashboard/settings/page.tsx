@@ -2,7 +2,6 @@
 
 import React, { useState, useTransition } from 'react'
 import Image from 'next/image'
-import DashboardHeader from '../components/DashboardHeader'
 import { useUser } from '../../../components/providers/UserContext'
 import Button from '@/components/ui/Button'
 import { Eye, EyeOff, CheckCircle, AlertCircle, Camera } from 'lucide-react'
@@ -354,8 +353,6 @@ export default function DashboardSettingsPage() {
                 className="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 rounded-full"
                 style={{ background: 'radial-gradient(circle, var(--accent-8) 0%, transparent 65%)', filter: 'blur(72px)' }}
             />
-
-            <DashboardHeader title="Settings" />
 
             <main className="relative z-10 flex-1 p-8 max-w-2xl flex flex-col gap-8">
                 {sections.map(({ title, sub, content }) => (

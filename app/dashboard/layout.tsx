@@ -16,7 +16,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <UserProvider user={user}>
             <div className="relative flex h-svh overflow-hidden surface">
                 <SectionGrid />
-                <Sidebar />
+                <div className="relative z-50 shrink-0 p-2">
+                    <Sidebar />
+                </div>
                 <div className="flex flex-col flex-1 min-w-0 overflow-hidden relative z-10">
                     {children}
                 </div>
