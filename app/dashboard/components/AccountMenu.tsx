@@ -106,7 +106,7 @@ export default function AccountMenu({ expanded, displayName, email, image, initi
 
                     <div className="h-px bg-(--border-subtle) my-1" />
 
-                    <MenuRow icon={User} label="Your account" onClick={() => go('/dashboard/settings')} />
+                    <MenuRow icon={User} label="Your account" onClick={() => go('/dashboard/account')} />
                     <MenuRow icon={Settings} label="Settings" onClick={() => go('/dashboard/settings')} />
 
                     <MenuRow
