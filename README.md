@@ -4,15 +4,15 @@ A browser-based AI-assisted video editor, built solo. Describe a video, get a sc
 
 **Status:** in active development. Export is not built yet (see Roadmap).
 
-![Editor](public/Images/screenshots/editor.png)
+![Editor](public/images/screenshots/editor.png)
 
 ## Screenshots
 
 **AI project generator**
-![AI generation](public/Images/screenshots/ai-generation.png)
+![AI generation](public/images/screenshots/ai-generation.png)
 
 **Projects dashboard**
-![Dashboard](public/Images/screenshots/dashboard.png)
+![Dashboard](public/images/screenshots/dashboard.png)
 
 ## What works today
 
