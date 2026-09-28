@@ -1,11 +1,13 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Pencil, House, Share2, Loader2, CheckCheck } from 'lucide-react'
+import { PenLine, House, Share2, Loader2, CheckCheck } from 'lucide-react'
 import { useUser } from '@/components/providers/UserContext'
 import Image from 'next/image'
 import Button from '@/components/ui/Button'
+import OperationNotice, { type OperationNoticeState } from '@/components/ui/OperationNotice'
+import { projectNameSchema } from '@/lib/schemas'
 
 interface EditorTopBarProps {
   projectId: string
@@ -48,7 +50,7 @@ function UserAvatar() {
         />
       ) : (
         <div
-          className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-body font-semibold bg-(--accent-40) text-(--accent-fg) "
+          className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-body font-semibold bg-accent-40 text-accent-fg "
         >
           {initials}
         </div>
@@ -90,59 +92,108 @@ export default function EditorTopBar({
   const router = useRouter()
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(projectName)
+  const [renaming, setRenaming] = useState(false)
+  const [renameError, setRenameError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<OperationNoticeState | null>(null)
+  const nameInputRef = useRef<HTMLInputElement>(null)
 
   const handleNameBlur = async () => {
-    setEditing(false)
-    if (name.trim() === projectName || !name.trim()) return
-    await fetch(`/api/projects/${projectId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'rename', name: name.trim() }),
-    })
+    const validation = projectNameSchema.safeParse(name)
+    if (!validation.success) {
+      const message = validation.error.issues[0]?.message ?? 'Invalid project name.'
+      setRenameError(message)
+      setNotice({ type: 'error', message })
+      requestAnimationFrame(() => nameInputRef.current?.focus())
+      return
+    }
+
+    const trimmedName = validation.data
+    if (!trimmedName || trimmedName === projectName) {
+      setName(projectName)
+      setEditing(false)
+      return
+    }
+
+    setRenaming(true)
+    setRenameError(null)
+    try {
+      const res = await fetch(`/api/projects/${projectId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: trimmedName }),
+      })
+      if (!res.ok) {
+        const response = await res.json().catch(() => null)
+        const apiError = response?.error
+        const message = typeof apiError === 'string'
+          ? apiError
+          : apiError?.fieldErrors?.name?.[0] ?? apiError?.formErrors?.[0]
+        throw new Error(message ?? `Could not save project name (HTTP ${res.status}).`)
+      }
+
+      setName(trimmedName)
+      setRenameError(null)
+      setEditing(false)
+      setNotice({ type: 'success', message: 'Project name updated successfully.' })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Could not save project name.'
+      setRenameError(message)
+      setNotice({ type: 'error', message })
+      requestAnimationFrame(() => nameInputRef.current?.focus())
+    } finally {
+      setRenaming(false)
+    }
   }
 
   return (
+    <>
     <div
-      className="relative flex items-center justify-between py-2 px-4 shrink-0 w-[99%] rounded-2xl border border-(--accent-16) shadow-accent-40 "
+      className="relative flex items-center justify-between py-2 px-4 shrink-0 w-[99%] rounded-2xl border border-accent-16 glow-accent-40 "
     >
       <button
         onClick={() => router.push('/dashboard')}
         title="Go to dashboard"
         className="cursor-pointer"
       >
-        <House size={24} strokeWidth={2} className="inline-block text-(--accent)" />
+        <House size={26} strokeWidth={1.5} fill='var(--accent)' className="border-(--text) inline-block scale-90 hover:scale-105 transition-all duration-300 " />
       </button>
 
-      <div>
+      <div className="relative">
         {editing ? (
           <input
+            ref={nameInputRef}
             autoFocus
             value={name}
-            onChange={e => setName(e.target.value)}
+            maxLength={100}
+            disabled={renaming}
+            onChange={e => { setName(e.target.value); setRenameError(null) }}
             onBlur={handleNameBlur}
-            onKeyDown={e => e.key === 'Enter' && handleNameBlur()}
-            className="text-caption font-semibold outline-none rounded-xl px-2 py-0.5 min-w-0 max-w-65 border"
-            style={{
-              backgroundColor: 'var(--surface-raised)',
-              borderColor: 'var(--accent-42)',
-              color: 'var(--text)',
+            onKeyDown={e => {
+              if (e.key === 'Enter') e.currentTarget.blur()
+              if (e.key === 'Escape' && !renaming) {
+                setName(projectName)
+                setRenameError(null)
+                setEditing(false)
+              }
             }}
+            className="text-caption font-bold outline-none rounded-xl px-3 py-2 min-w-0 max-w-65 glow-accent-22 border border-accent-20"
           />
         ) : (
           <button
             onClick={() => setEditing(true)}
-            className="flex items-center gap-1.5 text-caption font-semibold group bg-transparent border-none cursor-pointer p-0 max-w-70 overflow-hidden text-(--text) rounded-xl "
+            className="flex items-center gap-1.5 text-caption font-bold group bg-transparent border-none cursor-pointer p-0 max-w-70 overflow-hidden text-(--text) "
           >
             <span className="truncate">
               {name}
             </span>
-            <Pencil
-              size={20}
+            <PenLine
+              size={18}
               strokeWidth={2}
-              className="opacity-0 group-hover:opacity-40 shrink-0 transition-opacity text-(--accent-fg) "
+              className="opacity-40 group-hover:opacity-100 shrink-0 transition-opacity text-accent-fg ml-2"
             />
           </button>
         )}
+        {renameError && <span role="alert" className="absolute -bottom-12 left-1/2 -translate-x-1/2 z-100 min-w-sm text-center border-error border px-6 py-2 glow-error rounded-xl bg-error text-small text-white font-medium ">{renameError}</span>}
       </div>
 
       <div className="flex items-center gap-3">
@@ -161,5 +212,7 @@ export default function EditorTopBar({
         </Button>
       </div>
     </div>
+    <OperationNotice notice={notice} onClose={() => setNotice(null)} />
+    </>
   )
 }

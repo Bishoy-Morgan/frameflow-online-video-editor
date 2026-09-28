@@ -26,7 +26,7 @@ export default function SharePanel({ projectId, totalDuration, onExport, onClose
 
     return (
         <div
-        className="absolute top-16 right-6 w-80 rounded-xl p-4 flex flex-col gap-4 z-50 bg-overlay shadow-accent-40">
+        className="absolute top-16 right-6 w-80 rounded-xl p-4 flex flex-col gap-4 z-50 bg-overlay glow-accent-40">
             <div className="flex items-center justify-between">
                 <span className="text-body font-semibold text-(--text) ">Share project</span>
                 <button
@@ -38,10 +38,10 @@ export default function SharePanel({ projectId, totalDuration, onExport, onClose
             </div>
 
             <div className="flex flex-col gap-1.5">
-                <span className="text-caption font-semibold text-(--text-tertiary)">
+                <span className="text-caption font-semibold text-tertiary">
                     Link
                 </span>
-                <div className="flex items-center gap-2 rounded-xl px-2.5 py-2 shadow-accent-22 border border-(--accent-40) ">
+                <div className="flex items-center gap-2 rounded-xl px-2.5 py-2 glow-accent-22 border border-accent-40 ">
                 <span
                     className="flex-1 text-small font-semibold truncate"
                 >
@@ -49,7 +49,7 @@ export default function SharePanel({ projectId, totalDuration, onExport, onClose
                 </span>
                 <button
                     onClick={handleCopy}
-                    className="flex items-center gap-1 text-small font-semibold cursor-pointer bg-transparent border-none shrink-0 text-(--accent-65) hover:text-(--accent-fg) "
+                    className="flex items-center gap-1 text-small font-semibold cursor-pointer bg-transparent border-none shrink-0 text-accent-65 hover:text-accent-fg "
                 >
                     <Copy size={14} />
                     {copied ? 'Copied' : 'Copy'}
@@ -58,12 +58,12 @@ export default function SharePanel({ projectId, totalDuration, onExport, onClose
             </div>
 
             <div className="flex flex-col gap-1.5">
-                <span className="text-caption font-semibold text-(--text-tertiary)">
+                <span className="text-caption font-semibold text-tertiary">
                     Export
                 </span>
-                <div className="flex items-center gap-2 rounded-xl px-2.5 py-2 shadow-accent-22 border border-(--accent-40) ">
+                <div className="flex items-center gap-2 rounded-xl px-2.5 py-2 glow-accent-22 border border-accent-40 ">
                     <div className="flex items-center gap-1.5">
-                        <Clock size={14} className="text-(--accent-65) " />
+                        <Clock size={14} className="text-accent-65 " />
                         <span className="text-small font-medium" >
                             {totalDuration}s · size available after export
                         </span>

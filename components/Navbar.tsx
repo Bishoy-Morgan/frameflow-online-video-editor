@@ -68,7 +68,7 @@ function UserMenu({
                         onError={() => setImageFailed(true)}
                     />
                 ) : (
-                    <div className="p-1 rounded-lg text-(--accent)! text-caption font-medium 3xl:text-lead bg-(--accent-10) border border-(--accent-22)">
+                    <div className="p-1 rounded-lg text-accent! text-caption font-medium 3xl:text-lead bg-(--accent-10) border border-accent-22">
                         {initials}
                     </div>
                 )}
@@ -179,7 +179,7 @@ function MobileMenu({
                                     <Link
                                         href={link.href}
                                         onClick={closeMenu}
-                                        className={`block px-3.5 py-2.5 rounded-xl font-semibold no-underline transition-all duration-200 ${active ? 'text-(--accent) bg-(--accent-8)' : 'text-(--text-tertiary) hover:text-(--accent) focus-visible:text-(--accent) focus-visible:bg-(--accent-4)'}`}
+                                        className={`block px-3.5 py-2.5 rounded-xl font-semibold no-underline transition-all duration-200 ${active ? 'text-accent bg-(--accent-8)' : 'text-tertiary hover:text-accent focus-visible:text-accent focus-visible:bg-(--accent-4)'}`}
                                     >
                                         {link.name}
                                     </Link>
@@ -189,7 +189,7 @@ function MobileMenu({
                     </ul>
 
                     <div className="px-3 py-3 flex items-center justify-between" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                        <span className="text-caption font-semibold text-(--text-tertiary)">
+                        <span className="text-caption font-semibold text-tertiary">
                             Theme
                         </span>
 
@@ -292,7 +292,7 @@ const Navbar = () => {
         <header className="fixed top-0 inset-x-0 z-50 flex justify-center pt-8 w-full pointer-events-none">
             <nav
                 suppressHydrationWarning
-                className={`relative pointer-events-auto w-4/5 max-w-350 flex items-center justify-between px-5 py-3 3xl:px-8 3xl:py-4 rounded-2xl border border-(--border-default) bg-(--bg) ${isDark ? 'shadow-accent ' : 'shadow-md'}`}
+                className={`relative pointer-events-auto w-4/5 max-w-350 flex items-center justify-between px-5 py-3 3xl:px-8 3xl:py-4 rounded-2xl border border-default bg-(--bg) ${isDark ? 'shadow-accent ' : 'shadow-md'}`}
             >
                 <div className="flex items-center gap-8">
                     <Link href="/" className="relative shrink-0 w-10 h-10">
@@ -314,7 +314,7 @@ const Navbar = () => {
                                 <li key={link.name} className="text-caption 3xl:text-lead">
                                     <Link
                                         href={link.href}
-                                        className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-semibold no-underline transition-all duration-200 ${active ? 'text-(--accent) bg-(--accent-8)' : 'text-(--text-tertiary) hover:text-(--accent) focus-visible:text-(--accent) focus-visible:bg-(--accent-4)'}`}
+                                        className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-semibold no-underline transition-all duration-200 ${active ? 'text-accent bg-(--accent-8)' : 'text-tertiary hover:text-accent focus-visible:text-accent focus-visible:bg-(--accent-4)'}`}
                                     >
                                         {link.name}
                                     </Link>

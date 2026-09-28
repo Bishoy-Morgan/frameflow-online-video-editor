@@ -40,7 +40,7 @@ const CTASection = () => {
                     className="text-main max-w-150"
                 >
                     Start creating{' '}
-                    <span className="italic text-(--accent-fg)">
+                    <span className="italic text-accent-fg">
                         something great.
                     </span>
                 </h2>

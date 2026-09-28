@@ -59,7 +59,7 @@ const Footer = () => {
                                 height={30}
                                 priority
                             />
-                            <span className="text-hero ml-2 text-(--accent-fg)" style={{ fontFamily: 'var(--font-dm-serif-display)' }}>
+                            <span className="text-hero ml-2 text-accent-fg" style={{ fontFamily: 'var(--font-dm-serif-display)' }}>
                                 Frameflow
                             </span>
                         </Link>
@@ -73,7 +73,7 @@ const Footer = () => {
                                     key={name}
                                     href={href}
                                     aria-label={name}
-                                    className="p-2 rounded-xl flex items-center justify-center transition-all duration-200 bg-(--surface-raised) border border-(--border-default) text-(--text-tertiary) hover:text-(--accent) hover:bg-(--accent-8) hover:border-(--accent-42)"
+                                    className="p-2 rounded-xl flex items-center justify-center transition-all duration-200 bg-raised border border-default text-tertiary hover:text-accent hover:bg-(--accent-8) hover:border-accent-42"
                                 >
                                     <Icon size={22} strokeWidth={1.75} />
                                 </Link>
@@ -91,7 +91,7 @@ const Footer = () => {
                                     <li key={name}>
                                         <Link
                                             href={href}
-                                            className="text-small 3xl:text-body font-medium text-(--text-tertiary) hover:text-(--accent) transition-colors duration-150"
+                                            className="text-small 3xl:text-body font-medium text-tertiary hover:text-accent transition-colors duration-150"
                                         >
                                             {name}
                                         </Link>
@@ -103,7 +103,7 @@ const Footer = () => {
                 </div>
 
                 <div
-                    className="rounded-xl p-8 mb-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-transparent border border-(--border-default) shadow-md"
+                    className="rounded-xl p-8 mb-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-transparent border border-default shadow-md"
                 >
                     <div className="flex flex-col gap-1">
                         <span className="text-caption font-bold">Stay in the loop.</span>
@@ -113,7 +113,7 @@ const Footer = () => {
                         <input
                             type="email"
                             placeholder="your@email.com"
-                            className="flex-1 md:w-56 3xl:w-64 px-4 py-3 3xl:py-4 rounded-lg text-small font-medium focus:outline-none transition-colors duration-150 bg-(--bg) border border-(--border-default) text-(--text) placeholder-(--text-tertiary) focus:border-(--accent)"
+                            className="flex-1 md:w-56 3xl:w-64 px-4 py-3 3xl:py-4 rounded-lg text-small font-medium focus:outline-none transition-colors duration-150 bg-(--bg) border border-default text-(--text) placeholder-(--text-tertiary) focus:border-accent"
                         />
                         <Button 
                             variant="primary" 

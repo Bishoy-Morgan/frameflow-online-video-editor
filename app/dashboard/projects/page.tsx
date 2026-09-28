@@ -5,9 +5,11 @@ import {
     Search, FolderPlus, FolderOpen, Star, Trash2,
     ChevronDown, X, Loader2, SortAsc, SortDesc, Clock, AlignLeft,
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useCreateProject } from '@/hooks/useCreateProject'
 import DashboardCard, { Project as CardProject } from '../components/DashboardCard'
 import Button from '@/components/ui/Button'
+import OperationNotice, { type OperationNoticeState } from '@/components/ui/OperationNotice'
+import { projectNameSchema } from '@/lib/schemas'
 
 interface Scene {
     id: string
@@ -77,13 +79,13 @@ function StatBadge({ icon: Icon, count, label, active, onClick }: {
             onClick={onClick}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-caption font-semibold transition-all duration-150 border cursor-pointer ${
                 active
-                    ? 'bg-(--accent-8) border-(--accent-42) text-(--accent)'
-                    : 'bg-(--surface-overlay) border-(--border-default) text-(--text-tertiary) hover:border-(--border-strong) hover:text-(--text)'
+                    ? 'bg-(--accent-8) border-accent-42 text-accent'
+                    : 'bg-overlay border-default text-tertiary hover:border-(--border-strong) hover:text-(--text)'
             }`}
         >
             <Icon size={16} strokeWidth={2} />
             {label}
-            <span className={`text-tiny font-bold px-1.5 py-0.5 rounded-full ${active ? 'bg-(--accent-16) text-(--accent)' : 'bg-(--surface-raised) text-(--text-tertiary)'}`}>
+            <span className={`text-tiny font-bold px-1.5 py-0.5 rounded-full ${active ? 'bg-(--accent-16) text-accent' : 'bg-raised text-tertiary'}`}>
                 {count}
             </span>
         </button>
@@ -110,13 +112,13 @@ function SortDropdown({ field, dir, onChange, onClose }: {
     ]
 
     return (
-        <div ref={ref} className="absolute right-0 top-11 z-50 rounded-xl overflow-hidden py-1 min-w-45 bg-(--surface-overlay) border border-(--border-default) shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
+        <div ref={ref} className="absolute right-0 top-11 z-50 rounded-xl overflow-hidden py-1 min-w-45 bg-overlay border border-default shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
             {options.map(({ label, field: f, icon: Icon }) => (
                 <button
                     key={f}
                     onClick={() => { onChange(f, f === field ? (dir === 'asc' ? 'desc' : 'asc') : 'desc'); onClose() }}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-caption font-medium text-left transition-colors bg-transparent border-none cursor-pointer hover:bg-(--surface-raised) ${
-                        f === field ? 'text-(--accent)' : 'text-(--text-secondary)'
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-caption font-medium text-left transition-colors bg-transparent border-none cursor-pointer hover:bg-raised ${
+                        f === field ? 'text-accent' : 'text-(--text-secondary)'
                     }`}
                 >
                     <Icon size={16} />
@@ -128,44 +130,72 @@ function SortDropdown({ field, dir, onChange, onClose }: {
     )
 }
 
-function RenameModal({ project, onSave, onClose }: { project: Project; onSave: (name: string) => void; onClose: () => void }) {
+function RenameModal({ project, onSave, onClose, onNotice }: { project: Project; onSave: (name: string) => Promise<void>; onClose: () => void; onNotice: (notice: OperationNoticeState) => void }) {
     const [name, setName] = useState(project.name)
+    const [saving, setSaving] = useState(false)
+    const [error, setError] = useState<string | null>(null)
     const inputRef = React.useRef<HTMLInputElement>(null)
 
     useEffect(() => { inputRef.current?.focus(); inputRef.current?.select() }, [])
 
+    const handleSave = async () => {
+        if (saving) return
+        const validation = projectNameSchema.safeParse(name)
+        if (!validation.success) {
+            const message = validation.error.issues[0]?.message ?? 'Invalid project name.'
+            setError(message)
+            onNotice({ type: 'error', message })
+            return
+        }
+
+        setSaving(true)
+        setError(null)
+        try {
+            await onSave(validation.data)
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Could not save project name.'
+            setError(message)
+            onNotice({ type: 'error', message })
+        } finally {
+            setSaving(false)
+        }
+    }
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xs" onClick={onClose}>
             <div
-                className="rounded-xl p-8 w-full max-w-sm flex flex-col gap-4 bg-(--surface-overlay) border border-(--accent-16) shadow-accent-40"
+                className="rounded-xl p-8 w-full max-w-sm flex flex-col gap-4 bg-overlay border border-accent-16 glow-accent-40"
                 onClick={e => e.stopPropagation()}
             >
                 <div>
                     <h4 className="text-(--text) font-semibold">Rename project</h4>
-                    <p className="text-caption mt-1 text-(--text-tertiary)">Enter a new name for this project.</p>
+                    <p className="text-caption mt-1 text-tertiary">Enter a new name for this project.</p>
                 </div>
                 <input
                     ref={inputRef}
                     value={name}
-                    onChange={e => setName(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') onSave(name); if (e.key === 'Escape') onClose() }}
-                    className="w-full px-3 py-2.5 rounded-xl text-caption font-medium outline-none bg-(--bg) border border-(--border-default) text-(--text) focus:border-(--accent) focus:shadow-lg"
+                    maxLength={100}
+                    onChange={e => { setName(e.target.value); setError(null) }}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); void handleSave() } if (e.key === 'Escape' && !saving) onClose() }}
+                    className="w-full px-3 py-2.5 rounded-xl text-caption font-medium outline-none bg-(--bg) border border-default text-(--text) focus:border-accent focus:shadow-lg"
                 />
+                {error && <p className="text-caption text-(--error)">{error}</p>}
                 <div className="flex gap-2 justify-end">
                     <Button
                         variant='ghost'
                         size='sm'
                         onClick={onClose}
+                        disabled={saving}
                     >
                         Cancel
                     </Button>
                     <Button
                         variant='primary'
                         size='sm'
-                        onClick={() => onSave(name)}
-                        disabled={!name.trim()}
+                        onClick={() => void handleSave()}
+                        disabled={!name.trim() || saving}
                     >
-                        Save
+                        {saving ? 'Saving…' : 'Save'}
                     </Button>
                 </div>
             </div>
@@ -184,12 +214,12 @@ function ConfirmDeleteModal({ project, onConfirm, onClose }: {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xs" onClick={onClose}>
             <div
-                className="rounded-xl p-8 w-full max-w-sm flex flex-col gap-4 bg-(--surface-overlay) border border-(--accent-16) shadow-accent-40"
+                className="rounded-xl p-8 w-full max-w-sm flex flex-col gap-4 bg-overlay border border-accent-16 glow-error"
                 onClick={e => e.stopPropagation()}
             >
                 <div>
                     <h4 className="text-(--text) font-semibold">Delete permanently</h4>
-                    <p className="text-caption mt-1 text-(--text-tertiary)">
+                    <p className="text-caption mt-1 text-tertiary">
                         This can&apos;t be undone. Type <span className="font-bold text-(--text-secondary)">{project.name}</span> to confirm.
                     </p>
                 </div>
@@ -198,13 +228,14 @@ function ConfirmDeleteModal({ project, onConfirm, onClose }: {
                     onChange={e => setInput(e.target.value)}
                     placeholder={project.name}
                     autoFocus
-                    className="w-full px-3 py-2.5 rounded-xl text-caption font-medium outline-none bg-(--bg) border border-(--border-default) text-(--text) focus:border-(--accent) focus:shadow-lg"
+                    className="w-full px-3 py-2.5 rounded-xl text-caption font-medium outline-none bg-(--bg) border border-default text-(--text) focus:border-accent focus:shadow-lg"
                 />
                 <div className="flex gap-2 justify-end">
                     <Button
                         variant='ghost'
                         size='sm'
                         onClick={onClose}
+                        className='text-tertiary'
                     >
                         Cancel
                     </Button>
@@ -221,6 +252,13 @@ function ConfirmDeleteModal({ project, onConfirm, onClose }: {
     )
 }
 
+function nextCopyName(name: string): string {
+    const match = name.match(/^(.*) \(copy(?: (\d+))?\)$/)
+    if (!match) return `${name} (copy)`
+    const [, base, n] = match
+    return `${base} (copy ${n ? parseInt(n, 10) + 1 : 2})`
+}
+
 export default function ProjectsPage() {
     const [projects, setProjects] = useState<Project[]>([])
     const [loading, setLoading] = useState(true)
@@ -230,10 +268,9 @@ export default function ProjectsPage() {
     const [sortDir, setSortDir] = useState<SortDir>('desc')
     const [sortOpen, setSortOpen] = useState(false)
     const [renaming, setRenaming] = useState<Project | null>(null)
-    const [creating, setCreating] = useState(false)
     const [deletingPermanently, setDeletingPermanently] = useState<Project | null>(null)
-
-    const router = useRouter()
+    const [notice, setNotice] = useState<OperationNoticeState | null>(null)
+    const { createProject, creating } = useCreateProject()
 
     const fetchProjects = useCallback(async () => {
         setLoading(true)
@@ -278,28 +315,32 @@ export default function ProjectsPage() {
         return list
     }, [projects, filter, search, sortField, sortDir])
 
-    const handleNewProject = async () => {
-        setCreating(true)
-        try {
-            const res = await fetch('/api/projects', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: 'Untitled Project', style: 'Cinematic', aspectRatio: '16:9' }),
-            })
-            const project = await res.json()
-            router.push(`/editor/${project.id}`)
-        } catch (err) { console.error(err) } finally { setCreating(false) }
-    }
-
     const handleRename = async (project: Project, name: string) => {
-        setRenaming(null)
-        if (!name.trim() || name === project.name) return
-        setProjects(ps => ps.map(p => p.id === project.id ? { ...p, name } : p))
-        await fetch(`/api/projects/${project.id}`, {
+        const validation = projectNameSchema.safeParse(name)
+        if (!validation.success) throw new Error(validation.error.issues[0]?.message ?? 'Invalid project name.')
+        const trimmedName = validation.data
+        if (!trimmedName || trimmedName === project.name) {
+            setRenaming(null)
+            return
+        }
+
+        const res = await fetch(`/api/projects/${project.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name }),
+            body: JSON.stringify({ name: trimmedName }),
         })
+        if (!res.ok) {
+            const response = await res.json().catch(() => null)
+            const apiError = response?.error
+            const message = typeof apiError === 'string'
+                ? apiError
+                : apiError?.fieldErrors?.name?.[0] ?? apiError?.formErrors?.[0]
+            throw new Error(message ?? `Could not save project name (HTTP ${res.status}).`)
+        }
+
+        setProjects(ps => ps.map(p => p.id === project.id ? { ...p, name: trimmedName } : p))
+        setRenaming(null)
+        setNotice({ type: 'success', message: 'Project name updated successfully.' })
     }
 
 const handleDuplicate = async (project: Project) => {
@@ -307,7 +348,7 @@ const handleDuplicate = async (project: Project) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            name: `${project.name} (copy)`,
+            name: nextCopyName(project.name),
             style: project.style ?? undefined,
             aspectRatio: project.aspectRatio ?? undefined,
             scenes: project.scenes?.map(({ title, description, musicMood, duration, order, videoUrl }) =>
@@ -352,9 +393,21 @@ const handleDuplicate = async (project: Project) => {
     }
 
     const handlePermanentDelete = async (project: Project) => {
-        setProjects(ps => ps.filter(p => p.id !== project.id))
-        await fetch(`/api/projects/${project.id}`, { method: 'DELETE' })
-        setDeletingPermanently(null)
+        try {
+            const res = await fetch(`/api/projects/${project.id}`, { method: 'DELETE' })
+            if (!res.ok) {
+                const response = await res.json().catch(() => null)
+                const message = response?.error ?? `Could not delete project (HTTP ${res.status}).`
+                setNotice({ type: 'error', message })
+                return
+            }
+            setProjects(ps => ps.filter(p => p.id !== project.id))
+            setNotice({ type: 'success', message: 'Project permanently deleted.' })
+        } catch {
+            setNotice({ type: 'error', message: 'Could not delete project. Please try again.' })
+        } finally {
+            setDeletingPermanently(null)
+        }
     }
 
     const counts = useMemo(() => ({
@@ -365,13 +418,13 @@ const handleDuplicate = async (project: Project) => {
 
     return (
         <div className="relative flex flex-col flex-1 min-h-0 overflow-auto p-2 ">
-            <div className="flex flex-col rounded-xl overflow-hidden bg-(--surface-overlay) border border-(--border-default) shadow-accent-22">
+            <div className="flex flex-col rounded-xl overflow-hidden bg-overlay border border-default glow-accent-22">
 
                 <div className="flex flex-col gap-4 px-10 pt-8 ">
                     <div className="flex items-end justify-between flex-wrap gap-4">
                         <div className="flex flex-col gap-0.5">
                             <h3 className="font-semibold text-(--text)">Projects</h3>
-                            <span className="text-caption text-(--text-tertiary)">All your videos in one place</span>
+                            <span className="text-caption text-tertiary">All your videos in one place</span>
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -382,17 +435,17 @@ const handleDuplicate = async (project: Project) => {
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap">
-                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-caption bg-(--surface-raised) border border-(--border-default) min-w-50 flex-1 max-w-80">
-                            <Search size={16} className="text-(--text-tertiary) shrink-0" />
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-caption bg-raised border border-default min-w-50 flex-1 max-w-80 focus:shadow ">
+                            <Search size={16} className="text-tertiary shrink-0" />
                             <input
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search projects…"
-                                className="bg-transparent outline-none flex-1 text-caption text-(--text)"
+                                className="bg-transparent outline-none flex-1 text-caption text-(--text) "
                             />
                             {search && (
                                 <button onClick={() => setSearch('')} className="bg-transparent border-none cursor-pointer">
-                                    <X size={12} className="text-(--text-tertiary)" />
+                                    <X size={12} className="text-tertiary" />
                                 </button>
                             )}
                         </div>
@@ -401,7 +454,7 @@ const handleDuplicate = async (project: Project) => {
                             <button
                                 onClick={() => setSortOpen(v => !v)}
                                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-caption font-semibold transition-all duration-150 border cursor-pointer ${
-                                    sortOpen ? 'bg-(--surface-raised) border-(--border-strong)' : 'bg-(--surface-raised) border-(--border-default)'
+                                    sortOpen ? 'bg-raised border-(--border-strong)' : 'bg-raised border-default'
                                 } text-(--text-secondary)`}
                             >
                                 {sortDir === 'asc' ? <SortAsc size={16} strokeWidth={2} /> : <SortDesc size={12} strokeWidth={2} />}
@@ -418,10 +471,10 @@ const handleDuplicate = async (project: Project) => {
                             )}
                         </div>
 
-                        <Button size="sm" variant="primary" onClick={handleNewProject} disabled={creating}>
+                        <Button size="sm" variant="primary" onClick={() => createProject()} disabled={creating}>
                             {creating
-                                ? <><Loader2 size={16} className="animate-spin inline-block mr-2" />Creating…</>
-                                : <><FolderPlus size={16} strokeWidth={2.5} className="inline-block mr-2" />New Project</>}
+                                ? <><Loader2 size={18} className="animate-spin inline-block mr-2" />Creating…</>
+                                : <><FolderPlus size={18} strokeWidth={2.5} className="inline-block mr-2 mb-0.5" />New Project</>}
                         </Button>
                     </div>
                 </div>
@@ -431,21 +484,21 @@ const handleDuplicate = async (project: Project) => {
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pt-10">
                             {Array.from({ length: 8 }).map((_, i) => (
                                 <div key={i} className="rounded-2xl overflow-hidden animate-pulse ring-1 ring-(--border-default)">
-                                    <div className="aspect-video bg-(--surface-sunken)" />
-                                    <div className="px-3 py-2 flex flex-col gap-1.5 bg-(--surface-overlay)">
-                                        <div className="h-2.5 w-1/2 rounded-xl bg-(--surface-sunken)" />
+                                    <div className="aspect-video bg-sunken" />
+                                    <div className="px-3 py-2 flex flex-col gap-1.5 bg-overlay">
+                                        <div className="h-2.5 w-1/2 rounded-xl bg-sunken" />
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : displayed.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-20 gap-4 rounded-xl bg-(--surface-raised) ">
+                        <div className="flex flex-col items-center justify-center py-20 gap-4 rounded-xl bg-raised ">
                             <div className="w-14 h-14 flex items-center justify-center ">
                                 {filter === 'trash'
-                                    ? <Trash2 size={36} className="text-(--accent)" />
+                                    ? <Trash2 size={36} className="text-accent" />
                                     : filter === 'starred'
-                                        ? <Star size={24} className="text-(--accent)" />
-                                        : <FolderOpen size={24} className="text-(--accent)" />}
+                                        ? <Star size={24} className="text-accent" />
+                                        : <FolderOpen size={24} className="text-accent" />}
                             </div>
                             <div className="flex flex-col items-center gap-1 text-center">
                                 <span className="text-lead font-bold text-(--text-secondary)">
@@ -457,7 +510,7 @@ const handleDuplicate = async (project: Project) => {
                                                 ? 'No starred projects'
                                                 : 'No projects yet'}
                                 </span>
-                                <span className="text-small text-(--text-tertiary)">
+                                <span className="text-small text-tertiary">
                                     {search
                                         ? 'Try a different search term'
                                         : filter === 'all'
@@ -468,7 +521,7 @@ const handleDuplicate = async (project: Project) => {
                                 </span>
                             </div>
                             {filter === 'all' && !search && (
-                                <Button size="sm" variant="primary" onClick={handleNewProject}>
+                                <Button size="sm" variant="primary" onClick={() => createProject()} disabled={creating}>
                                     <FolderPlus size={13} strokeWidth={2.5} className="inline-block mr-2" />
                                     New Project
                                 </Button>
@@ -492,7 +545,7 @@ const handleDuplicate = async (project: Project) => {
                     )}
 
                     {!loading && displayed.length > 0 && (
-                        <p className="text-small font-medium text-center mt-6 text-(--text-tertiary)">
+                        <p className="text-small font-medium text-center mt-6 text-tertiary">
                             {displayed.length} {displayed.length === 1 ? 'project' : 'projects'}
                             {search && ` matching "${search}"`}
                         </p>
@@ -505,6 +558,7 @@ const handleDuplicate = async (project: Project) => {
                     project={renaming}
                     onSave={name => handleRename(renaming, name)}
                     onClose={() => setRenaming(null)}
+                    onNotice={setNotice}
                 />
             )}
 
@@ -515,6 +569,7 @@ const handleDuplicate = async (project: Project) => {
                     onClose={() => setDeletingPermanently(null)}
                 />
             )}
+            <OperationNotice notice={notice} onClose={() => setNotice(null)} />
         </div>
     )
 }

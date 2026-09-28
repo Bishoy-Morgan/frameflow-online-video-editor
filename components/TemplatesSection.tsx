@@ -93,7 +93,7 @@ const TemplateCard = ({
             onMouseLeave={handleMouseLeave}
         >
             <div
-                className="relative aspect-3/4 overflow-hidden rounded-xl border border-(--accent-22) transition-[border-color,box-shadow] duration-300 group-hover:border-(--accent-42) group-hover:glow-accent"
+                className="relative aspect-3/4 overflow-hidden rounded-xl border border-accent-22 transition-[border-color,box-shadow] duration-300 group-hover:border-accent-42 group-hover:glow-accent"
             >
                 {(videoError || !videoLoaded) && (
                     <div
@@ -104,7 +104,7 @@ const TemplateCard = ({
                 {!videoLoaded && !videoError && (
                     <div className="absolute inset-0 z-2 flex items-center justify-center">
                         <div
-                            className="h-7 w-7 animate-spin rounded-full border-2 border-(--accent-22) border-t-(--accent)"
+                            className="h-7 w-7 animate-spin rounded-full border-2 border-accent-22 border-t-(--accent)"
                         />
                     </div>
                 )}
@@ -208,7 +208,7 @@ const TemplatesSection = () => {
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-3 mb-8 3xl:mb-12">
                             <div className="w-7 h-px bg-(--accent) " />
-                            <span className="text-caption font-bold tracking-[0.14em] uppercase text-(--accent-fg)">
+                            <span className="text-caption font-bold tracking-[0.14em] uppercase text-accent-fg">
                                 Templates
                             </span>
                         </div>

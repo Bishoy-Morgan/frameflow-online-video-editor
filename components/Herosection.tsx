@@ -5,55 +5,66 @@ import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Button from './ui/Button'
 import SectionGrid from './ui/SectionGrid'
-import desktop from '@/public/images/editor.png'
+import desktop from '@/public/images/hero-editorPage.png'
 import { ArrowRight } from 'lucide-react'
 
 const HeroSection = () => {
     const router = useRouter()
 
     return (
-        <section className="relative w-full md:h-svh md:max-h-250 flex items-center overflow-hidden">
+        <section className="relative w-full overflow-hidden">
 
             <SectionGrid />
 
-            <div className="container relative z-10 pt-32 md:pt-40 pb-20">
-                <div className="w-full lg:w-1/2 flex flex-col items-start">
+            <div className="relative z-10 container pt-32 md:pt-40">
+
+                <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, ease: 'easeOut' }}
+                        className="mb-6"
+                    >
+                        <span className="text-small font-medium uppercase tracking-[0.18em] text-accent">
+                            Browser-based video editor
+                        </span>
+                    </motion.div>
 
                     <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 24 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.65, ease: 'easeOut', delay: 0.1 }}
-                        className="font-normal mb-6 text-main"
+                        transition={{ duration: 0.7, ease: 'easeOut', delay: 0.08 }}
+                        className="max-w-4xl font-normal tracking-tight text-main"
                     >
-                        Edit video.
-                        <br />
-                        <span className="italic text-accent">In your browser.</span>
-                        <br />
-                        Ship faster.
+                        Turn ideas into<br/>
+                        <span className="italic text-accent">
+                            finished videos.
+                        </span>
                     </motion.h1>
 
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.65, ease: 'easeOut', delay: 0.22 }}
-                        className="mb-10 text-lead 3xl:text-hero"
+                        transition={{ duration: 0.65, ease: 'easeOut', delay: 0.18 }}
+                        className="max-w-2xl text-lead 3xl:text-hero"
                     >
-                        Frameflow gives you a fast, structured timeline editor for social media,
-                        marketing content, and product demos — no downloads, no complexity.
+                        A fast, structured video editor for social content,
+                        marketing videos, and product demos — entirely in your browser.
                     </motion.p>
 
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 18 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.65, ease: 'easeOut', delay: 0.34 }}
-                        className="flex flex-col items-start md:flex-row md:items-center gap-4"
+                        transition={{ duration: 0.6, ease: 'easeOut', delay: 0.28 }}
+                        className="mt-9 flex flex-col items-center gap-4 sm:flex-row"
                     >
                         <Button
                             variant="primary"
                             size="lg"
                             onClick={() => router.push('/auth/signup')}
                         >
-                            Sign up for free
+                            Start creating — free
                         </Button>
 
                         <Button
@@ -68,10 +79,10 @@ const HeroSection = () => {
                     </motion.div>
 
                     <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.65, ease: 'easeOut', delay: 0.44 }}
-                        className="m-0 mt-5 text-small text-tertiary font-medium ml-1"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.6, ease: 'easeOut', delay: 0.4 }}
+                        className="mt-4 text-small font-medium text-tertiary"
                     >
                         No credit card required · Free forever plan available
                     </motion.p>
@@ -79,49 +90,54 @@ const HeroSection = () => {
                 </div>
 
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.75, ease: 'easeOut', delay: 0.2 }}
-                    className="relative mt-14 lg:mt-0 lg:absolute lg:top-3/5 lg:-translate-y-1/2 lg:left-[52%] lg:w-[58vw] lg:z-10"
+                    initial={{ opacity: 0, y: 70, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{
+                        duration: 0.9,
+                        ease: [0.16, 1, 0.3, 1],
+                        delay: 0.35,
+                    }}
+                    className="relative mx-auto mt-10 w-full max-w-7xl"
                 >
+
                     <motion.div
                         aria-hidden
-                        className="absolute -inset-[40%] -z-10 pointer-events-none"
+                        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[70%] w-[70%] -translate-x-1/2 -translate-y-1/2"
                         style={{
-                            background: 'radial-gradient(ellipse 55% 35% at 50% 50%, var(--accent-32) 0%, transparent 70%)',
-                            filter: 'blur(70px)',
+                            background:
+                                'radial-gradient(circle, var(--accent-32) 0%, transparent 68%)',
+                            filter: 'blur(80px)',
                         }}
                         animate={{
-                            x: [-40, 40, -40],
-                            y: [-20, 20, -20],
-                            scale: [1, 1.1, 1],
-                            opacity: [0.6, 0.9, 0.6],
+                            scale: [1, 1.08, 1],
+                            opacity: [0.45, 0.7, 0.45],
                         }}
                         transition={{
-                            duration: 8,
+                            duration: 7,
                             repeat: Infinity,
                             ease: 'easeInOut',
                         }}
                     />
 
                     <div
-                        className="relative w-full aspect-video"
-                        style={{
-                            maskImage: 'radial-gradient(ellipse 85% 85% at 50% 50%, black 65%, transparent 100%)',
-                            WebkitMaskImage: 'radial-gradient(ellipse 85% 85% at 50% 50%, black 65%, transparent 100%)',
-                        }}
+                        className="relative overflow-hidden rounded-xl glow-accent"
                     >
                         <Image
                             src={desktop}
-                            alt="Frameflow Video Editor Interface"
-                            fill
-                            quality={82}
+                            alt="Frameflow video editor interface"
+                            width={2400}
+                            height={1350}
+                            quality={88}
                             priority
-                            sizes="(min-width: 1024px) 58vw, 100vw"
-                            className="w-full h-full object-contain block"
+                            sizes="(min-width: 1536px) 1200px, (min-width: 1024px) 90vw, 100vw"
+                            className="block h-auto w-full"
                         />
                     </div>
+
                 </motion.div>
+
+                <div className="h-20 md:h-28" />
+
             </div>
 
         </section>

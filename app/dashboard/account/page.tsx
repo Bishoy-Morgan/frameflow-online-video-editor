@@ -6,15 +6,15 @@ import { useUser } from '@/components/providers/UserContext'
 import Button from '@/components/ui/Button'
 import { Eye, EyeOff, CheckCircle, AlertCircle, Camera, Pencil } from 'lucide-react'
 
-const inputClass = 'w-full px-3 py-2.5 rounded-xl text-caption font-medium outline-none bg-(--bg) border border-(--border-default) text-(--text) focus:border-(--accent) focus:shadow-lg'
-const readonlyInputClass = `${inputClass} cursor-not-allowed bg-(--surface-sunken) text-(--text-tertiary)`
+const inputClass = 'w-full px-3 py-2.5 rounded-xl text-caption font-medium outline-none bg-(--bg) border border-default text-(--text) focus:border-accent focus:shadow-lg'
+const readonlyInputClass = `${inputClass} cursor-not-allowed bg-sunken text-tertiary`
 
 function Feedback({ type, message }: { type: 'success' | 'error'; message: string }) {
     return (
         <div
             className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-semibold ${
                 type === 'success'
-                    ? 'border-(--accent-22) bg-(--accent-8) text-(--accent)'
+                    ? 'border-accent-22 bg-(--accent-8) text-accent'
                     : 'border-(--error-22) bg-(--error-8) text-(--error)'
             }`}
         >
@@ -86,15 +86,15 @@ function ProfileSection() {
                             alt={user.name ?? user.email}
                             width={64}
                             height={64}
-                            className="rounded-xl border border-(--border-default) object-cover"
+                            className="rounded-xl border border-default object-cover"
                         />
                     ) : (
-                        <div className="flex h-20 w-20 items-center justify-center rounded-xl border border-(--accent-22) bg-(--accent-10) text-main text-(--accent) shadow-accent-22">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-xl border border-accent-22 bg-(--accent-10) text-main text-accent glow-accent-22">
                             {initials}
                         </div>
                     )}
                     <div
-                        className="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-(--border-default) bg-(--bg) text-(--text-tertiary)"
+                        className="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-default bg-(--bg) text-tertiary"
                         title="Avatar is managed via your Google account"
                     >
                         <Camera size={14} strokeWidth={1.75} />
@@ -141,12 +141,12 @@ function ProfileSection() {
 
             <div className="flex flex-col gap-1.5">
                 <label className="text-caption font-bold text-secondary">Role</label>
-                <div className="flex items-center gap-2 rounded-lg border border-(--border-subtle) bg-(--surface-sunken) px-4 py-2.5">
+                <div className="flex items-center gap-2 rounded-lg border border-(--border-subtle) bg-sunken px-4 py-2.5">
                     <span
                         className={`rounded-full border px-2 py-0.5 text-small font-bold uppercase tracking-wider ${
                             user.role === 'ADMIN'
-                                ? 'border-(--accent-22) bg-(--accent-8) text-(--accent)'
-                                : 'border-(--border-default) bg-(--surface-raised) text-(--text-tertiary)'
+                                ? 'border-accent-22 bg-(--accent-8) text-accent'
+                                : 'border-default bg-raised text-tertiary'
                         }`}
                     >
                         {user.role}
@@ -187,8 +187,8 @@ function PasswordSection() {
 
     if (isGoogleOnly) {
         return (
-            <div className="flex items-start gap-3 rounded-lg border border-(--border-subtle) bg-(--surface-sunken) px-4 py-3.5">
-                <AlertCircle size={15} strokeWidth={1.75} className="mt-px text-(--text-tertiary)" />
+            <div className="flex items-start gap-3 rounded-lg border border-(--border-subtle) bg-sunken px-4 py-3.5">
+                <AlertCircle size={15} strokeWidth={1.75} className="mt-px text-tertiary" />
                 <div className="flex flex-col gap-0.5">
                     <span className="text-caption font-bold text-secondary">No password set</span>
                     <span className="text-small text-tertiary font-medium">
@@ -271,7 +271,7 @@ function PasswordSection() {
                                 type="button"
                                 onClick={() => setShowPw(p => !p)}
                                 disabled={!isEditing || isPending}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer border-0 bg-transparent text-(--text-tertiary) focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer border-0 bg-transparent text-tertiary focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
@@ -307,12 +307,12 @@ export default function AccountPage() {
 
     return (
         <div className="flex flex-1 min-h-0 flex-col p-2 overflow-y-scroll">
-            <div className="flex flex-col rounded-t-xl border border-(--accent-20) bg-(--surface-overlay) shadow-accent-40">
+            <div className="flex flex-col rounded-t-xl border border-accent-20 bg-overlay glow-accent-40">
 
                 <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-12 pb-12 pt-12">
-                    <div className="flex flex-col gap-1 pb-6 border-b border-(--accent-20) ">
+                    <div className="flex flex-col gap-1 pb-6 border-b border-accent-20 ">
                         <h3 className="m-0 text-(--text)">Account</h3>
-                        <span className="text-caption text-(--text-tertiary)">Manage your profile and sign-in details</span>
+                        <span className="text-caption text-tertiary">Manage your profile and sign-in details</span>
                     </div>
 
                     {sections.map(({ title, sub, content }) => (
@@ -321,7 +321,7 @@ export default function AccountPage() {
                                 <h4 className="m-0 font-semibold">{title}</h4>
                                 <p className="m-0 mt-1 text-caption text-tertiary">{sub}</p>
                             </div>
-                            <div className="rounded-xl border border-(--accent-40) bg-(--surface-raised) p-6 shadow-accent-22">
+                            <div className="rounded-xl border border-accent-40 bg-raised p-6 glow-accent-22">
                                 {content}
                             </div>
                         </section>

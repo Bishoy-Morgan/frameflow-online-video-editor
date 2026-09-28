@@ -6,6 +6,7 @@ import {
     Film, Zap, Megaphone, Loader2, ArrowRight, Clock, Check, RefreshCw,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useCreateProject } from '@/hooks/useCreateProject'
 import DashboardCard, { Project } from './components/DashboardCard'
 import { getMoodColor } from '@/lib/constants/moods'
 import Button from '@/components/ui/Button'
@@ -78,8 +79,8 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
             onClick={onClick}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-caption font-semibold transition-all duration-150 border cursor-pointer ${
                 active
-                    ? 'bg-(--accent-8) border-(--accent-42) text-(--accent)'
-                    : 'bg-(--surface-overlay) border-(--border-default) text-(--text-tertiary) hover:border-(--border-strong) hover:text-(--text)'
+                    ? 'bg-(--accent-8) border-accent-42 text-accent'
+                    : 'bg-overlay border-default text-tertiary hover:border-(--border-strong) hover:text-(--text)'
             }`}
         >
             {children}
@@ -89,11 +90,11 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
 
 function SkeletonCard() {
     return (
-        <div className="rounded-xl overflow-hidden animate-pulse border border-(--border-default)">
-            <div className="aspect-video w-full bg-(--surface-sunken)" />
-            <div className="px-4 py-3 flex flex-col gap-2 bg-(--surface-overlay) border-t border-(--border-subtle)">
-                <div className="h-3 w-3/4 rounded-xl bg-(--surface-sunken)" />
-                <div className="h-2.5 w-1/2 rounded-xl bg-(--surface-sunken)" />
+        <div className="rounded-xl overflow-hidden animate-pulse border border-default">
+            <div className="aspect-video w-full bg-sunken" />
+            <div className="px-4 py-3 flex flex-col gap-2 bg-overlay border-t border-(--border-subtle)">
+                <div className="h-3 w-3/4 rounded-xl bg-sunken" />
+                <div className="h-2.5 w-1/2 rounded-xl bg-sunken" />
             </div>
         </div>
     )
@@ -128,7 +129,7 @@ function SceneCard({ scene, index, selected, onToggle }: {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
-            <div className="relative w-full aspect-video overflow-hidden bg-(--surface-sunken)">
+            <div className="relative w-full aspect-video overflow-hidden bg-sunken">
                 {scene.videoUrl ? (
                     <video
                         ref={videoRef}
@@ -141,9 +142,9 @@ function SceneCard({ scene, index, selected, onToggle }: {
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-(--accent-8) to-(--surface-sunken)">
-                        <Film size={22} className="text-(--accent-65)" />
+                        <Film size={40} className="text-accent-65 opacity-50 " />
                     </div>
-                )}
+                )}  
 
                 <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/10 to-transparent" />
 
@@ -268,18 +269,18 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                 <div className="flex flex-col items-center text-center gap-2">
                     <h1 className="text-(--text)">
                         What video do you want<br />
-                        <span className="text-(--accent)">
+                        <span className="text-accent">
                             to create?
                         </span>
                     </h1>
-                    <p className="text-lead leading-7 max-w-md text-(--text-tertiary)">
+                    <p className="text-lead leading-7 max-w-md text-tertiary">
                         Describe your idea — AI generates a scene breakdown you can pick from and edit.
                     </p>
                 </div>
 
                 <div className="max-w-2xl w-full mx-auto">
-                    <div className={`relative rounded-xl overflow-hidden bg-(--surface-overlay) border transition-all duration-200 ${
-                        focused ? 'border-(--accent) shadow-accent-40' : 'shadow-accent-22 border-(--accent-10)'
+                    <div className={`relative rounded-xl overflow-hidden bg-overlay border transition-all duration-200 ${
+                        focused ? 'border-accent glow-accent-40' : 'glow-accent border-accent-10'
                     }`}>
                         <textarea
                             value={prompt}
@@ -291,8 +292,8 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                             className="w-full resize-none px-5 pt-4 pb-14 text-caption outline-none bg-transparent text-(--text) placeholder:font-medium font-medium "
                             placeholder={placeholder + '|'}
                         />
-                        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2.5 bg-(--surface-raised) border-t border-(--accent-20)">
-                            <span className="text-small text-(--text-tertiary)">
+                        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2.5 bg-raised border-t border-accent-20">
+                            <span className="text-small text-tertiary">
                                 {prompt.length > 0 ? `${prompt.length} / 500 · ⌘Enter to generate` : 'Be descriptive for best results'}
                             </span>
                             <Button
@@ -313,7 +314,7 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
 
                 <div className="flex flex-wrap justify-center gap-8">
                     <div className="flex flex-col gap-2 items-center">
-                        <span className="text-tiny font-bold uppercase tracking-widest text-(--text-tertiary)">Style</span>
+                        <span className="text-tiny font-bold uppercase tracking-widest text-tertiary">Style</span>
                         <div className="flex gap-1.5">
                             {STYLES.map(({ label, icon: Icon }) => (
                                 <Pill key={label} active={style === label} onClick={() => setStyle(label)}>
@@ -323,7 +324,7 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                         </div>
                     </div>
                     <div className="flex flex-col gap-2 items-center">
-                        <span className="text-tiny font-bold uppercase tracking-widest text-(--text-tertiary)">Format</span>
+                        <span className="text-tiny font-bold uppercase tracking-widest text-tertiary">Format</span>
                         <div className="flex gap-1.5">
                             {RATIOS.map(({ label, icon: Icon, hint }) => (
                                 <Pill key={label} active={ratio === label} onClick={() => setRatio(label)}>
@@ -333,7 +334,7 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                         </div>
                     </div>
                     <div className="flex flex-col gap-2 items-center">
-                        <span className="text-tiny font-bold uppercase tracking-widest text-(--text-tertiary)">Duration</span>
+                        <span className="text-tiny font-bold uppercase tracking-widest text-tertiary">Duration</span>
                         <div className="flex gap-1.5">
                             {DURATIONS.map(d => <Pill key={d} active={duration === d} onClick={() => setDuration(d)}>{d}</Pill>)}
                         </div>
@@ -347,7 +348,7 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                                 <p className="text-caption font-bold text-(--text-secondary)">
                                     {generatedProject.name}
                                 </p>
-                                <p className="text-tiny text-(--text-tertiary)">
+                                <p className="text-tiny text-tertiary">
                                     {selectedScenes.size === 0
                                         ? 'Click clips to select them for your video'
                                         : `${selectedScenes.size} of ${generatedProject.scenes.length} clips selected · ${totalDuration}s total`}
@@ -382,8 +383,8 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                                 disabled={selectedScenes.size === 0}
                                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-caption font-bold transition-all duration-200 border ${
                                     selectedScenes.size > 0
-                                        ? 'bg-(--accent) text-[#020202] border-transparent shadow-accent-40 cursor-pointer'
-                                        : 'bg-(--surface-raised) text-(--text-tertiary) border-(--border-default) cursor-not-allowed'
+                                        ? 'bg-(--accent) text-[#020202] border-transparent glow-accent-40 cursor-pointer'
+                                        : 'bg-raised text-tertiary border-default cursor-not-allowed'
                                 }`}
                             >
                                 Open Editor <ArrowRight size={13} strokeWidth={2.5} />
@@ -401,10 +402,9 @@ export default function DashboardPage() {
 
     const [projects, setProjects] = useState<Project[]>([])
     const [projectsLoading, setProjectsLoading] = useState(true)
-    const [creatingProject, setCreatingProject] = useState(false)
+    const { createProject, creating } = useCreateProject()
 
     const fetchProjects = useCallback(() => {
-        setProjectsLoading(true)
         fetch('/api/projects')
             .then(r => r.json())
             .then((data: Array<{
@@ -434,41 +434,25 @@ export default function DashboardPage() {
             .finally(() => setProjectsLoading(false))
     }, [])
 
-    useEffect(() => { fetchProjects() }, [fetchProjects])
+    const refreshProjects = useCallback(() => {
+        setProjectsLoading(true)
+        fetchProjects()
+    }, [fetchProjects])
 
-    const handleNewProject = useCallback(async () => {
-        if (creatingProject) return
-        setCreatingProject(true)
-        try {
-            const res = await fetch('/api/projects', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: 'Untitled Project', style: 'Cinematic', aspectRatio: '16:9' }),
-            })
-            if (res.status === 401) { router.push('/auth/signin?callbackUrl=/dashboard'); return }
-            if (!res.ok) throw new Error('Failed')
-            const project = await res.json()
-            router.push(`/editor/${project.id}`)
-            fetchProjects()
-        } catch (err) {
-            console.error(err)
-        } finally {
-            setCreatingProject(false)
-        }
-    }, [creatingProject, router, fetchProjects])
+    useEffect(() => { fetchProjects() }, [fetchProjects])
 
     return (
         <div className="relative flex flex-col flex-1 min-h-0 overflow-auto p-2">
-            <div className="flex flex-col rounded-t-xl bg-(--surface-overlay) border border-(--accent-20) shadow-accent-40">
+            <div className="flex flex-col rounded-t-xl bg-overlay border border-accent-20 glow-accent-40">
 
-                <AIHero onProjectCreated={fetchProjects} />
+                <AIHero onProjectCreated={refreshProjects} />
 
                 <main className="flex-1 px-20 pb-12 flex flex-col gap-6">
                     <div className='pt-8'>
-                        <div className="flex items-end justify-between mb-6 pt-10 border-t border-(--accent-20)">
+                        <div className="flex items-end justify-between mb-6 pt-10 border-t border-accent-20">
                             <div className="flex flex-col">
                                 <h3 className="font-semibold text-(--text) leading-5">Recent Projects</h3>
-                                <span className="text-caption text-(--text-tertiary)">Pick up where you left off</span>
+                                <span className="text-caption text-tertiary">Pick up where you left off</span>
                             </div>
                             <div className="flex items-center gap-2 pt-6">
                                 <Button
@@ -481,13 +465,13 @@ export default function DashboardPage() {
                                 <Button
                                     size='sm'
                                     variant='primary'
-                                    onClick={handleNewProject}
-                                    disabled={creatingProject}
+                                    onClick={() => createProject()}
+                                    disabled={creating}
                                     className='flex items-center'
                                 >
-                                    {creatingProject
+                                    {creating
                                         ? <><Loader2 size={18} className="animate-spin inline-block mr-2" />Creating…</>
-                                        : <><FolderPlus size={18} strokeWidth={2.5} className='inline-block mr-2' />New Project</>}
+                                        : <><FolderPlus size={20} strokeWidth={2.5} className='inline-block mr-2 mb-0.5' />New Project</>}
                                 </Button>
                             </div>
                         </div>
@@ -497,20 +481,20 @@ export default function DashboardPage() {
                                 {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
                             </div>
                         ) : projects.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-14 gap-4 rounded-xl bg-(--surface-raised) border border-(--border-default)">
-                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-(--accent-8) border border-(--accent-22)">
-                                    <FolderOpen size={22} className="text-(--accent)" />
+                            <div className="flex flex-col items-center justify-center py-14 gap-4 rounded-xl bg-raised border border-default">
+                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-accent-8 border border-accent-22">
+                                    <FolderOpen size={22} className="text-accent" />
                                 </div>
                                 <div className="flex flex-col items-center gap-1 text-center">
                                     <span className="text-lead font-bold text-(--text-secondary)">
                                         No projects yet
                                     </span>
-                                    <span className="text-caption text-(--text-tertiary)">
+                                    <span className="text-caption text-tertiary">
                                         Generate with AI above or start a new blank project
                                     </span>
                                 </div>
                                 <Button
-                                    onClick={handleNewProject}
+                                    onClick={() => createProject()}
                                     size='md'
                                     variant='primary'
                                 >

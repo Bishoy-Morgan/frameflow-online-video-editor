@@ -377,7 +377,7 @@ export default function EditorPage() {
     if (loading) return (
         <div className="flex items-center justify-center h-dvh surface">
             <div className="flex flex-col items-center gap-3">
-                <Loader2 size={40} className="animate-spin text-(--accent)" />
+                <Loader2 size={40} className="animate-spin text-accent" />
                 <p className="text-body font-semibold text-tertiary">Loading editor…</p>
             </div>
         </div>
@@ -387,7 +387,7 @@ export default function EditorPage() {
         <div className="flex items-center justify-center h-dvh surface">
             <div className="flex flex-col items-center gap-3">
                 <p className="text-body font-bold text-(--text)">Project not found</p>
-                <Link href="/dashboard" className="flex items-center gap-3 text-caption text-(--accent)">
+                <Link href="/dashboard" className="flex items-center gap-3 text-caption text-accent">
                     <ArrowLeftFromLineIcon size={30} strokeWidth={2} className='text-(--text)'/>
                     Back to Dashboard
                 </Link>
@@ -417,7 +417,7 @@ export default function EditorPage() {
                         onToolClick={id => setActiveTool(prev => prev === id ? null : id)}
                     />
                     {activeTool && toolPanels[activeTool] && (
-                        <div className="absolute top-2 left-[calc(100%+0.5rem)] w-50 h-fit shrink-0 overflow-y-scroll scrollbar-hide bg-(--accent-40) rounded-xl shadow-lg">
+                        <div className="absolute top-2 left-[calc(100%+0.5rem)] w-50 h-fit shrink-0 overflow-y-scroll scrollbar-hide bg-accent-40 rounded-xl shadow-lg">
                             {toolPanels[activeTool]}
                         </div>
                     )}
@@ -441,8 +441,8 @@ export default function EditorPage() {
                             onClick={() => setRatioOpen(o => !o)}
                             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-caption font-semibold text-(--text) shadow transition-all duration-300 ease-out ${
                                 ratioOpen
-                                    ? 'bg-(--accent-40) border border-transparent'
-                                    : 'bg-(--surface-overlay) border border-(--accent-40)'
+                                    ? 'bg-accent-40 border border-transparent'
+                                    : 'bg-overlay border border-accent-40'
                             }`}
                         >
                             {React.createElement(
@@ -452,7 +452,7 @@ export default function EditorPage() {
                             {aspectRatio}
                         </button>
                         {ratioOpen && (
-                            <div className="absolute bottom-10 right-1/2 flex flex-col gap-2 p-2 rounded-xl bg-(--surface-overlay) shadow-accent-40 text-(--text)">
+                            <div className="absolute bottom-10 right-1/2 flex flex-col gap-2 p-2 rounded-xl bg-overlay glow-accent-40 text-(--text)">
                                 {RATIO_OPTIONS.map(({ label, icon: Icon, hint }) => (
                                     <button
                                         key={label}
@@ -472,7 +472,7 @@ export default function EditorPage() {
                 </div>
             </div>
 
-            <div className="shrink-0 w-full h-64 shadow-accent-40 p-2 rounded-xl m-2 mt-0">
+            <div className="shrink-0 w-full h-64 glow-accent-40 p-2 rounded-xl m-2 mt-0">
                 <SceneTimeline
                     scenes={project.scenes}
                     activeSceneId={activeSceneId}
@@ -505,11 +505,11 @@ export default function EditorPage() {
                     aiOpen ? 'bg-(--accent-16) scale-110' : 'bg-(--overlay)'
                 }`}
             >
-                {aiOpen ? <X size={20} strokeWidth={2} className="text-(--text)" /> : <Sparkles size={16} strokeWidth={2} className="text-(--accent)" />}
+                {aiOpen ? <X size={20} strokeWidth={2} className="text-(--text)" /> : <Sparkles size={16} strokeWidth={2} className="text-accent" />}
             </button>
 
             {aiOpen && (
-                <div className="absolute top-36 right-6 w-100 shadow-accent-40 rounded-xl overflow-hidden z-30">
+                <div className="absolute top-36 right-6 w-100 glow-accent-40 rounded-xl overflow-hidden z-30">
                     <AISidebar
                         projectId={projectId}
                         projectName={project.name}

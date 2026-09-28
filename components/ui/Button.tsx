@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import clsx from "clsx";
 import { ReactNode, ComponentPropsWithoutRef, useState } from "react";
 
-type Variant = "primary" | "secondary" | "ghost";
+type Variant = "primary" | "secondary" | "ghost" | "success" | "error";
 type Size    = "sm" | "md" | "lg";
 
 interface ButtonProps extends ComponentPropsWithoutRef<typeof motion.button> {
@@ -23,8 +23,8 @@ const sizes: Record<Size, string> = {
 };
 
 export default function Button({
-    variant  = "primary",
-    size     = "md",
+    variant = "primary",
+    size = "md",
     children,
     className,
     icon,
@@ -37,18 +37,24 @@ export default function Button({
         primary: "bg-accent border border-accent text-[--bg]",
         secondary: "bg-transparent border border-accent text-accent",
         ghost: "bg-transparent border border-transparent text-accent",
+        success: "bg-(--success-8) border border-(--success-35) text-(--success-fg)",
+        error: "bg-(--error-8) border border-(--error-35) text-(--error-fg)",
     };
 
     const overlayStyles: Record<Variant, string> = {
         primary: "bg-[var(--bg)]",
         secondary: "bg-accent",
         ghost: "bg-transparent",
+        success: "bg-(--success-16)",
+        error: "bg-(--error-16)",
     };
 
     const textColor: Record<Variant, { initial: string; hover: string }> = {
         primary: { initial: "var(--bg)", hover: "var(--accent)" },
         secondary: { initial: "var(--accent)", hover: "var(--bg)" },
         ghost: { initial: "var(--accent)",  hover: "var(--accent)"},
+        success: { initial: "var(--success-fg)", hover: "var(--success-fg)" },
+        error: { initial: "var(--error-fg)", hover: "var(--error-fg)" },
     }; 
 
     if (variant === "ghost") {

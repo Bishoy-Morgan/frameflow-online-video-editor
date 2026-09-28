@@ -135,7 +135,7 @@ const HomepageFeatures = () => {
                 >
                     <div className="flex items-center gap-3 mb-8 3xl:mb-12">
                         <div className="w-7 h-px bg-(--accent)" />
-                        <span className="text-caption font-bold tracking-[0.14em] uppercase text-(--accent-fg)">
+                        <span className="text-caption font-bold tracking-[0.14em] uppercase text-accent-fg">
                             Features
                         </span>
                     </div>
@@ -165,7 +165,7 @@ const HomepageFeatures = () => {
                                     {feature.title}
                                 </h3>
                                 {!feature.live && (
-                                    <span className="text-tiny font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md shrink-0 border border-(--border-default) bg-(--surface-raised) text-(--text-tertiary)">
+                                    <span className="text-tiny font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md shrink-0 border border-default bg-raised text-tertiary">
                                         Soon
                                     </span>
                                 )}
@@ -177,7 +177,7 @@ const HomepageFeatures = () => {
                     </AnimatePresence>
 
                     <div
-                        className="relative aspect-video overflow-hidden rounded-2xl w-4/5 mx-auto backdrop-blur-xl border border-(--border-default)"
+                        className="relative aspect-video overflow-hidden rounded-2xl w-4/5 mx-auto backdrop-blur-xl border border-default"
                         style={{
                             background: 'color-mix(in srgb, var(--surface-raised) 55%, transparent)',
                         }}

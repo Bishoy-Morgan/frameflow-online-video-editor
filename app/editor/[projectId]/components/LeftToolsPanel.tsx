@@ -31,7 +31,7 @@ interface LeftToolsPanelProps {
 export default function LeftToolsPanel({ activeTool, onToolClick }: LeftToolsPanelProps) {
   return (
     <div
-      className="flex w-full flex-col items-center shrink-0 overflow-x-hidden overflow-y-scroll scrollbar-hide shadow-accent-40 rounded-xl p-1.5 gap-y-1.5"
+      className="flex w-full flex-col items-center shrink-0 overflow-x-hidden overflow-y-scroll scrollbar-hide glow-accent-40 rounded-xl p-1.5 gap-y-1.5"
     >
       {TOOLS.map(({ id, icon: Icon, label }) => {
         const active = activeTool === id
@@ -45,7 +45,7 @@ export default function LeftToolsPanel({ activeTool, onToolClick }: LeftToolsPan
             <Icon
               size={24}
               strokeWidth={active ? 2.25 : 1.75}
-              className={`transition-all duration-150 ${active ? 'text-(--accent)' : 'text-(--tertiary)'}`}
+              className={`transition-all duration-150 ${active ? 'text-accent' : 'text-(--tertiary)'}`}
             />
             <div
               className="absolute top-0 bg-black left-full ml-2 w-4 h-4 rounded-lg text-caption font-semibold whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50 "

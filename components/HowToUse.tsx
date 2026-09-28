@@ -90,7 +90,7 @@ const HowToUse = () => {
                 <div ref={headerRef} className="max-w-135 mb-16">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-7 h-px bg-(--accent)" />
-                        <span className="text-caption font-bold tracking-[0.14em] uppercase text-(--accent-fg)">
+                        <span className="text-caption font-bold tracking-[0.14em] uppercase text-accent-fg">
                             How it works
                         </span>
                     </div>
@@ -118,7 +118,7 @@ const HowToUse = () => {
                                         <span
                                             className={`
                                                 text-hero shrink-0 pt-0.5 select-none transition-colors duration-200
-                                                ${active ? 'text-(--accent)' : 'text-(--text-ghost)'}
+                                                ${active ? 'text-accent' : 'text-(--text-ghost)'}
                                             `}
                                         >
                                             {step.tag}
@@ -128,7 +128,7 @@ const HowToUse = () => {
                                             <h4
                                                 className={`
                                                     font-semibold m-0 transition-colors duration-200
-                                                    ${active ? 'text-(--text)' : 'text-(--text-tertiary)'}    
+                                                    ${active ? 'text-(--text)' : 'text-tertiary'}    
                                                 `}
                                             >
                                                 {step.title}

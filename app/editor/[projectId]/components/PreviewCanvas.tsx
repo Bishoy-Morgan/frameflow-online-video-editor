@@ -148,11 +148,11 @@ const PreviewCanvas = forwardRef<PreviewCanvasHandle, PreviewCanvasProps>(
         const aspectClass = aspectClassMap[aspectRatio] ?? 'aspect-video'
 
         return (
-            <div className={`relative h-full overflow-hidden border border-transparent hover:border-(--accent-22) shadow-accent-22 hover:bg-(--accent-4) transition-all duration-300 ease-in-out ${aspectClass} ${videoUrl ? 'w-fit px-1.5' : 'w-full rounded-xl'}`}>
+            <div className={`relative h-full overflow-hidden border border-transparent hover:border-accent-22 glow-accent-22 hover:bg-(--accent-4) transition-all duration-300 ease-in-out ${aspectClass} ${videoUrl ? 'w-fit' : 'w-full rounded-xl'}`}>
                 {videoUrl ? (
                     <video
                         ref={videoRef}
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-cover"
                         onEnded={handleNativeEnded}
                         muted
                     />

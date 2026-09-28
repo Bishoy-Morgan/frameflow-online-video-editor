@@ -21,7 +21,7 @@ const AboutHero = () => {
             transition={{ duration: 0.65, ease: 'easeOut', delay: 0 }}
           >
             Editing video should feel{' '}
-            <span className="relative inline-block italic text-(--accent-fg)">
+            <span className="relative inline-block italic text-accent-fg">
               effortless
               <svg
                 aria-hidden
@@ -86,7 +86,7 @@ const AboutHero = () => {
             transition={{ duration: 0.65, ease: 'easeOut', delay: 0.38 }}
           >
             <div className="flex items-center gap-3 my-3 md:my-0">
-              <span className="text-4xl font-normal text-(--accent)">60</span>
+              <span className="text-4xl font-normal text-accent">60</span>
               <span className="text-body leading-5 text-(--text)">
                 frames
                 <br />
@@ -97,7 +97,7 @@ const AboutHero = () => {
             <span className="w-px h-8 bg-(--accent-fg) hidden md:block" />
 
             <div className="flex items-center gap-3 my-3 md:my-0">
-              <span className="text-4xl font-normal text-(--accent)">4K</span>
+              <span className="text-4xl font-normal text-accent">4K</span>
               <span className="text-body leading-5 text-(--text)">
                 export
                 <br />
@@ -108,7 +108,7 @@ const AboutHero = () => {
             <span className="w-px h-8 bg-(--accent-fg) hidden md:block" />
 
             <div className="flex items-center gap-3 my-3 md:my-0">
-              <span className="text-4xl font-normal text-(--accent)">0</span>
+              <span className="text-4xl font-normal text-accent">0</span>
               <span className="text-body leading-5 text-(--text)">
                 installs
                 <br />

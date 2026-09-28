@@ -47,6 +47,28 @@ export async function GET(req: Request) {
     return NextResponse.json(projects)
 }
 
+async function generateUniqueProjectName(userId: string, base = 'New Project') {
+    const existing = await prisma.project.findMany({
+        where: { userId, name: { startsWith: base } },
+        select: { name: true },
+    })
+
+    if (existing.length === 0) return base
+
+    const pattern = new RegExp(`^${base}(?: (\\d+))?$`)
+    let maxSuffix = 0
+    let baseTaken = false
+
+    for (const { name } of existing) {
+        const match = name.match(pattern)
+        if (!match) continue
+        if (!match[1]) baseTaken = true
+        else maxSuffix = Math.max(maxSuffix, parseInt(match[1], 10))
+    }
+
+    return (!baseTaken && maxSuffix === 0) ? base : `${base} ${maxSuffix + 1}`
+}
+
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -62,6 +84,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: result.error.flatten() }, { status: 400 })
     }
     const { name, style, aspectRatio, prompt, scenes } = result.data
+    const finalName = name?.trim() || await generateUniqueProjectName(session.user.id)
 
     const scenesData = Array.isArray(scenes) && scenes.length > 0
         ? {
@@ -87,7 +110,7 @@ export async function POST(req: Request) {
 
     const project = await prisma.project.create({
         data: {
-            name: name.trim(),
+            name: finalName,
             userId: session.user.id,
             style: style ?? null,
             aspectRatio: aspectRatio ?? null,

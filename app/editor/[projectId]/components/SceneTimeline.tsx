@@ -53,8 +53,8 @@ function formatTime(s: number) {
 function TrackLabel({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
   return (
     <div className="flex flex-col items-center justify-center shrink-0 h-full bg-(--accent-16) rounded-xl" style={{ width: GUTTER_WIDTH }}>
-      <Icon size={18} className="text-(--text-tertiary)" />
-      <span className="text-small font-semibold uppercase tracking-wide text-(--text-tertiary)">
+      <Icon size={18} className="text-tertiary" />
+      <span className="text-small font-semibold uppercase tracking-wide text-tertiary">
         {label}
       </span>
     </div>
@@ -76,7 +76,7 @@ function AudioTrackRow({
     <div className="relative" style={{ height: AUDIO_ROW_HEIGHT, width: trackWidth }}>
       {url ? (
         <div
-          className="absolute top-1 bottom-1 rounded-lg flex items-center gap-2 px-3 overflow-hidden group/audio bg-(--surface-raised) border border-(--border-default)"
+          className="absolute top-1 bottom-1 rounded-lg flex items-center gap-2 px-3 overflow-hidden group/audio bg-raised border border-default"
           style={{ left: TRACK_PADDING, right: TRACK_PADDING }}
         >
           <div className="w-1 h-full absolute left-0 top-0 rounded-l-lg" style={{ backgroundColor: color }} />
@@ -96,10 +96,10 @@ function AudioTrackRow({
       ) : (
         <button
           onClick={e => { e.stopPropagation(); onAdd?.() }}
-          className="absolute top-1 bottom-1 rounded-lg flex items-center justify-center gap-1.5 font-semibold text-caption border border-dashed transition-all duration-200 bg-(--surface-overlay) text-(--text) border-(--border-default) hover:border-(--accent) cursor-pointer min-w-40"
+          className="absolute top-1 bottom-1 rounded-lg flex items-center justify-center gap-1.5 font-semibold text-caption border border-dashed transition-all duration-200 bg-overlay text-(--text) border-default hover:border-accent cursor-pointer min-w-40"
           style={{ left: TRACK_PADDING, right: TRACK_PADDING }}
         >
-          <Plus size={16} strokeWidth={4} className="text-(--accent)" />
+          <Plus size={16} strokeWidth={4} className="text-accent" />
           Add {label.toLowerCase()}
         </button>
       )}
@@ -271,9 +271,9 @@ export default function SceneTimeline({
           <button
             onClick={onStop}
             title="Stop"
-            className="w-7 h-7 rounded-xl flex items-center justify-center transition-all bg-(--surface-overlay) hover:shadow-sm hover:shadow-black/50 cursor-pointer"
+            className="w-7 h-7 rounded-xl flex items-center justify-center transition-all bg-overlay hover:shadow-sm hover:shadow-black/50 cursor-pointer"
           >
-            <Square size={11} fill="currentColor" className="text-(--text-tertiary)" />
+            <Square size={11} fill="currentColor" className="text-tertiary" />
           </button>
 
           <button
@@ -294,9 +294,9 @@ export default function SceneTimeline({
         <div className="flex-1 flex items-center justify-end">
           <button
             onClick={onAddScene}
-            className="flex items-center gap-1.5 font-semibold px-3 py-1.5 rounded-xl text-caption border border-transparent transition-all duration-200 bg-(--surface-overlay) text-(--text) hover:border-(--accent) shadow-accent-40 cursor-pointer"
+            className="flex items-center gap-1.5 font-semibold px-3 py-1.5 rounded-xl text-caption border border-transparent transition-all duration-200 bg-overlay text-(--text) hover:border-accent glow-accent-40 cursor-pointer"
           >
-            <Plus size={18} strokeWidth={4} className="text-(--accent)" /> Add scene
+            <Plus size={18} strokeWidth={4} className="text-accent" /> Add scene
           </button>
         </div>
       </div>
@@ -328,7 +328,7 @@ export default function SceneTimeline({
                   className="absolute flex flex-col items-center pointer-events-none"
                   style={{ left: TRACK_PADDING + t * pxPerSec, bottom: 0, transform: 'translateX(-50%)' }}
                 >
-                  <span className="font-mono text-(--text-tertiary) opacity-60 mb-0.75 text-tiny">
+                  <span className="font-mono text-tertiary opacity-60 mb-0.75 text-tiny">
                     {t}s
                   </span>
                   <div className="w-px h-1 bg-(--border-default)" />
@@ -339,7 +339,7 @@ export default function SceneTimeline({
             <div className="relative" style={{ height: CLIP_HEIGHT }}>
               {display.length === 0 ? (
                 <div className="flex items-center justify-center w-full h-full pointer-events-none">
-                  <span className="text-(--text-tertiary) opacity-40 text-caption">
+                  <span className="text-tertiary opacity-40 text-caption">
                     No scenes yet — add your first scene above
                   </span>
                 </div>
@@ -357,8 +357,8 @@ export default function SceneTimeline({
                       <div
                         className={`absolute flex flex-col justify-between overflow-hidden rounded-xl transition-all duration-150 border ${
                           isActive
-                            ? 'bg-(--accent-40) border-(--accent-40)'
-                            : 'bg-(--accent-16) border-(--border-default)'
+                            ? 'bg-accent-40 border-accent-40'
+                            : 'bg-(--accent-16) border-default'
                         }`}
                         style={{ left: 0, right: HANDLE_WIDTH, top: 0, bottom: 0, cursor: 'grab' }}
                         onClick={e => { e.stopPropagation(); onSceneClick(scene, scene.startTime) }}
@@ -375,18 +375,18 @@ export default function SceneTimeline({
                           />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center opacity-[0.12]">
-                            <Film size={16} className="text-(--text-tertiary)" />
+                            <Film size={16} className="text-tertiary" />
                           </div>
                         )}
 
                         <div className="relative z-10 flex flex-col justify-between h-full p-2 pt-3">
                           <span
-                            className={`font-semibold truncate select-none text-small ${isActive ? 'text-(--accent)' : 'text-(--text)'}`}
+                            className={`font-semibold truncate select-none text-small ${isActive ? 'text-accent' : 'text-(--text)'}`}
                           >
                             {scene.title}
                           </span>
                           <div className="flex items-center justify-between">
-                            <span className="flex items-center gap-1 font-mono font-medium select-none text-(--text) text-small bg-(--surface-sunken) py-1 px-2 rounded-xl">
+                            <span className="flex items-center gap-1 font-mono font-medium select-none text-(--text) text-small bg-sunken py-1 px-2 rounded-xl">
                               <Clock size={10} />{scene.duration}s
                             </span>
                           </div>
@@ -441,7 +441,7 @@ export default function SceneTimeline({
                 onMouseDown={handlePlayheadMouseDown}
               >
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rotate-45 bg-(--accent) w-2.5 h-2.5 rounded-sm" />
-                <div className="absolute inset-0 shadow-accent-40" />
+                <div className="absolute inset-0 glow-accent-40" />
               </div>
             )}
           </div>

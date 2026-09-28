@@ -45,7 +45,7 @@ function NotificationItem({ notification, onRead }: {
 
     return (
         <div
-            className="flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors duration-150 relative hover:bg-(--surface-raised)"
+            className="flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors duration-150 relative hover:bg-raised"
             style={{ backgroundColor: notification.read ? 'transparent' : 'var(--surface-raised)' }}
             onClick={() => !notification.read && onRead(notification.id)}
         >
@@ -64,7 +64,7 @@ function NotificationItem({ notification, onRead }: {
                 <span className="text-caption font-bold text-(--text-secondary) leading-snug">
                     {config.label}
                 </span>
-                <span className="text-caption text-(--text-tertiary) leading-relaxed">
+                <span className="text-caption text-tertiary leading-relaxed">
                     {notification.message}
                 </span>
                 <span className="text-tiny font-medium mt-0.5 text-(--text-ghost)">
@@ -94,7 +94,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
             <button
                 onClick={() => setOpen(o => !o)}
                 className={`relative flex items-center justify-center cursor-pointer focus:outline-none transition-colors duration-150 ${
-                    open ? 'text-(--accent)' : 'text-(--text-tertiary) hover:text-(--accent)'
+                    open ? 'text-accent' : 'text-tertiary hover:text-accent'
                 }`}
             >
                 <Bell size={20} strokeWidth={1.75} fill={open ? '#00D9AA' : 'transparent'} />
@@ -111,14 +111,14 @@ export default function NotificationBell({ userId }: { userId: string }) {
 
             {open && (
                 <div
-                    className="absolute left-full bottom-1/4 ml-6 w-80 rounded-xl overflow-hidden z-80 flex flex-col bg-(--bg) border border-(--border-default) shadow-[0_16px_48px_rgba(0,0,0,0.12)]"
+                    className="absolute left-full bottom-1/4 ml-6 w-80 rounded-xl overflow-hidden z-80 flex flex-col bg-(--bg) border border-default shadow-[0_16px_48px_rgba(0,0,0,0.12)]"
                     style={{ maxHeight: '420px' }}
                 >
                     <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-(--border-subtle)">
                         <div className="flex items-center gap-2">
                             <span className="text-caption font-bold text-(--text-secondary)">Notifications</span>
                             {unreadCount > 0 && (
-                                <span className="text-tiny font-bold px-1.5 py-0.5 rounded-full bg-(--accent-8) text-(--accent) border border-(--accent-22)">
+                                <span className="text-tiny font-bold px-1.5 py-0.5 rounded-full bg-(--accent-8) text-accent border border-accent-22">
                                     {unreadCount} new
                                 </span>
                             )}
@@ -128,7 +128,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
                                 <button
                                     onClick={markAllAsRead}
                                     title="Mark all as read"
-                                    className="flex items-center gap-1 px-2 py-1 rounded-xl text-tiny font-bold cursor-pointer transition-colors duration-150 focus:outline-none bg-transparent border-none text-(--text-tertiary) hover:text-(--accent)"
+                                    className="flex items-center gap-1 px-2 py-1 rounded-xl text-tiny font-bold cursor-pointer transition-colors duration-150 focus:outline-none bg-transparent border-none text-tertiary hover:text-accent"
                                 >
                                     <CheckCheck size={13} strokeWidth={2} />
                                     All read
@@ -136,7 +136,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
                             )}
                             <button
                                 onClick={() => setOpen(false)}
-                                className="w-6 h-6 rounded-xl flex items-center justify-center cursor-pointer transition-colors duration-150 focus:outline-none bg-transparent border-none text-(--text-tertiary) hover:text-(--text)"
+                                className="w-6 h-6 rounded-xl flex items-center justify-center cursor-pointer transition-colors duration-150 focus:outline-none bg-transparent border-none text-tertiary hover:text-(--text)"
                             >
                                 <X size={16} strokeWidth={2} />
                             </button>
@@ -146,12 +146,12 @@ export default function NotificationBell({ userId }: { userId: string }) {
                     <div className="overflow-y-auto flex-1">
                         {loading ? (
                             <div className="flex items-center justify-center py-12">
-                                <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin text-(--text-tertiary)" />
+                                <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin text-tertiary" />
                             </div>
                         ) : notifications.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-12 gap-2">
                                 <Bell size={24} strokeWidth={1.25} className="text-(--text-ghost)" />
-                                <span className="text-caption font-semibold text-(--text-tertiary)">No notifications yet</span>
+                                <span className="text-caption font-semibold text-tertiary">No notifications yet</span>
                             </div>
                         ) : (
                             <div className="flex flex-col divide-y divide-(--border-subtle)">

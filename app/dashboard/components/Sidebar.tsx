@@ -52,7 +52,7 @@ export default function Sidebar() {
                 <Icon
                     size={22}
                     strokeWidth={active ? 2.25 : 1.75}
-                    className={`shrink-0 transition-all duration-150 ${active ? 'text-(--accent)' : 'text-(--text-tertiary)'}`}
+                    className={`shrink-0 transition-all duration-150 ${active ? 'text-accent' : 'text-tertiary'}`}
                 />
                 {expanded && (
                     <span
@@ -74,7 +74,7 @@ export default function Sidebar() {
 
     return (
         <aside
-            className="relative flex flex-col h-full shrink-0 overflow-visible bg-(--bg) shadow-accent-40 rounded-xl p-1.5 transition-[width] duration-300"
+            className="relative flex flex-col h-full shrink-0 overflow-visible bg-(--bg) glow-accent-40 rounded-xl p-1.5 transition-[width] duration-300"
             style={{ width: expanded ? '200px' : '60px' }}
         >
             <Link href="/dashboard" className="flex items-center h-16 px-1.5 shrink-0 overflow-hidden no-underline">
@@ -133,7 +133,7 @@ export default function Sidebar() {
 
             <button
                 onClick={() => setExpanded(e => !e)}
-                className="absolute -right-3 top-28 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer focus:outline-none z-20 bg-(--bg) shadow-accent-40 text-(--text-tertiary) hover:text-(--accent) transition-colors"
+                className="absolute -right-3 top-28 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer focus:outline-none z-20 bg-(--bg) glow-accent-40 text-tertiary hover:text-accent transition-colors"
             >
                 <ChevronRight
                     size={16}

@@ -24,7 +24,7 @@ function MenuRow({ icon: Icon, label, onClick, trailing }: {
 }) {
     const content = (
         <>
-            <Icon size={17} strokeWidth={1.75} className="shrink-0 text-(--text-tertiary)" />
+            <Icon size={17} strokeWidth={1.75} className="shrink-0 text-tertiary" />
             <span className="text-caption font-semibold flex-1 text-left">{label}</span>
             {trailing}
         </>
@@ -74,33 +74,33 @@ export default function AccountMenu({ expanded, displayName, email, image, initi
             >
                 {image
                     ? <Image src={image} alt={displayName} width={28} height={28} className="rounded-xl object-cover shrink-0" />
-                    : <div className="w-10 h-10 rounded-xl flex items-center justify-center text-hero font-bold shrink-0 bg-(--accent-10) text-(--accent)">
+                    : <div className="w-10 h-10 rounded-xl flex items-center justify-center text-hero font-bold shrink-0 bg-(--accent-10) text-accent">
                         {initials}
                     </div>}
                 {expanded && (
                     <div className="flex flex-col min-w-0 gap-0.5">
                         <span className="text-caption font-bold text-(--text-secondary) truncate leading-none whitespace-nowrap">{displayName}</span>
-                        <span className="text-tiny text-(--text-tertiary) font-medium leading-none whitespace-nowrap">{isAdmin ? 'Admin' : 'Free plan'}</span>
+                        <span className="text-tiny text-tertiary font-medium leading-none whitespace-nowrap">{isAdmin ? 'Admin' : 'Free plan'}</span>
                     </div>
                 )}
             </button>
 
             {open && (
-                <div className="absolute left-full bottom-0 ml-3 w-72 rounded-xl overflow-hidden z-80 flex flex-col bg-(--surface-overlay) border border-(--accent-10) shadow-accent-40">
+                <div className="absolute left-full bottom-0 ml-3 w-72 rounded-xl overflow-hidden z-80 flex flex-col bg-overlay border border-accent-10 glow-accent-40">
 
                     <div className="px-2 pt-3 pb-2">
-                        <span className="text-tiny font-bold uppercase tracking-wide text-(--text-tertiary) px-2">Account</span>
+                        <span className="text-tiny font-bold uppercase tracking-wide text-tertiary px-2">Account</span>
                     </div>
 
                     <div className="w-full flex items-center gap-3 px-4 py-2.5">
                         {image
                             ? <Image src={image} alt={displayName} width={36} height={36} className="rounded-xl object-cover shrink-0" />
-                            : <div className="w-9 h-9 rounded-xl flex items-center justify-center text-body font-bold shrink-0 bg-(--accent-10) text-(--accent)">
+                            : <div className="w-9 h-9 rounded-xl flex items-center justify-center text-body font-bold shrink-0 bg-(--accent-10) text-accent">
                                 {initials}
                             </div>}
                         <div className="flex flex-col min-w-0 flex-1 text-left">
                             <span className="text-caption font-bold text-(--text-secondary) truncate">{displayName}</span>
-                            <span className="text-tiny text-(--text-tertiary) font-medium truncate">{email}</span>
+                            <span className="text-tiny text-tertiary font-medium truncate">{email}</span>
                         </div>
                     </div>
 
@@ -116,7 +116,7 @@ export default function AccountMenu({ expanded, displayName, email, image, initi
                             <button
                                 onClick={e => { e.stopPropagation(); toggleTheme() }}
                                 aria-label="Toggle theme"
-                                className="relative flex items-center h-6 w-12 rounded-xl cursor-pointer focus:outline-none bg-(--surface-raised) border border-(--border-default)"
+                                className="relative flex items-center h-6 w-12 rounded-xl cursor-pointer focus:outline-none bg-raised border border-default"
                                 suppressHydrationWarning
                             >
                                 <div

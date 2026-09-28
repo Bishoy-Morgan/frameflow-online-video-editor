@@ -78,7 +78,7 @@ function AiChat({ projectName, prompt, scenes }: { projectName: string; prompt: 
         <div className="flex flex-col h-full min-h-0 ">
             <div className="flex-1 overflow-y-auto p-1 space-y-3 min-h-0">
                 {messages.map((msg, i) => (
-                    <div key={i} className={`flex flex-col gap-1 shadow-accent-22 p-1.5 min-h-40 rounded-xl ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                    <div key={i} className={`flex flex-col gap-1 glow-accent-22 p-1.5 min-h-40 rounded-xl ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                         <div className={`relative max-w-4/5 p-2.5 rounded-xl text-small pr-6 group ${
                             msg.role === 'user'
                                 ? 'bg-(accent-16) text-(--text)'
@@ -90,8 +90,8 @@ function AiChat({ projectName, prompt, scenes }: { projectName: string; prompt: 
                             {msg.role === 'assistant' && (
                                 <button
                                     onClick={() => { navigator.clipboard.writeText(msg.content); setCopied(i); setTimeout(() => setCopied(null), 2000) }}
-                                    className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded bg-transparent border-0 cursor-pointer text-(--ghost) hover:text-(--accent) hover:bg-(--accent-10)">
-                                    {copied === i ? <CheckCheck size={12} className="text-(--accent)" /> : <Copy size={12} />}
+                                    className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded bg-transparent border-0 cursor-pointer text-(--ghost) hover:text-accent hover:bg-(--accent-10)">
+                                    {copied === i ? <CheckCheck size={12} className="text-accent" /> : <Copy size={12} />}
                                 </button>
                             )}
                         </div>
@@ -110,14 +110,14 @@ function AiChat({ projectName, prompt, scenes }: { projectName: string; prompt: 
             <div className="px-3 py-2 flex gap-1.5 flex-wrap border-t border-subtle">
                 {['Improve scene descriptions', 'Suggest transitions', 'Write a hook'].map(q => (
                     <button key={q} onClick={() => setInput(q)}
-                        className="text-small font-semibold px-2.5 py-1 rounded-xl transition-colors bg-raised border border-default text-(--text) cursor-pointer hover:bg-(--accent-16) hover:border-(--accent-16) hover:shadow-md">
+                        className="text-small font-semibold px-2.5 py-1 rounded-xl transition-colors bg-raised border border-default text-(--text) cursor-pointer hover:bg-(--accent-16) hover:border-accent-16 hover:shadow-md">
                         {q}
                     </button>
                 ))}
             </div>
 
             <div className="px-3 pb-3 pt-2">
-                <div className="flex items-end gap-2 rounded-xl p-4 shadow-accent-22 border-(--accent-40)">
+                <div className="flex items-end gap-2 rounded-xl p-4 glow-accent-22 border-accent-40">
                     <textarea 
                     value={input} 
                     onChange={e => setInput(e.target.value)}
@@ -312,7 +312,7 @@ function ScriptToEdit({ projectId, onScenesUpdate }: { projectId: string; onScen
             </p>
             <textarea value={script} onChange={e => setScript(e.target.value.slice(0, 2000))} rows={6}
                 placeholder="Scene 1: Open with a close-up of the product on a dark surface…"
-                className="w-full resize-none text-caption rounded-xl p-3 outline-none shadow-accent-22"/>
+                className="w-full resize-none text-caption rounded-xl p-3 outline-none glow-accent-22"/>
             <div className="flex items-center justify-between">
                 <span className="text-small text-(--text)" >{script.length}/2000</span>
                 <Button
@@ -346,9 +346,9 @@ export default function AISidebar({
     return (
         <div className="flex flex-col h-full p-2 bg-(--bg)">
 
-            <div className="flex items-center gap-2 px-3 shrink-0 border-b border-(--accent) p-2 ">
+            <div className="flex items-center gap-2 px-3 shrink-0 border-b border-accent p-2 ">
                 <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0">
-                    <Sparkles size={18} className="text-(--accent)" />
+                    <Sparkles size={18} className="text-accent" />
                 </div>
                 <span className="text-caption font-semibold">
                     AI Assistant
@@ -365,10 +365,10 @@ export default function AISidebar({
                         >
                             <Icon 
                             size={22} 
-                            className={active ? 'text-(--accent)' : 'text-(--text-tertiary)'} strokeWidth={active ? 2 : 1.75} 
+                            className={active ? 'text-accent' : 'text-tertiary'} strokeWidth={active ? 2 : 1.75} 
                             />
                             <span 
-                            className={`text-tiny font-semibold ${active ? 'text-(--accent)' : 'text-(--text-tertiary)'}`}
+                            className={`text-tiny font-semibold ${active ? 'text-accent' : 'text-tertiary'}`}
                             >
                                 {label}
                             </span>
