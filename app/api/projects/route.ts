@@ -37,8 +37,10 @@ export async function GET(req: Request) {
                     description: true,
                     musicMood: true,
                     duration: true,
+                    sourceDuration: true,
                     order: true,
                     videoUrl: true,
+                    pexelsId: true,
                 },
             },
         },
@@ -93,6 +95,7 @@ export async function POST(req: Request) {
                 description: string
                 musicMood: string
                 duration: number
+                sourceDuration?: number | null
                 order: number
                 videoUrl?: string | null
                 pexelsId?: string | null
@@ -101,6 +104,7 @@ export async function POST(req: Request) {
                 description: s.description,
                 musicMood: s.musicMood,
                 duration: s.duration,
+                sourceDuration: s.sourceDuration ?? null,
                 order: s.order,
                 videoUrl: s.videoUrl ?? null,
                 pexelsId: s.pexelsId ?? null,

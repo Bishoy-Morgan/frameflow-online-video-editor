@@ -50,7 +50,7 @@ function NotificationItem({ notification, onRead }: {
             onClick={() => !notification.read && onRead(notification.id)}
         >
             {!notification.read && (
-                <div className="absolute right-4 top-4 w-1.5 h-1.5 rounded-full bg-(--accent) shadow-[0_0_4px_var(--accent)]" />
+                <div className="absolute right-4 top-4 w-1.5 h-1.5 rounded-full bg-accent " />
             )}
 
             <div
@@ -61,13 +61,13 @@ function NotificationItem({ notification, onRead }: {
             </div>
 
             <div className="flex flex-col gap-0.5 flex-1 min-w-0 pr-4">
-                <span className="text-caption font-bold text-(--text-secondary) leading-snug">
+                <span className="text-caption font-bold text-secondary leading-snug">
                     {config.label}
                 </span>
                 <span className="text-caption text-tertiary leading-relaxed">
                     {notification.message}
                 </span>
-                <span className="text-tiny font-medium mt-0.5 text-(--text-ghost)">
+                <span className="text-tiny font-medium mt-0.5 text-ghost">
                     {timeAgo(notification.createdAt)}
                 </span>
             </div>
@@ -93,16 +93,15 @@ export default function NotificationBell({ userId }: { userId: string }) {
 
             <button
                 onClick={() => setOpen(o => !o)}
-                className={`relative flex items-center justify-center cursor-pointer focus:outline-none transition-colors duration-150 ${
-                    open ? 'text-accent' : 'text-tertiary hover:text-accent'
+                className={`relative flex items-center justify-center cursor-pointer focus:outline-none transition-colors duration-300 ${
+                    open ? 'text-accent scale-110' : 'text-tertiary'
                 }`}
             >
-                <Bell size={20} strokeWidth={1.75} fill={open ? '#00D9AA' : 'transparent'} />
+                <Bell size={20} strokeWidth={2} fill={open ? '#00D9AA' : 'transparent'} />
 
                 {unreadCount > 0 && (
                     <span
-                        className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full flex items-center justify-center text-tiny font-bold px-1 bg-(--accent) shadow-[0_0_6px_var(--accent)]"
-                        style={{ color: '#020202' }}
+                        className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full flex items-center justify-center text-tiny font-bold px-1 bg-accent glow-accent"
                     >
                         {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
@@ -111,12 +110,11 @@ export default function NotificationBell({ userId }: { userId: string }) {
 
             {open && (
                 <div
-                    className="absolute left-full bottom-1/4 ml-6 w-80 rounded-xl overflow-hidden z-80 flex flex-col bg-(--bg) border border-default shadow-[0_16px_48px_rgba(0,0,0,0.12)]"
-                    style={{ maxHeight: '420px' }}
+                    className="absolute left-full bottom-1/4 ml-6 w-80 rounded-xl overflow-hidden z-80 flex flex-col bg-(--bg) border border-accent-20 max-h-105 glow-accent "
                 >
-                    <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-(--border-subtle)">
+                    <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-subtle">
                         <div className="flex items-center gap-2">
-                            <span className="text-caption font-bold text-(--text-secondary)">Notifications</span>
+                            <span className="text-caption font-bold text-secondary)">Notifications</span>
                             {unreadCount > 0 && (
                                 <span className="text-tiny font-bold px-1.5 py-0.5 rounded-full bg-(--accent-8) text-accent border border-accent-22">
                                     {unreadCount} new
@@ -136,9 +134,9 @@ export default function NotificationBell({ userId }: { userId: string }) {
                             )}
                             <button
                                 onClick={() => setOpen(false)}
-                                className="w-6 h-6 rounded-xl flex items-center justify-center cursor-pointer transition-colors duration-150 focus:outline-none bg-transparent border-none text-tertiary hover:text-(--text)"
+                                className="w-6 h-6 rounded-xl flex items-center justify-center cursor-pointer transition-all duration-200 focus:outline-none bg-transparent border-none hover:scale-110 text-subtle hover:text-black"
                             >
-                                <X size={16} strokeWidth={2} />
+                                <X size={18} strokeWidth={2} />
                             </button>
                         </div>
                     </div>
@@ -150,7 +148,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
                             </div>
                         ) : notifications.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-12 gap-2">
-                                <Bell size={24} strokeWidth={1.25} className="text-(--text-ghost)" />
+                                <Bell size={24} strokeWidth={1.25} className="text--ghost" />
                                 <span className="text-caption font-semibold text-tertiary">No notifications yet</span>
                             </div>
                         ) : (

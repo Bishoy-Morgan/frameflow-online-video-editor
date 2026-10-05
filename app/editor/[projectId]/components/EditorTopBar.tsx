@@ -2,12 +2,14 @@
 
 import React, { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { PenLine, House, Share2, Loader2, CheckCheck } from 'lucide-react'
+import { PenLine, Share2, Loader2, CheckCheck } from 'lucide-react'
 import { useUser } from '@/components/providers/UserContext'
 import Image from 'next/image'
 import Button from '@/components/ui/Button'
-import OperationNotice, { type OperationNoticeState } from '@/components/ui/OperationNotice'
+import OperationNotice from '@/components/ui/OperationNotice'
 import { projectNameSchema } from '@/lib/schemas'
+import home from '@/public/icons/home.svg'
+import { useNoticeQueue } from '@/hooks/useNoticeQueue'
 
 interface EditorTopBarProps {
   projectId: string
@@ -94,7 +96,7 @@ export default function EditorTopBar({
   const [name, setName] = useState(projectName)
   const [renaming, setRenaming] = useState(false)
   const [renameError, setRenameError] = useState<string | null>(null)
-  const [notice, setNotice] = useState<OperationNoticeState | null>(null)
+  const { notices, pushNotice, dismissNotice } = useNoticeQueue()
   const nameInputRef = useRef<HTMLInputElement>(null)
 
   const handleNameBlur = async () => {
@@ -102,7 +104,7 @@ export default function EditorTopBar({
     if (!validation.success) {
       const message = validation.error.issues[0]?.message ?? 'Invalid project name.'
       setRenameError(message)
-      setNotice({ type: 'error', message })
+      pushNotice({ type: 'error', message })
       requestAnimationFrame(() => nameInputRef.current?.focus())
       return
     }
@@ -134,11 +136,11 @@ export default function EditorTopBar({
       setName(trimmedName)
       setRenameError(null)
       setEditing(false)
-      setNotice({ type: 'success', message: 'Project name updated successfully.' })
+      pushNotice({ type: 'success', message: 'Project name updated successfully.' })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Could not save project name.'
       setRenameError(message)
-      setNotice({ type: 'error', message })
+      pushNotice({ type: 'error', message })
       requestAnimationFrame(() => nameInputRef.current?.focus())
     } finally {
       setRenaming(false)
@@ -152,10 +154,16 @@ export default function EditorTopBar({
     >
       <button
         onClick={() => router.push('/dashboard')}
-        title="Go to dashboard"
+        title="back to dashboard"
         className="cursor-pointer"
       >
-        <House size={26} strokeWidth={1.5} fill='var(--accent)' className="border-(--text) inline-block scale-90 hover:scale-105 transition-all duration-300 " />
+        <Image 
+        src={home}
+        alt='Home'
+        width={32}
+        height={32}
+        className='scale-90 hover:scale-105 transition-all duration-300 '
+        />
       </button>
 
       <div className="relative">
@@ -212,7 +220,7 @@ export default function EditorTopBar({
         </Button>
       </div>
     </div>
-    <OperationNotice notice={notice} onClose={() => setNotice(null)} />
+    <OperationNotice notices={notices} onDismiss={dismissNotice} />
     </>
   )
 }

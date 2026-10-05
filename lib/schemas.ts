@@ -6,6 +6,7 @@ const sceneSchema = z.object({
     description: z.string(),
     musicMood: z.string(),
     duration: z.number().nonnegative(),
+    sourceDuration: z.number().nonnegative().nullable().optional(),
     order: z.number().int().nonnegative(),
     videoUrl: z.string().nullable().optional(),
     pexelsId: z.string().nullable().optional(),
@@ -22,14 +23,16 @@ export const projectNameSchema = z.string()
     .regex(/[\p{L}\p{N}]/u, 'Project name must include at least one letter or number.')
 
 export const patchProjectSchema = z.object({
-    action: z.enum(['save', 'star', 'unstar', 'restore', 'update']).optional(),
+    action: z.enum(['save', 'update']).optional(),
     scenes: z.array(sceneSchema).optional(),
     name: projectNameSchema.optional(),
     starred: z.boolean().optional(),
     deletedAt: z.string().datetime().nullable().optional(),
     musicUrl: z.string().nullable().optional(),
+    musicVolume: z.number().min(0).max(1).optional(),
     musicSource: musicSourceSchema.nullable().optional(),
     voiceoverUrl: z.string().nullable().optional(),
+    voiceoverVolume: z.number().min(0).max(1).optional(),
     voiceoverSource: voiceoverSourceSchema.nullable().optional(),
 })
 

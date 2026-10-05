@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useTheme } from '@/hooks/useTheme'
 import { useSession } from 'next-auth/react'
 import type { Session } from 'next-auth'
-import { Moon, Sun, ChevronDown, ArrowLeftFromLine, User, X, Logs, LayoutDashboardIcon } from 'lucide-react'
+import { Sun, ChevronDown, ArrowLeftFromLine, User, X, Logs, LayoutDashboardIcon, Spotlight } from 'lucide-react'
 import Link from 'next/link'
 import Button from './ui/Button'
 import { useState, useRef, useEffect } from 'react'
@@ -35,7 +35,7 @@ function UserMenu({
     const [imageFailed, setImageFailed] = useState(false)
 
     const initials = name
-        ? name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+        ? name.split(' ').map(w => w[0]).slice(0, 1).join('').toUpperCase()
         : (email?.[0] ?? '?').toUpperCase()
 
     const displayName = name ?? email?.split('@')[0] ?? 'User'
@@ -68,7 +68,7 @@ function UserMenu({
                         onError={() => setImageFailed(true)}
                     />
                 ) : (
-                    <div className="p-1 rounded-lg text-accent! text-caption font-medium 3xl:text-lead bg-(--accent-10) border border-accent-22">
+                    <div className="w-7 h-7 flex justify-center items-center rounded-xl text-accent text-lead font-medium bg-accent-10 border border-accent-22">
                         {initials}
                     </div>
                 )}
@@ -98,7 +98,7 @@ function UserMenu({
                             variant="ghost"
                             size="sm"
                             icon={<User size={22} strokeWidth={1.5} />}
-                            onClick={() => { setOpen(false); router.push('/dashboard') }}
+                            onClick={() => { setOpen(false); router.push('/dashboard/account') }}
                         >
                             Profile
                         </Button>
@@ -167,8 +167,7 @@ function MobileMenu({
 
             {open && (
                 <div
-                    className="absolute right-0 top-full mt-2 w-60 rounded-2xl overflow-hidden z-50"
-                    style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border-default)', boxShadow: '0 16px 48px rgba(0,0,0,0.14)' }}
+                    className="absolute right-0 top-full mt-2 w-60 rounded-2xl overflow-hidden z-50 bg-(--bg) border border-default shadow  "
                 >
                     <ul className="flex flex-col m-0 p-2 list-none">
                         {links.map(link => {
@@ -195,27 +194,22 @@ function MobileMenu({
 
                         <button
                             onClick={toggleTheme}
-                            aria-label="Toggle theme"
-                            className="relative flex items-center h-8 w-18 rounded-xl cursor-pointer focus:outline-none"
-                            style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}
+                            aria-label={isDark ? 'Switch to daylight' : 'Turn on lamp'}
+                            className={`group relative flex h-8 w-8 items-center justify-center rounded-xl border border-default bg-raised/80 cursor-pointer transition-all focus:outline-none shadow ${
+                                isDark ? 'shadow-white/50' : 'shadow-black/10'
+                            }`}
                         >
-                            <div
-                                suppressHydrationWarning
-                                className={`absolute top-0.75 w-7 h-6 rounded-lg transition-all duration-300 ease-in-out border border-(--border-strong) shadow-sm ${isDark ? 'left-9.5 bg-(--accent-16)' : 'left-0.75'}`}
-                            />
+                            <span>
+                                {isDark ? (
+                                    <Spotlight size={18} strokeWidth={2} />
+                                ) : (
+                                    <Sun size={18} strokeWidth={2} />
+                                )}
+                            </span>
 
-                            <div className="relative w-full flex items-center justify-around">
-                                <Sun
-                                    size={16}
-                                    suppressHydrationWarning
-                                    className={`text-(--text) transition-opacity duration-200 ${isDark ? 'opacity-30' : 'opacity-100'}`}
-                                />
-                                <Moon
-                                    size={16}
-                                    suppressHydrationWarning
-                                    className={`text-(--text) transition-opacity duration-200 ${isDark ? 'opacity-100' : 'opacity-30'}`}
-                                />
-                            </div>
+                            <span className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2 translate-y-1 rounded-xl bg-(--bg) px-2.5 py-1.5 text-small whitespace-nowrap text-secondary opacity-0 shadow transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+                                {isDark ? 'Switch to daylight' : 'Turn on lamp'}
+                            </span>
                         </button>
                     </div>
 
@@ -289,10 +283,10 @@ const Navbar = () => {
         href === '/' ? pathname === '/' : pathname.startsWith(href)
 
     return (
-        <header className="fixed top-0 inset-x-0 z-50 flex justify-center pt-8 w-full pointer-events-none">
+        <header className="fixed top-0 inset-x-0 z-50 flex justify-center pt-4 w-full pointer-events-none">
             <nav
                 suppressHydrationWarning
-                className={`relative pointer-events-auto w-4/5 max-w-350 flex items-center justify-between px-5 py-3 3xl:px-8 3xl:py-4 rounded-2xl border border-default bg-(--bg) ${isDark ? 'shadow-accent ' : 'shadow-md'}`}
+                className={`relative pointer-events-auto w-4/5 max-w-350 flex items-center justify-between px-5 py-3 3xl:px-8 3xl:py-4 rounded-2xl border border-accent-16 bg-(--bg) glow-accent `}
             >
                 <div className="flex items-center gap-8">
                     <Link href="/" className="relative shrink-0 w-10 h-10">
@@ -304,7 +298,7 @@ const Navbar = () => {
                         />
                     </Link>
 
-                    <div className="hidden md:block w-px h-4 shrink-0" style={{ backgroundColor: 'var(--border-strong)' }} />
+                    <div className="hidden md:block w-px h-4 shrink-0 bg-(--border-strong) " />
 
                     <ul className="hidden md:flex items-center gap-0.5 m-0 p-0 list-none">
                         {links.map(link => {
@@ -328,27 +322,22 @@ const Navbar = () => {
                     <div className="hidden md:flex items-center gap-3">
                         <button
                             onClick={toggleTheme}
-                            aria-label="Toggle theme"
-                            className="relative flex items-center h-8 w-18 3xl:h-10 3xl:w-20 rounded-xl cursor-pointer focus:outline-none"
-                            style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-default)' }}
+                            aria-label={isDark ? 'Switch to daylight' : 'Turn on lamp'}
+                            className={`group relative flex h-8 w-8 3xl:h-12 3xl:w-12 items-center justify-center rounded-xl border border-default bg-raised/80 cursor-pointer transition-all focus:outline-none shadow ${
+                                isDark ? 'shadow-white/50' : 'shadow-black/10'
+                            } `}
                         >
-                            <div
-                                suppressHydrationWarning
-                                className={`absolute top-0.75 3xl:top-1 w-7 h-6 3xl:w-9 3xl:h-7.5 rounded-lg transition-all duration-300 ease-in-out border border-(--border-strong) shadow-sm ${isDark ? 'left-9.5 3xl:left-10 bg-(--accent-16)' : 'left-0.75 3xl:left-1'}`}
-                            />
+                            <span>
+                                {isDark ? (
+                                    <Spotlight size={18} strokeWidth={2} />
+                                ) : (
+                                    <Sun size={18} strokeWidth={2} />
+                                )}
+                            </span>
 
-                            <div className="relative w-full flex items-center justify-around">
-                                <Sun
-                                    size={16}
-                                    suppressHydrationWarning
-                                    className={`text-(--text) transition-opacity duration-200 ${isDark ? 'opacity-30' : 'opacity-100'}`}
-                                />
-                                <Moon
-                                    size={16}
-                                    suppressHydrationWarning
-                                    className={`text-(--text) transition-opacity duration-200 ${isDark ? 'opacity-100' : 'opacity-30'}`}
-                                />
-                            </div>
+                            <span className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2 translate-y-1 rounded-xl bg-(--bg) px-2.5 py-1.5 text-small whitespace-nowrap text-secondary opacity-0 shadow transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+                                {isDark ? 'Switch to daylight' : 'Turn on lamp'}
+                            </span>
                         </button>
 
                         {isLoading ? (
@@ -359,7 +348,7 @@ const Navbar = () => {
                                     variant="primary"
                                     size="sm"
                                     onClick={() => router.push('/dashboard')}
-                                    icon={<LayoutDashboardIcon size={22} strokeWidth={2}  />}
+                                    icon={<LayoutDashboardIcon size={22} strokeWidth={2} fill={ isDark ? 'black' : 'white' }  />}
                                 >
                                     Dashboard
                                 </Button>

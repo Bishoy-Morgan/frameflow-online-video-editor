@@ -6,43 +6,34 @@ import { signIn } from "next-auth/react";
 import { useTheme } from "@/hooks/useTheme";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, MoveLeft } from "lucide-react";
 import googleIcon from "@/public/icons/google.svg";
-import whiteLogo  from '@/public/whiteLogo.png';
-import blackLogo  from '@/public/blackLogo.png';
-import Button      from "@/components/ui/Button";
+import whiteLogo from "@/public/whiteLogo.png";
+import blackLogo from "@/public/blackLogo.png";
+import Button from "@/components/ui/Button";
 import SectionGrid from "@/components/ui/SectionGrid";
 
-const inputStyle: React.CSSProperties = {
-    width: '100%',
-    backgroundColor: 'var(--surface-raised)',
-    border: '1px solid var(--border-default)',
-    borderRadius: '0.625rem',
-    padding: '0.625rem 1rem',
-    fontSize: '0.875rem',
-    fontFamily: 'var(--font-quicksand), sans-serif',
-    fontWeight: 500,
-    color: 'var(--text)',
-    outline: 'none',
-    transition: 'border-color 0.2s ease',
-}
 
 export default function SignInPage() {
     const router = useRouter();
     const { isDark } = useTheme();
 
-    const [email,        setEmail]        = useState("");
-    const [password,     setPassword]     = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const [error,        setError]        = useState("");
-    const [loading,      setLoading]      = useState(false);
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setLoading(true);
         setError("");
 
-        const res = await signIn("credentials", { email, password, redirect: false });
+        const res = await signIn("credentials", {
+            email,
+            password,
+            redirect: false,
+        });
 
         if (res?.error) {
             setError("Invalid email or password.");
@@ -53,249 +44,230 @@ export default function SignInPage() {
     }
 
     return (
-        <div className="w-full flex h-svh surface">
+        <main className="relative min-h-svh w-full overflow-hidden">
+            <SectionGrid />
 
-            {/* ── Left — visual panel ── */}
-            <div className="hidden lg:flex relative w-1/2 h-full flex-col items-center justify-center overflow-hidden"
-                style={{ backgroundColor: 'var(--surface-sunken)' }}
-            >
-                <SectionGrid />
-
-                {/* Center glow */}
-                <div
-                    aria-hidden
-                    className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-125 h-125 rounded-full"
-                    style={{ background: 'radial-gradient(circle, var(--accent-10) 0%, transparent 65%)', filter: 'blur(60px)' }}
-                />
-
-                <div className="relative z-10 flex flex-col items-center text-center gap-8 px-12">
-                    <div className="flex flex-col items-center gap-3">
-                        <Image
-                            src={isDark ? whiteLogo : blackLogo}
-                            alt="Frameflow"
-                            width={56}
-                            height={56}
-                            priority
-                            suppressHydrationWarning
-                        />
-                        <span
-                            className="font-normal"
-                            style={{ fontFamily: 'var(--font-dm-serif-display), serif', fontSize: '2rem', color: 'var(--text)' }}
-                        >
-                            Frameflow
-                        </span>
-                    </div>
-
-                    <p className="m-0 text-base leading-relaxed text-tertiary" style={{ maxWidth: '300px' }}>
-                        Welcome back. Your projects are right where you left them.
-                    </p>
-
-                    <div className="flex flex-col gap-3 w-full max-w-70">
-                        {[
-                            { stat: '60fps',  label: 'Timeline playback'  },
-                            { stat: '4K',     label: 'Export quality'      },
-                            { stat: '< 2s',   label: 'Project load time'   },
-                        ].map(({ stat, label }) => (
-                            <div
-                                key={stat}
-                                className="flex items-center justify-between px-5 py-3 rounded-xl"
-                                style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border-default)' }}
-                            >
-                                <span
-                                    className="font-normal text-accent"
-                                    style={{ fontFamily: 'var(--font-dm-serif-display), serif', fontSize: '1.1rem' }}
-                                >
-                                    {stat}
-                                </span>
-                                <span className="text-xs font-semibold text-tertiary">{label}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="absolute bottom-8 left-0 right-0 flex justify-center">
-                    <span className="text-[0.65rem] font-medium tracking-widest uppercase text-tertiary">
-                        Browser Video Editor
-                    </span>
-                </div>
-            </div>
-
-            {/* ── Right — form panel ── */}
-            <div className="relative w-full lg:w-1/2 flex items-center justify-center h-full overflow-hidden">
-
-                <SectionGrid />
-
-                {/* Glows */}
-                <div
-                    aria-hidden
-                    className="pointer-events-none absolute -top-[20%] -right-[10%] w-100 h-100 rounded-full"
-                    style={{ background: 'radial-gradient(circle, var(--accent-8) 0%, transparent 70%)', filter: 'blur(60px)' }}
-                />
-                <div
-                    aria-hidden
-                    className="pointer-events-none absolute -bottom-[20%] -left-[10%] w-75 h-75 rounded-full"
-                    style={{ background: 'radial-gradient(circle, var(--accent-6) 0%, transparent 70%)', filter: 'blur(50px)' }}
-                />
-
-                {/* Form card */}
-                <div
-                    className="relative z-10 w-full max-w-105 mx-6 flex flex-col gap-6 p-8 rounded-2xl"
-                    style={{
-                        backgroundColor: 'var(--bg)',
-                        border: '1px solid var(--border-default)',
-                        boxShadow: '0 8px 40px rgba(0,0,0,0.08)',
-                    }}
+            <header className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-6 md:px-10">
+                <Link
+                    href="/"
+                    className="flex items-center gap-2.5 cursor-default"
                 >
-                    {/* Logo + brand */}
-                    <div className="flex flex-col gap-3">
-                        <Link href="/" style={{ textDecoration: 'none' }} className="flex items-center gap-2.5">
-                            <Image
-                                src={isDark ? whiteLogo : blackLogo}
-                                alt="Frameflow"
-                                width={28}
-                                height={28}
-                                priority
-                                suppressHydrationWarning
-                            />
-                            <span
-                                className="font-normal"
-                                style={{ fontFamily: 'var(--font-dm-serif-display), serif', fontSize: '1.1rem', color: 'var(--text)' }}
-                            >
-                                Frameflow
-                            </span>
-                        </Link>
-                        <div>
-                            <h2 className="font-normal m-0" style={{ fontSize: 'clamp(1.4rem, 2.5vw, 1.85rem)', lineHeight: 1.15 }}>
-                                Welcome back.
-                            </h2>
-                            <p className="m-0 mt-1 text-sm text-tertiary">
-                                Sign in to continue editing.
-                            </p>
-                        </div>
-                    </div>
+                    <Image
+                        src={isDark ? whiteLogo : blackLogo}
+                        alt="Frameflow"
+                        width={36}
+                        height={36}
+                        priority
+                        suppressHydrationWarning
+                    />
 
-                    {/* Google */}
-                    <button
-                        type="button"
-                        onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-                        disabled={loading}
-                        className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl cursor-pointer transition-all duration-200 focus:outline-none"
-                        style={{
-                            backgroundColor: 'var(--surface-raised)',
-                            border: '1px solid var(--border-default)',
-                            color: 'var(--text-secondary)',
-                            fontSize: '0.875rem',
-                            fontFamily: 'var(--font-quicksand), sans-serif',
-                            fontWeight: 600,
-                        }}
-                        onMouseEnter={e => {
-                            e.currentTarget.style.borderColor = 'var(--border-strong)'
-                            e.currentTarget.style.backgroundColor = 'var(--surface-sunken)'
-                        }}
-                        onMouseLeave={e => {
-                            e.currentTarget.style.borderColor = 'var(--border-default)'
-                            e.currentTarget.style.backgroundColor = 'var(--surface-raised)'
-                        }}
-                    >
-                        <Image src={googleIcon} alt="Google" width={18} height={18} />
-                        Continue with Google
-                    </button>
+                    <h4 className="text-(--text) m-0" >
+                        Frameflow
+                    </h4>
+                </Link>
 
-                    {/* Divider */}
-                    <div className="flex items-center gap-3">
-                        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-default)' }} />
-                        <span className="text-xs font-semibold text-tertiary">or</span>
-                        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-default)' }} />
-                    </div>
+                <Link
+                    href="/"
+                    className="group/btn flex items-center gap-2 text-small font-semibold text-subtle hover:text-black transition-all duration-150"
+                >
+                    <MoveLeft size={18} strokeWidth={2} className="text-subtle group-hover/btn:text-black group-hover/btn:-translate-x-2 transition-all duration-150" />
+                    Back to home
+                </Link>
+            </header>
 
-                    {/* Error */}
-                    {error && (
-                        <p
-                            className="m-0 text-xs font-semibold px-4 py-2.5 rounded-lg"
-                            style={{
-                                color: '#ef4444',
-                                backgroundColor: 'rgba(239,68,68,0.08)',
-                                border: '1px solid rgba(239,68,68,0.2)',
-                            }}
-                        >
-                            {error}
+            <div className="relative z-10 flex min-h-[calc(100svh-82px)] items-center justify-center px-6 pb-12 pt-8">
+                <div className="w-full max-w-105 ">
+
+                    <div className="mb-8 text-center">
+                        <span className="text-small font-medium uppercase tracking-[0.18em] text-accent">
+                            Welcome back
+                        </span>
+
+                        <h1 className="mt-4 tracking-tight text-main">
+                            Continue creating.
+                        </h1>
+
+                        <p className="mx-auto mt-3 max-w-sm text-caption">
+                            Your projects are right where you left them.
                         </p>
-                    )}
+                    </div>
 
-                    {/* Fields */}
-                    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+                    <div className="relative overflow-hidden rounded-xl p-6 sm:p-8 border border-accent-22 glow-accent-22 bg-(--bg)" >
 
-                        <input
-                            type="email"
-                            placeholder="Email address"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                            required
-                            style={inputStyle}
-                            onFocus={e => e.currentTarget.style.borderColor = 'var(--accent-42)'}
-                            onBlur={e  => e.currentTarget.style.borderColor = 'var(--border-default)'}
-                        />
-
-                        <div className="relative">
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                placeholder="Password"
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                                required
-                                style={{ ...inputStyle, paddingRight: '2.75rem' }}
-                                onFocus={e => e.currentTarget.style.borderColor = 'var(--accent-42)'}
-                                onBlur={e  => e.currentTarget.style.borderColor = 'var(--border-default)'}
-                            />
                             <button
                                 type="button"
-                                onClick={() => setShowPassword(p => !p)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 focus:outline-none cursor-pointer transition-colors duration-150"
-                                style={{ color: 'var(--text-subtle)', background: 'none', border: 'none', padding: 0 }}
-                                onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
-                                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-subtle)'}
+                                onClick={() =>
+                                    signIn("google", {
+                                        callbackUrl: "/dashboard",
+                                    })
+                                }
+                                disabled={loading}
+                                className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-default bg-raised px-4 py-2.5 text-caption font-semibold text-secondary transition-all duration-150 hover:border-(--accent) hover: shadow-xs hover:shadow-[#00E6BB] focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                <Image
+                                    src={googleIcon}
+                                    alt="Google"
+                                    width={18}
+                                    height={18}
+                                />
+                                Continue with Google
                             </button>
-                        </div>
 
-                        {/* Forgot password */}
-                        <div className="flex justify-end -mt-1">
-                            <Link
-                                href="/auth/forgot-password"
-                                className="text-xs font-semibold text-tertiary transition-colors duration-150"
-                                style={{ textDecoration: 'none' }}
-                                onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
-                                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}
+                            <div className="my-6 flex items-center gap-3 ">
+                                <div className="h-px flex-1 bg-accent" />
+
+                                <span className="text-small font-semibold text-tertiary">
+                                    or
+                                </span>
+
+                                <div className="h-px flex-1 bg-accent" />
+                            </div>
+
+                            {error && (
+                                <p className="mb-4 rounded-xl px-4 py-2.5 text-caption font-semibold text-white bg-error ">
+                                    {error}
+                                </p>
+                            )}
+
+                            <form
+                                onSubmit={handleSubmit}
+                                className="flex flex-col gap-4"
                             >
-                                Forgot password?
-                            </Link>
+                                <div>
+                                    <label className="mb-2 block text-small font-semibold text-tertiary">
+                                        Email
+                                    </label>
+
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        placeholder="you@example.com"
+                                        value={email}
+                                        onChange={(e) =>
+                                            setEmail(e.target.value)
+                                        }
+                                        required
+                                        className="w-full rounded-xl border border-default bg-raised px-4 py-2.5 text-caption font-medium text-(--text) outline-none transition-all duration-150 placeholder:text-(--text-subtle) focus:border-(--accent) focus:shadow-lg "
+                                    />
+                                </div>
+
+                                <div>
+                                    <div className="mb-2 flex items-center justify-between">
+                                        <label className="text-small font-semibold text-tertiary">
+                                            Password
+                                        </label>
+
+                                        <Link
+                                            href="/auth/forgot-password"
+                                            className="text-small font-semibold text-tertiary transition-colors duration-150 hover:text-(--text)"
+                                        >
+                                            Forgot password?
+                                        </Link>
+                                    </div>
+
+                                    <div className="relative">
+                                        <input
+                                            id="password"
+                                            type={
+                                                showPassword
+                                                    ? "text"
+                                                    : "password"
+                                            }
+                                            placeholder="Enter your password"
+                                            value={password}
+                                            onChange={(e) =>
+                                                setPassword(e.target.value)
+                                            }
+                                            required
+                                            className="w-full rounded-xl border border-default bg-raised px-4 py-2.5 text-caption font-medium text-(--text) outline-none transition-all duration-150 placeholder:text-(--text-subtle) focus:border-(--accent) focus:shadow-lg "
+                                        />
+
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setShowPassword(
+                                                    (p) => !p
+                                                )
+                                            }
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer transition-colors duration-150 focus:outline-none text-subtle"
+                                            onMouseEnter={(e) =>
+                                                (e.currentTarget.style.color =
+                                                    "var(--text)")
+                                            }
+                                            onMouseLeave={(e) =>
+                                                (e.currentTarget.style.color =
+                                                    "var(--text-subtle)")
+                                            }
+                                        >
+                                            {showPassword ? (
+                                                <EyeOff size={18} />
+                                            ) : (
+                                                <Eye size={18} />
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <Button
+                                    variant="primary"
+                                    type="submit"
+                                    disabled={loading}
+                                    className="mt-1 w-full justify-center"
+                                >
+                                    {loading ? (
+                                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                    ) : (
+                                        "Sign in"
+                                    )}
+                                </Button>
+                            </form>
+
+                            <p className="mt-6 text-center text-small text-tertiary">
+                                Don&apos;t have an account?{" "}
+                                <Link
+                                    href="/auth/signup"
+                                    className="font-semibold text-accent"
+                                    style={{
+                                        textDecoration: "none",
+                                    }}
+                                >
+                                    Sign up free
+                                </Link>
+                            </p>
+                    </div>
+
+                    <div className="mt-10">
+                        <div className="flex items-center gap-3">
+                            <span className="text-tiny font-medium uppercase tracking-[0.16em] text-tertiary">
+                                Timeline
+                            </span>
+
+                            <div
+                                className="relative h-px flex-1 overflow-hidden bg-(--border-default)"
+                            >
+                                <div
+                                    className="absolute left-[34%] top-1/2 h-2.5 w-px -translate-y-1/2 bg-accent"
+                                />
+                            </div>
+
+                            <span className="text-tiny font-medium text-tertiary">
+                                00:18
+                            </span>
                         </div>
 
-                        <Button
-                            variant="primary"
-                            type="submit"
-                            disabled={loading}
-                            className="w-full justify-center"
-                        >
-                            {loading
-                                ? <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />
-                                : 'Sign in'
-                            }
-                        </Button>
-                    </form>
+                        <div className="mt-2 flex gap-1.5">
+                            <div className="h-1.5 w-[18%] rounded-full bg-accent-40"/>
+                            <div className="h-1.5 w-[27%] rounded-full bg-(--border-strong)"/>
+                            <div className="h-1.5 w-[12%] rounded-full bg-accent-16"/>
+                            <div className="h-1.5 flex-1 rounded-full bg-(--border-default)"/>
+                        </div>
+                    </div>
 
-                    {/* Sign up */}
-                    <p className="m-0 text-sm text-center text-tertiary">
-                        Don&apos;t have an account?{' '}
-                        <Link href="/auth/signup" className="font-semibold text-accent" style={{ textDecoration: 'none' }}>
-                            Sign up free
-                        </Link>
+                    <p className="mt-6 text-center text-small font-medium uppercase tracking-[0.16em] text-tertiary">
+                        Browser-based video editor
                     </p>
-
                 </div>
             </div>
-
-        </div>
+        </main>
     );
 }

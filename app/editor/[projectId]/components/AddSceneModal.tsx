@@ -20,6 +20,7 @@ interface Scene {
     order: number
     videoUrl: string | null
     pexelsId: string | null
+    sourceDuration?: number | null
 }
 
 interface PexelsVideo {
@@ -131,6 +132,7 @@ function UploadTab({
                 description: '',
                 musicMood: mood,
                 duration,
+                sourceDuration: duration,
                 order: sceneOrder,
                 videoUrl: data.url,
                 pexelsId: null,
@@ -386,6 +388,7 @@ function PexelsTab({
             description: '',
             musicMood: 'Cinematic',
             duration: selected.duration,
+            sourceDuration: selected.duration,
             order: sceneOrder,
             videoUrl: selected.videoUrl,
             pexelsId: String(selected.id),
@@ -497,7 +500,7 @@ function PexelsTab({
             {!loading && videos.length > 0 && (
                 <div
                     className="grid grid-cols-4 gap-4 overflow-y-auto flex-1 min-h-0 pr-1 auto-rows-[256px]"
-                    style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--accent-fg) transparent' }}
+                    style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--accent-35) transparent' }}
                 >
                     {videos.map(v => (
                         <PexelsVideoCard

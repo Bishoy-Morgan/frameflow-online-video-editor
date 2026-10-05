@@ -109,7 +109,7 @@ export default function DashboardCard({ project, onRename, onDuplicate, onToggle
         onClick={() => !isTrashed && router.push(`/editor/${project.id}`)}
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => { setHovering(false); setRailOpen(false) }}
-        className={`group relative flex flex-col rounded-xl overflow-visible transition-all duration-300 ring-1 ring-(--border-default) hover:ring-(--accent-42) hover:-translate-y-0.5 hover:shadow-xl  ${
+        className={`group relative flex flex-col rounded-xl overflow-visible transition-all duration-500 ease-in-out ring-1 ring-(--border-default) hover:ring-3 hover:ring-(--accent-42) hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/50  ${
             isTrashed ? 'cursor-default' : 'cursor-pointer'
         }`}
     >

@@ -10,6 +10,7 @@ import DashboardCard, { Project as CardProject } from '../components/DashboardCa
 import Button from '@/components/ui/Button'
 import OperationNotice, { type OperationNoticeState } from '@/components/ui/OperationNotice'
 import { projectNameSchema } from '@/lib/schemas'
+import { useNoticeQueue } from '@/hooks/useNoticeQueue'
 
 interface Scene {
     id: string
@@ -269,7 +270,7 @@ export default function ProjectsPage() {
     const [sortOpen, setSortOpen] = useState(false)
     const [renaming, setRenaming] = useState<Project | null>(null)
     const [deletingPermanently, setDeletingPermanently] = useState<Project | null>(null)
-    const [notice, setNotice] = useState<OperationNoticeState | null>(null)
+    const { notices, pushNotice, dismissNotice } = useNoticeQueue()
     const { createProject, creating } = useCreateProject()
 
     const fetchProjects = useCallback(async () => {
@@ -340,7 +341,7 @@ export default function ProjectsPage() {
 
         setProjects(ps => ps.map(p => p.id === project.id ? { ...p, name: trimmedName } : p))
         setRenaming(null)
-        setNotice({ type: 'success', message: 'Project name updated successfully.' })
+        pushNotice({ type: 'success', message: 'Project name updated successfully.' })
     }
 
 const handleDuplicate = async (project: Project) => {
@@ -398,13 +399,13 @@ const handleDuplicate = async (project: Project) => {
             if (!res.ok) {
                 const response = await res.json().catch(() => null)
                 const message = response?.error ?? `Could not delete project (HTTP ${res.status}).`
-                setNotice({ type: 'error', message })
+                pushNotice({ type: 'error', message })
                 return
             }
             setProjects(ps => ps.filter(p => p.id !== project.id))
-            setNotice({ type: 'success', message: 'Project permanently deleted.' })
+            pushNotice({ type: 'success', message: 'Project permanently deleted.' })
         } catch {
-            setNotice({ type: 'error', message: 'Could not delete project. Please try again.' })
+            pushNotice({ type: 'error', message: 'Could not delete project. Please try again.' })
         } finally {
             setDeletingPermanently(null)
         }
@@ -418,7 +419,7 @@ const handleDuplicate = async (project: Project) => {
 
     return (
         <div className="relative flex flex-col flex-1 min-h-0 overflow-auto p-2 ">
-            <div className="flex flex-col rounded-xl overflow-hidden bg-overlay border border-default glow-accent-22">
+            <div className="flex flex-col rounded-xl overflow-hidden bg-(--bg) border border-accent-10 glow-accent-22">
 
                 <div className="flex flex-col gap-4 px-10 pt-8 ">
                     <div className="flex items-end justify-between flex-wrap gap-4">
@@ -520,12 +521,6 @@ const handleDuplicate = async (project: Project) => {
                                                 : 'Deleted projects will appear here'}
                                 </span>
                             </div>
-                            {filter === 'all' && !search && (
-                                <Button size="sm" variant="primary" onClick={() => createProject()} disabled={creating}>
-                                    <FolderPlus size={13} strokeWidth={2.5} className="inline-block mr-2" />
-                                    New Project
-                                </Button>
-                            )}
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pt-10">
@@ -558,7 +553,7 @@ const handleDuplicate = async (project: Project) => {
                     project={renaming}
                     onSave={name => handleRename(renaming, name)}
                     onClose={() => setRenaming(null)}
-                    onNotice={setNotice}
+                    onNotice={pushNotice}
                 />
             )}
 
@@ -569,7 +564,7 @@ const handleDuplicate = async (project: Project) => {
                     onClose={() => setDeletingPermanently(null)}
                 />
             )}
-            <OperationNotice notice={notice} onClose={() => setNotice(null)} />
+            <OperationNotice notices={notices} onDismiss={dismissNotice} />
         </div>
     )
 }

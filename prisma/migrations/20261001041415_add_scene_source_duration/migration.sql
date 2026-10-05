@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Scene" ADD COLUMN     "sourceDuration" DOUBLE PRECISION,
+ALTER COLUMN "duration" SET DATA TYPE DOUBLE PRECISION;

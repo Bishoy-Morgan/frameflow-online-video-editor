@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
-import { Loader2, Monitor, Smartphone, Square, Sparkles, X, ArrowLeftFromLineIcon } from 'lucide-react'
+import { Loader2, Monitor, Smartphone, Square, Sparkles, X, MoveLeft } from 'lucide-react'
 import Link from 'next/link'
 
 import EditorTopBar from './components/EditorTopBar'
@@ -12,7 +12,10 @@ import LeftToolsPanel, { type ToolId } from './components/LeftToolsPanel'
 import AISidebar from './components/AISidebar'
 import AddSceneModal from './components/AddSceneModal'
 import SharePanel from './components/SharePanel'
+import OperationNotice from '@/components/ui/OperationNotice'
 import { useFileUpload } from '@/hooks/useFileUpload'
+import { useAudioTrack } from '@/hooks/useAudioTrack'
+import { useNoticeQueue } from '@/hooks/useNoticeQueue'
 
 interface Scene {
     id: string
@@ -20,6 +23,7 @@ interface Scene {
     description: string
     musicMood: string
     duration: number
+    sourceDuration?: number | null
     order: number
     videoUrl?: string | null
     pexelsId?: string | null
@@ -33,8 +37,10 @@ interface Project {
     style: string | null
     aspectRatio: string | null
     musicUrl: string | null
+    musicVolume: number | null
     musicSource: string | null
     voiceoverUrl: string | null
+    voiceoverVolume: number | null
     voiceoverSource: string | null
     scenes: Scene[]
     _count: { assets: number; timelines: number; renders: number }
@@ -76,6 +82,7 @@ export default function EditorPage() {
     const [playing, setPlaying] = useState(false)
     const [addSceneOpen, setAddSceneOpen] = useState(false)
     const [shareOpen, setShareOpen] = useState(false)
+    const { notices, pushNotice, dismissNotice } = useNoticeQueue()
 
     const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
     const canvasRef = useRef<PreviewCanvasHandle>(null)
@@ -228,7 +235,6 @@ export default function EditorPage() {
     }, [])
 
     const persistScenes = useCallback((scenes: Scene[]) => {
-        console.trace('persistScenes called', scenes)
         if (JSON.stringify(scenes) === initialScenesRef.current) return
 
         if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
@@ -319,15 +325,44 @@ export default function EditorPage() {
     ) => {
         setProject(p => p ? { ...p, [field]: url, [sourceField]: source } : p)
         try {
-            await fetch(`/api/projects/${projectId}`, {
+            const res = await fetch(`/api/projects/${projectId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'update', [field]: url, [sourceField]: source }),
             })
+            if (!res.ok) {
+                pushNotice({ type: 'error', message: 'Could not save audio changes. Please try again.' })
+                return
+            }
+            pushNotice({
+                type: 'success',
+                message: url ? `${field === 'musicUrl' ? 'Music' : 'Voiceover'} added.` : `${field === 'musicUrl' ? 'Music' : 'Voiceover'} removed.`,
+            })
         } catch (err) {
             console.error('Failed to save audio field:', err)
+            pushNotice({ type: 'error', message: 'Could not save audio changes. Please try again.' })
         }
-    }, [projectId])
+    }, [projectId, pushNotice])
+
+    const patchAudioVolume = useCallback(async (
+        field: 'musicVolume' | 'voiceoverVolume',
+        volume: number,
+    ) => {
+        setProject(p => p ? { ...p, [field]: volume } : p)
+        try {
+            const res = await fetch(`/api/projects/${projectId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'update', [field]: volume }),
+            })
+            if (!res.ok) {
+                pushNotice({ type: 'error', message: 'Could not save volume. Please try again.' })
+            }
+        } catch (err) {
+            console.error('Failed to save volume:', err)
+            pushNotice({ type: 'error', message: 'Could not save volume. Please try again.' })
+        }
+    }, [projectId, pushNotice])
 
     const musicUpload = useFileUpload({
         accept: 'audio/*',
@@ -354,6 +389,17 @@ export default function EditorPage() {
     const handleRemoveVoiceover = useCallback(() => {
         patchProjectAudio('voiceoverUrl', null, 'voiceoverSource', null)
     }, [patchProjectAudio])
+
+    useEffect(() => {
+        if (musicUpload.error) pushNotice({ type: 'error', message: musicUpload.error })
+    }, [musicUpload.error, pushNotice])
+
+    useEffect(() => {
+        if (voiceoverUpload.error) pushNotice({ type: 'error', message: voiceoverUpload.error })
+    }, [voiceoverUpload.error, pushNotice])
+
+    useAudioTrack(project?.musicUrl ?? null, playing, globalTime, project?.musicVolume ?? 0.5)
+    useAudioTrack(project?.voiceoverUrl ?? null, playing, globalTime, project?.voiceoverVolume ?? 1.0)
 
     const toolPanels: Partial<Record<ToolId, React.ReactNode>> = {
         text: (
@@ -386,9 +432,9 @@ export default function EditorPage() {
     if (error || !project) return (
         <div className="flex items-center justify-center h-dvh surface">
             <div className="flex flex-col items-center gap-3">
-                <p className="text-body font-bold text-(--text)">Project not found</p>
-                <Link href="/dashboard" className="flex items-center gap-3 text-caption text-accent">
-                    <ArrowLeftFromLineIcon size={30} strokeWidth={2} className='text-(--text)'/>
+                <p className="text-hero font-semibold text-(--text)">Project not found</p>
+                <Link href="/dashboard" className="flex items-center font-medium gap-3 text-body text-accent">
+                    <MoveLeft size={30} strokeWidth={2} className='text-(--text)'/>
                     Back to Dashboard
                 </Link>
             </div>
@@ -427,9 +473,12 @@ export default function EditorPage() {
                     <PreviewCanvas
                         ref={canvasRef}
                         videoUrl={currentVideoUrl}
+                        nextVideoUrl={nextVideo}
+                        sourceDuration={project.scenes.find(s => s.id === activeSceneId)?.sourceDuration}
                         aspectRatio={aspectRatio}
                         clipDuration={activeClipDuration}
                         seekOffset={seekOffset}
+                        shouldPlay={playing}
                         onTimeUpdate={handleTimeUpdate}
                         onEnded={handleClipEnded}
                         onPlayStateChange={handlePlayStateChange}
@@ -472,7 +521,7 @@ export default function EditorPage() {
                 </div>
             </div>
 
-            <div className="shrink-0 w-full h-64 glow-accent-40 p-2 rounded-xl m-2 mt-0">
+            <div className="shrink-0 w-full glow-accent-40 p-2 rounded-xl m-2 mt-0 ">
                 <SceneTimeline
                     scenes={project.scenes}
                     activeSceneId={activeSceneId}
@@ -487,15 +536,19 @@ export default function EditorPage() {
                     onPause={handlePause}
                     onStop={handleStop}
                     musicUrl={project.musicUrl}
+                    musicVolume={project.musicVolume ?? 0.5}
+                    onMusicVolumeChange={v => patchAudioVolume('musicVolume', v)}
                     onAddMusic={handleAddMusic}
                     onRemoveMusic={handleRemoveMusic}
+                    musicUploading={musicUpload.uploading}
                     voiceoverUrl={project.voiceoverUrl}
+                    voiceoverVolume={project.voiceoverVolume ?? 1.0}
+                    onVoiceoverVolumeChange={v => patchAudioVolume('voiceoverVolume', v)}
                     onAddVoiceover={handleAddVoiceover}
                     onRemoveVoiceover={handleRemoveVoiceover}
+                    voiceoverUploading={voiceoverUpload.uploading}
+                    pushNotice={pushNotice}
                 />
-                {nextVideo && (
-                    <video preload="auto" src={nextVideo} className="hidden" />
-                )}
             </div>
 
             <button
@@ -538,6 +591,8 @@ export default function EditorPage() {
                     onClose={() => setAddSceneOpen(false)}
                 />
             )}
+
+            <OperationNotice notices={notices} onDismiss={dismissNotice} />
         </div>
     )
 }

@@ -1,15 +1,18 @@
 'use client'
 
-import Image from 'next/image'
-import { motion } from 'framer-motion'
-import { useRouter } from 'next/navigation'
-import Button from './ui/Button'
 import SectionGrid from './ui/SectionGrid'
-import desktop from '@/public/images/hero-editorPage.png'
+import Button from './ui/Button'
+import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
+import Image from 'next/image'
+import lightEditorImg from '@/public/images/homepage/lighteditorImg.png'
+import darkEditorImg from '@/public/images/homepage/darkeditorImg.png'
 import { ArrowRight } from 'lucide-react'
+import { useTheme } from '@/hooks/useTheme'
 
 const HeroSection = () => {
     const router = useRouter()
+    const { isDark } = useTheme()
 
     return (
         <section className="relative w-full overflow-hidden">
@@ -17,9 +20,7 @@ const HeroSection = () => {
             <SectionGrid />
 
             <div className="relative z-10 container pt-32 md:pt-40">
-
                 <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-
                     <motion.div
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -86,7 +87,6 @@ const HeroSection = () => {
                     >
                         No credit card required · Free forever plan available
                     </motion.p>
-
                 </div>
 
                 <motion.div
@@ -123,7 +123,7 @@ const HeroSection = () => {
                         className="relative overflow-hidden rounded-xl glow-accent"
                     >
                         <Image
-                            src={desktop}
+                            src={isDark ? (darkEditorImg) : (lightEditorImg)}
                             alt="Frameflow video editor interface"
                             width={2400}
                             height={1350}
@@ -135,9 +135,7 @@ const HeroSection = () => {
                     </div>
 
                 </motion.div>
-
                 <div className="h-20 md:h-28" />
-
             </div>
 
         </section>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import {
-    Wand2, FolderPlus, FolderOpen, Monitor, Smartphone, Square,
+    Wand2, FolderPlus, Monitor, Smartphone, Square,
     Film, Zap, Megaphone, Loader2, ArrowRight, Clock, Check, RefreshCw,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -79,8 +79,8 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
             onClick={onClick}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-caption font-semibold transition-all duration-150 border cursor-pointer ${
                 active
-                    ? 'bg-(--accent-8) border-accent-42 text-accent'
-                    : 'bg-overlay border-default text-tertiary hover:border-(--border-strong) hover:text-(--text)'
+                    ? 'bg-accent-8 border-accent-42 text-accent'
+                    : 'bg-(--bg) border-default text-tertiary hover:border-(--border-accent-16) hover:text-(--text)'
             }`}
         >
             {children}
@@ -253,16 +253,8 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
 
     return (
         <div className="relative">
-            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-40"
-                style={{ background: 'radial-gradient(ellipse 90% 100% at 50% 0%, var(--accent-10) 0%, transparent 100%)' }} />
-            <div aria-hidden className="pointer-events-none absolute inset-0"
-                style={{
-                    backgroundImage: 'radial-gradient(circle, var(--accent-22) 1px, transparent 1px)',
-                    backgroundSize: '28px 28px',
-                    opacity: 0.35,
-                    maskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%)',
-                    WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%)',
-                }} />
+            <div aria-hidden className="accent-radial-top pointer-events-none absolute inset-x-0 top-0 h-40 rounded-t-xl" />
+            <div aria-hidden className="accent-dot-fade-top pointer-events-none absolute inset-0" />
 
             <div className="relative flex flex-col gap-6 px-8 pt-28 pb-7">
 
@@ -279,7 +271,7 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                 </div>
 
                 <div className="max-w-2xl w-full mx-auto">
-                    <div className={`relative rounded-xl overflow-hidden bg-overlay border transition-all duration-200 ${
+                    <div className={`relative rounded-xl overflow-hidden bg-(--bg) border transition-all duration-200 ${
                         focused ? 'border-accent glow-accent-40' : 'glow-accent border-accent-10'
                     }`}>
                         <textarea
@@ -292,7 +284,7 @@ function AIHero({ onProjectCreated }: { onProjectCreated: () => void }) {
                             className="w-full resize-none px-5 pt-4 pb-14 text-caption outline-none bg-transparent text-(--text) placeholder:font-medium font-medium "
                             placeholder={placeholder + '|'}
                         />
-                        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2.5 bg-raised border-t border-accent-20">
+                        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2.5 bg-(--bg) border-t border-accent-20">
                             <span className="text-small text-tertiary">
                                 {prompt.length > 0 ? `${prompt.length} / 500 · ⌘Enter to generate` : 'Be descriptive for best results'}
                             </span>
@@ -443,7 +435,7 @@ export default function DashboardPage() {
 
     return (
         <div className="relative flex flex-col flex-1 min-h-0 overflow-auto p-2">
-            <div className="flex flex-col rounded-t-xl bg-overlay border border-accent-20 glow-accent-40">
+            <div className="flex flex-col rounded-t-xl bg-(--bg) border border-accent-10 ">
 
                 <AIHero onProjectCreated={refreshProjects} />
 
@@ -481,10 +473,7 @@ export default function DashboardPage() {
                                 {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
                             </div>
                         ) : projects.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-14 gap-4 rounded-xl bg-raised border border-default">
-                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-accent-8 border border-accent-22">
-                                    <FolderOpen size={22} className="text-accent" />
-                                </div>
+                            <div className="flex flex-col items-center justify-center py-14 gap-4 rounded-xl bg-raised">
                                 <div className="flex flex-col items-center gap-1 text-center">
                                     <span className="text-lead font-bold text-(--text-secondary)">
                                         No projects yet
@@ -493,14 +482,6 @@ export default function DashboardPage() {
                                         Generate with AI above or start a new blank project
                                     </span>
                                 </div>
-                                <Button
-                                    onClick={() => createProject()}
-                                    size='md'
-                                    variant='primary'
-                                >
-                                    <FolderPlus size={13} strokeWidth={2.5} className='inline-block mr-2' />
-                                    Start a project
-                                </Button>
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-10">

@@ -122,7 +122,8 @@ model Scene {
   title       String
   description String
   musicMood   String
-  duration    Int
+  duration       Float
+  sourceDuration Float?
   order       Int
 
   videoUrl    String?  

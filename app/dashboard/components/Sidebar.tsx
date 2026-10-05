@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useTheme } from '@/hooks/useTheme'
 import { useUser } from '../../../components/providers/UserContext'
-import { LayoutDashboard, FolderOpen, ChevronRight, Wand2, Zap } from 'lucide-react'
+import { LayoutDashboard, FolderOpen, ChevronRight, Wand2, Zap, Minus } from 'lucide-react'
 import NotificationBell from './NotificationBell'
 import AccountMenu from './AccountMenu'
 import whiteLogo from '@/public/whiteLogo.png'
@@ -23,7 +23,7 @@ function NavTooltip({ label, expanded, children }: { label: string; expanded: bo
         <div className="relative group">
             {children}
             {!expanded && (
-                <div className="absolute top-1/2 -translate-y-1/2 left-full ml-4 px-2.5 py-1.5 rounded-xl text-caption font-semibold whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-80 bg-(--accent-65) text-(--text) ">
+                <div className="absolute top-1/2 -translate-y-1/2 left-full ml-4 px-2.5 py-1.5 rounded-xl text-caption font-semibold whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-80 bg-accent-65 text-(--text) ">
                     {label}
                 </div>
             )}
@@ -74,8 +74,10 @@ export default function Sidebar() {
 
     return (
         <aside
-            className="relative flex flex-col h-full shrink-0 overflow-visible bg-(--bg) glow-accent-40 rounded-xl p-1.5 transition-[width] duration-300"
-            style={{ width: expanded ? '200px' : '60px' }}
+            className={`relative flex flex-col h-full shrink-0 overflow-visible bg-(--bg) glow-accent-22 rounded-xl p-1.5 transition-[width] duration-300 ${
+                expanded ? 'w-52' : 'w-16'} ${
+                    isDark ? 'glow-accent-22' : 'glow-accent-40'
+                }`}
         >
             <Link href="/dashboard" className="flex items-center h-16 px-1.5 shrink-0 overflow-hidden no-underline">
                 <Image src={isDark ? whiteLogo : blackLogo} alt="Frameflow" width={32} height={32} priority />
@@ -133,14 +135,20 @@ export default function Sidebar() {
 
             <button
                 onClick={() => setExpanded(e => !e)}
-                className="absolute -right-3 top-28 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer focus:outline-none z-20 bg-(--bg) glow-accent-40 text-tertiary hover:text-accent transition-colors"
+                className="absolute -right-3 top-12 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer focus:outline-none z-20 bg-(--bg) shadow-sm text-subtle hover:text-black transition-all duration-300 ease-out"
             >
-                <ChevronRight
-                    size={16}
-                    strokeWidth={2.5}
-                    className="transition-transform duration-300"
-                    style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                />
+                {expanded ? (
+                    <Minus 
+                        size={16}
+                        strokeWidth={2.5}
+                        className='rotate-90 text-black'
+                    />
+                ) : ( 
+                    <ChevronRight
+                        size={16}
+                        strokeWidth={2.5}
+                    />
+                )}
             </button>
         </aside>
     )

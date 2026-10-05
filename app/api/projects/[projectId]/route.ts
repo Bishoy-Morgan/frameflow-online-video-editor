@@ -63,13 +63,15 @@ export async function PATCH(req: Request, { params }: Params) {
     }
 
     if (action === 'update') {
-        const { musicUrl, musicSource, voiceoverUrl, voiceoverSource } = result.data
+        const { musicUrl, musicSource, musicVolume, voiceoverUrl, voiceoverSource, voiceoverVolume } = result.data
         const data: Record<string, unknown> = {}
 
         if (musicUrl !== undefined) data.musicUrl = musicUrl
         if (musicSource !== undefined) data.musicSource = musicSource
+        if (musicVolume !== undefined) data.musicVolume = musicVolume
         if (voiceoverUrl !== undefined) data.voiceoverUrl = voiceoverUrl
         if (voiceoverSource !== undefined) data.voiceoverSource = voiceoverSource
+        if (voiceoverVolume !== undefined) data.voiceoverVolume = voiceoverVolume
 
         const updated = await prisma.project.update({
             where: { id: projectId },
@@ -102,10 +104,6 @@ export async function PATCH(req: Request, { params }: Params) {
         })
         return NextResponse.json(updated)
     }
-
-    if (action === 'star') return NextResponse.json(await prisma.project.update({ where: { id: projectId }, data: { starred: true } }))
-    if (action === 'unstar') return NextResponse.json(await prisma.project.update({ where: { id: projectId }, data: { starred: false } }))
-    if (action === 'restore') return NextResponse.json(await prisma.project.update({ where: { id: projectId }, data: { deletedAt: null } }))
 
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
 }
