@@ -38,16 +38,7 @@ export async function POST(req: Request) {
 
     try {
         const result = await uploadProjectAudio(file, session.user.id, projectId)
-
-        const updated = await prisma.project.update({
-            where: { id: projectId },
-            data: {
-                musicUrl: result.url,
-                musicSource: 'UPLOAD',
-            },
-        })
-
-        return NextResponse.json({ url: updated.musicUrl, fileName: result.fileName })
+        return NextResponse.json({ url: result.url, fileName: result.fileName })
     } catch (err) {
         if (err instanceof StorageError)
             return NextResponse.json({ error: err.message }, { status: 422 })

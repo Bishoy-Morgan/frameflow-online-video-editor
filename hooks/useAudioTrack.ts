@@ -2,53 +2,35 @@
 
 import { useEffect, useRef } from 'react'
 
-export function useAudioTrack(url: string | null, playing: boolean, time: number, volume = 1) {
+export function useAudioTrack(
+    url: string | null,
+    playing: boolean,
+    globalTime: number,
+    volume: number,
+    startTime: number = 0,
+) {
     const audioRef = useRef<HTMLAudioElement | null>(null)
-    const timeRef = useRef(time)
-    const playingRef = useRef(playing)
 
-    useEffect(() => { timeRef.current = time }, [time])
-    useEffect(() => { playingRef.current = playing }, [playing])
-
-    // one element per url
     useEffect(() => {
         if (!url) return
         const a = new Audio(url)
-        a.preload = 'auto'
         audioRef.current = a
-        if (playingRef.current) {
-            a.currentTime = timeRef.current
-            a.play().catch(() => {})
-        }
-        return () => {
-            a.pause()
-            a.removeAttribute('src')
-            a.load()
-            audioRef.current = null
-        }
+        return () => { a.pause(); audioRef.current = null }
     }, [url])
 
     useEffect(() => {
         if (audioRef.current) audioRef.current.volume = volume
-    }, [volume, url])
+    }, [url, volume])
 
-    // play / pause
     useEffect(() => {
         const a = audioRef.current
         if (!a) return
-        if (playing) {
-            a.currentTime = timeRef.current
-            a.play().catch(() => {})
-        } else {
-            a.pause()
-        }
-    }, [playing])
+        const localTime = globalTime - startTime
 
-    // scrubbing while paused, drift correction while playing
-    useEffect(() => {
-        const a = audioRef.current
-        if (!a) return
-        if (Number.isFinite(a.duration) && time > a.duration) return
-        if (Math.abs(a.currentTime - time) > (playing ? 0.3 : 0.05)) a.currentTime = time
-    }, [time, playing])
+        if (!playing || localTime < 0) { a.pause(); return }
+        if (Number.isFinite(a.duration) && localTime > a.duration) { a.pause(); return }
+
+        if (Math.abs(a.currentTime - localTime) > 0.3) a.currentTime = localTime
+        if (a.paused) a.play().catch(() => {})
+    }, [playing, globalTime, startTime, url])
 }

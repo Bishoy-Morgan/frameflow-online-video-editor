@@ -43,7 +43,7 @@ const socialLinks = [
 
 const Footer = () => {
     const year = new Date().getFullYear()
-    const { isDark, toggleTheme } = useTheme()
+    const { isDark } = useTheme()
 
     return (
         <footer className="relative w-full border-t-(--border-default)">

@@ -16,6 +16,7 @@ export async function GET(_req: Request, { params }: Params) {
         where: { id: projectId, userId: session.user.id },
         include: {
             scenes: { orderBy: { order: 'asc' } },
+            audioLayers: { orderBy: [{ type: 'asc' }, { row: 'asc' }, { startTime: 'asc' }] },
             _count: { select: { assets: true, timelines: true, renders: true } },
         },
     })

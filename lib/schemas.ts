@@ -43,3 +43,20 @@ export const createProjectSchema = z.object({
     prompt: z.string().optional(),
     scenes: z.array(sceneSchema).optional(),
 })
+
+const audioLayerTypeSchema = z.enum(['MUSIC', 'VOICEOVER'])
+
+export const createAudioLayerSchema = z.object({
+    type: audioLayerTypeSchema,
+    url: z.string().min(1),
+    volume: z.number().min(0).max(1).optional(),
+    startTime: z.number().nonnegative().optional(),
+    row: z.number().int().nonnegative().optional(),
+    sourceDuration: z.number().nonnegative().nullable().optional(),
+})
+
+export const patchAudioLayerSchema = z.object({
+    volume: z.number().min(0).max(1).optional(),
+    startTime: z.number().nonnegative().optional(),
+    row: z.number().int().nonnegative().optional(),
+})

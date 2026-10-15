@@ -98,16 +98,19 @@ model Project {
   musicUrl        String?
   musicVolume     Float?           @default(0.5)
   musicSource     MusicSource?
+  musicStartTime  Float?           @default(0)
 
   voiceoverUrl    String?
   voiceoverVolume Float?           @default(1.0)
   voiceoverSource VoiceoverSource?
+  voiceoverStartTime Float?        @default(0)
 
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   assets      MediaAsset[]
   timelines   Timeline[]
   renders     RenderJob[]
   scenes      Scene[]
+  audioLayers  AudioLayer[]
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -185,6 +188,29 @@ model Clip {
 
   @@index([timelineId])
   @@index([assetId])
+}
+
+enum AudioLayerType {
+  MUSIC
+  VOICEOVER
+}
+
+model AudioLayer {
+  id             String         @id @default(cuid())
+  projectId      String
+
+  type           AudioLayerType
+  url            String
+  volume         Float          @default(1.0)
+  startTime      Float          @default(0)
+  row            Int            @default(0)
+  sourceDuration Float?
+
+  project        Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime       @default(now())
+
+  @@index([projectId])
 }
 
 model RenderJob {

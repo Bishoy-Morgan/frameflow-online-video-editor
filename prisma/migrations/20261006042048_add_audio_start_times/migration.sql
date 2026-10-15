@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Project" ADD COLUMN     "musicStartTime" DOUBLE PRECISION DEFAULT 0,
+ADD COLUMN     "voiceoverStartTime" DOUBLE PRECISION DEFAULT 0;

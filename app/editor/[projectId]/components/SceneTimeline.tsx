@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef, useCallback, useState, useEffect } from 'react'
-import { Plus, Music2, AudioLines, Film, Play, Pause, Square, Mic, PackageX, Ellipsis, Volume2, VolumeX, Video } from 'lucide-react'
+import { Plus, Music2, AudioLines, Film, Play, Pause, Square, Mic, PackageX, Ellipsis, Video } from 'lucide-react'
 import type { OperationNoticeState } from '@/components/ui/OperationNotice'
 import Button from '@/components/ui/Button'
 
@@ -37,10 +37,14 @@ interface SceneTimelineProps {
   onRemoveMusic?: () => void
   musicUploading?: boolean
   voiceoverUrl?: string | null
+  musicStartTime?: number
+  onMusicStartTimeChange?: (value: number) => void
   voiceoverVolume?: number
   onVoiceoverVolumeChange?: (value: number) => void
   onAddVoiceover?: () => void
+  voiceoverStartTime?: number
   onRemoveVoiceover?: () => void
+  onVoiceoverStartTimeChange?: (value: number) => void
   voiceoverUploading?: boolean
   pushNotice: (notice: OperationNoticeState) => void
 }
@@ -63,6 +67,8 @@ function formatTime(s: number) {
 
 
 type SelectedTrack = 'video' | 'music' | 'voiceover' | null
+type AudioTrackKey = 'music' | 'voiceover'
+type AudioDragMouseEvent = React.MouseEvent<HTMLDivElement>
 
 function TrackCell({ selected, children }: { selected: boolean; children: React.ReactNode }) {
     return (
@@ -144,7 +150,8 @@ function FakeWaveform({ seed, color, width }: { seed: string; color: string; wid
 }
 
 function AudioTrackRow({
-    url, pxPerSec, color, icon: Icon, label, onAdd, onRemove, uploading, onSelect
+    url, pxPerSec, color, icon: Icon, label, onAdd, onRemove, uploading, onSelect,
+    startTime, dragging, onDragStart, timelineEnd
 }: {
     url?: string | null
     pxPerSec: number
@@ -155,9 +162,14 @@ function AudioTrackRow({
     onRemove?: () => void
     uploading?: boolean
     onSelect?: () => void
+    startTime: number
+    dragging?: boolean
+    onDragStart?: (e: AudioDragMouseEvent, audioDuration: number) => void
+    timelineEnd: number
 }) {
     const duration = useAudioDuration(url)
-    const clipWidth = duration != null ? Math.max(40, duration * pxPerSec) : 0
+    const visibleDuration = duration != null ? Math.max(0.5, Math.min(duration, timelineEnd - startTime)) : 0
+    const clipWidth = visibleDuration * pxPerSec
 
     return (
         <div className="relative" style={{ height: AUDIO_ROW_HEIGHT }}>
@@ -172,18 +184,21 @@ function AudioTrackRow({
             ) : url ? (
                 duration != null ? (
                     <div
-                        className="group/remove absolute top-1 rounded-xl flex items-center gap-2 px-3 overflow-hidden group/audio cursor-pointer "
+                        className={`group/remove absolute top-1 rounded-xl flex items-center gap-2 px-1 overflow-hidden group/audio ${dragging
+                          ? `Starts at ${startTime.toFixed(1)}s`
+                          : `${label} · ${formatTime(visibleDuration)}${visibleDuration < duration ? ` of ${formatTime(duration)}` : ''}`}`}
                         style={{
-                            left: TRACK_PADDING,
+                            left: TRACK_PADDING + startTime * pxPerSec,
                             width: clipWidth,
                             bottom: 4,
                             backgroundColor: `color-mix(in srgb, ${color} 25%, var(--surface-raised))`,
                         }}
                         onClick={e => { e.stopPropagation(); onSelect?.() }}
+                        onMouseDown={e => onDragStart?.(e, duration)}
                     >
                         <Icon size={18} style={{ color }} className="shrink-0 ml-1" />
                         <span className="text-small font-semibold truncate text-secondary shrink-0">
-                            {label} · {formatTime(duration)}
+                            {dragging ? `Starts at ${startTime.toFixed(1)}s` : `${label} · ${formatTime(visibleDuration)}${visibleDuration < duration ? ` of ${formatTime(duration)}` : ''}`}
                         </span>
 
                         <FakeWaveform seed={url} color={color} width={Math.max(20, clipWidth - 120)} />
@@ -191,7 +206,8 @@ function AudioTrackRow({
                         {onRemove && (
                             <button
                                 onClick={e => { e.stopPropagation(); onRemove?.() }}
-                                className="group/removeBtn absolute left-3 top-1/2 -translate-y-1/2 h-7 rounded-lg flex items-center overflow-hidden transition-all duration-300 bg-(--error-fg) cursor-pointer opacity-0 w-0 px-0 group-hover/remove:opacity-100 group-hover/remove:w-24 group-hover/remove:px-3"
+                                onMouseDown={e => e.stopPropagation()}
+                                className="group/removeBtn absolute left-1 top-1/2 -translate-y-1/2 h-7 rounded-lg flex items-center overflow-hidden transition-all duration-300 bg-(--error-fg) cursor-pointer opacity-0 w-0 px-0 group-hover/remove:opacity-100 group-hover/remove:w-22 group-hover/remove:px-2.5"
                             >
                                 <span className="flex items-center gap-1.5 shrink-0">
                                     <PackageX
@@ -232,8 +248,10 @@ export default function SceneTimeline({
   scenes, activeSceneId, currentTime, totalDuration, playing,
   onSceneClick, onPlayheadDrag, onAddScene, onScenesChange,
   onPlay, onPause, onStop,
-  musicUrl, musicVolume, onMusicVolumeChange, onAddMusic, onRemoveMusic, musicUploading,
-  voiceoverUrl, voiceoverVolume, onVoiceoverVolumeChange, onAddVoiceover, onRemoveVoiceover, voiceoverUploading, pushNotice
+  musicUrl, musicVolume, onMusicVolumeChange, musicStartTime, onMusicStartTimeChange,
+  onAddMusic, onRemoveMusic, musicUploading,
+  voiceoverUrl, voiceoverVolume, onVoiceoverVolumeChange, voiceoverStartTime, onVoiceoverStartTimeChange,
+  onAddVoiceover, onRemoveVoiceover, voiceoverUploading, pushNotice,
 }: SceneTimelineProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -241,6 +259,7 @@ export default function SceneTimeline({
   const [containerWidth, setContainerWidth] = useState(800)
   const [dragScenes, setDragScenes] = useState<Scene[] | null>(null)
   const [selectedTrack, setSelectedTrack] = useState<SelectedTrack>(null)
+  const [audioDrag, setAudioDrag] = useState<{ track: AudioTrackKey; start: number } | null>(null)
   const activeScene = scenes.find(s => s.id === activeSceneId)
 
   const display = dragScenes ?? scenes
@@ -380,6 +399,41 @@ export default function SceneTimeline({
     document.addEventListener('mouseup', onUp)
   }, [scenes, pxPerSec, onScenesChange])
 
+  const handleAudioDragMouseDown = (
+    e: AudioDragMouseEvent,
+    track: AudioTrackKey,
+    audioDuration: number,
+    initialStart: number,
+    commit: (newStart: number) => void,
+  ) => {
+    e.stopPropagation()
+    e.preventDefault()
+    const startX = e.clientX
+    const maxStart = Math.max(0, total - Math.min(audioDuration, 1))
+    let latest = initialStart
+    let moved = false
+
+    const onMove = (mv: MouseEvent) => {
+        if (!moved && Math.abs(mv.clientX - startX) < 3) return
+        moved = true
+        const dSec = (mv.clientX - startX) / pxPerSec
+        latest = Math.min(maxStart, Math.max(0, Math.round((initialStart + dSec) * 10) / 10))
+        setAudioDrag({ track, start: latest })
+    }
+
+    const onUp = () => {
+        document.removeEventListener('mousemove', onMove)
+        document.removeEventListener('mouseup', onUp)
+        setAudioDrag(null)
+        if (moved && latest !== initialStart) commit(latest)
+    }
+
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }
+
+  const musicStart = audioDrag?.track === 'music' ? audioDrag.start : (musicStartTime ?? 0)
+  const voiceoverStart = audioDrag?.track === 'voiceover' ? audioDrag.start : (voiceoverStartTime ?? 0)
   
   const xToTime = (clientX: number) => {
     const rect = scrollRef.current?.getBoundingClientRect()
@@ -389,11 +443,11 @@ export default function SceneTimeline({
     return Math.max(0, Math.min(x / pxPerSec, total))
   }
 
-  const handleTrackClick = useCallback((e: React.MouseEvent) => {
+  const handleTrackClick = (e: React.MouseEvent) => {
     onPlayheadDrag(xToTime(e.clientX))
-  }, [xToTime, onPlayheadDrag])
+  }
 
-  const handlePlayheadMouseDown = useCallback((e: React.MouseEvent) => {
+  const handlePlayheadMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
 
@@ -408,7 +462,7 @@ export default function SceneTimeline({
 
     document.addEventListener('mousemove', onMove)
     document.addEventListener('mouseup', onUp)
-  }, [xToTime, onPlayheadDrag])
+  }
 
   return (
     <div ref={containerRef} className="flex flex-col shrink-0">
@@ -637,28 +691,36 @@ export default function SceneTimeline({
             </div>
 
             <AudioTrackRow
-                url={musicUrl}
-                pxPerSec={pxPerSec}
-                color="var(--amber)"
-                icon={Music2}
-                label="Music"
-                onAdd={onAddMusic}
-                onRemove={onRemoveMusic}
-                uploading={musicUploading}
-                onSelect={() => setSelectedTrack('music')}
-            />
+              url={musicUrl}
+              pxPerSec={pxPerSec}
+              color="var(--amber)"
+              icon={Music2}
+              label="Music"
+              onAdd={onAddMusic}
+              onRemove={onRemoveMusic}
+              uploading={musicUploading}
+              onSelect={() => setSelectedTrack('music')}
+              startTime={musicStart}
+              dragging={audioDrag?.track === 'music'}
+              onDragStart={(e, dur) => handleAudioDragMouseDown(e, 'music', dur, musicStartTime ?? 0, v => onMusicStartTimeChange?.(v))}
+              timelineEnd={total}
+          />
 
-            <AudioTrackRow
-                url={voiceoverUrl}
-                pxPerSec={pxPerSec}
-                color="var(--mood-melancholic)"
-                icon={Mic}
-                label="Voiceover"
-                onAdd={onAddVoiceover}
-                onRemove={onRemoveVoiceover}
-                uploading={voiceoverUploading}
-                onSelect={() => setSelectedTrack('voiceover')}
-            />
+          <AudioTrackRow
+              url={voiceoverUrl}
+              pxPerSec={pxPerSec}
+              color="var(--mood-melancholic)"
+              icon={Mic}
+              label="Voiceover"
+              onAdd={onAddVoiceover}
+              onRemove={onRemoveVoiceover}
+              uploading={voiceoverUploading}
+              onSelect={() => setSelectedTrack('voiceover')}
+              startTime={voiceoverStart}
+              dragging={audioDrag?.track === 'voiceover'}
+              onDragStart={(e, dur) => handleAudioDragMouseDown(e, 'voiceover', dur, voiceoverStartTime ?? 0, v => onVoiceoverStartTimeChange?.(v))}
+              timelineEnd={total}
+          />
 
             {totalDuration > 0 && (
               <div

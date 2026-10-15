@@ -14,7 +14,7 @@ import AddSceneModal from './components/AddSceneModal'
 import SharePanel from './components/SharePanel'
 import OperationNotice from '@/components/ui/OperationNotice'
 import { useFileUpload } from '@/hooks/useFileUpload'
-import { useAudioTrack } from '@/hooks/useAudioTrack'
+import AudioLayerPlayer, { type AudioLayerData } from './components/AudioLayerPlayer'
 import { useNoticeQueue } from '@/hooks/useNoticeQueue'
 
 interface Scene {
@@ -43,6 +43,7 @@ interface Project {
     voiceoverVolume: number | null
     voiceoverSource: string | null
     scenes: Scene[]
+    audioLayers: AudioLayerData[]
     _count: { assets: number; timelines: number; renders: number }
 }
 
@@ -84,15 +85,20 @@ export default function EditorPage() {
     const [shareOpen, setShareOpen] = useState(false)
     const { notices, pushNotice, dismissNotice } = useNoticeQueue()
 
-    const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-    const canvasRef = useRef<PreviewCanvasHandle>(null)
-    const initialScenesRef = useRef<string | null>(null)
-
     const [globalTime, setGlobalTime] = useState(0)
     const [activeSceneId, setActiveSceneId] = useState<string | null>(null)
     const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(null)
 
+    const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const canvasRef = useRef<PreviewCanvasHandle>(null)
+    const initialScenesRef = useRef<string | null>(null)
+
+
     const startTimesRef = useRef<Map<string, number>>(new Map())
+    const musicLayer = project?.audioLayers.find(l => l.type === 'MUSIC' && l.row === 0) ?? null
+    const voiceoverLayer = project?.audioLayers.find(l => l.type === 'VOICEOVER' && l.row === 0) ?? null
+    const audioPatchTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+    const audioPatchPending = useRef<Record<string, Partial<Pick<AudioLayerData, 'volume' | 'startTime' | 'row'>>>>({})
 
     const getSortedScenes = useCallback((scenes: Scene[]) =>
         [...scenes].sort((a, b) => a.order - b.order)
@@ -209,9 +215,13 @@ export default function EditorPage() {
     }, [project, activeSceneId, getSortedScenes])
 
     const handlePlay = useCallback(() => {
+        if (!project || project.scenes.length === 0) {
+            pushNotice({ type: 'error', autoDismiss: true, message: 'Add a clip first. Audio plays along the video timeline.' })
+            return
+        }
         canvasRef.current?.play()
         setPlaying(true)
-    }, [])
+    }, [project, pushNotice])
 
     const handlePause = useCallback(() => {
         canvasRef.current?.pause()
@@ -317,78 +327,102 @@ export default function EditorPage() {
         }
     }, [getSortedScenes, persistScenes, activeSceneId])
 
-    const patchProjectAudio = useCallback(async (
-        field: 'musicUrl' | 'voiceoverUrl',
-        url: string | null,
-        sourceField: 'musicSource' | 'voiceoverSource',
-        source: string | null,
-    ) => {
-        setProject(p => p ? { ...p, [field]: url, [sourceField]: source } : p)
+    const addAudioLayer = useCallback(async (type: 'MUSIC' | 'VOICEOVER', url: string) => {
         try {
-            const res = await fetch(`/api/projects/${projectId}`, {
-                method: 'PATCH',
+            const res = await fetch(`/api/projects/${projectId}/audio-layers`, {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'update', [field]: url, [sourceField]: source }),
+                body: JSON.stringify({ type, url, row: 0 }),
             })
             if (!res.ok) {
-                pushNotice({ type: 'error', message: 'Could not save audio changes. Please try again.' })
+                pushNotice({ type: 'error', message: 'Could not save audio. Please try again.' })
                 return
             }
-            pushNotice({
-                type: 'success',
-                message: url ? `${field === 'musicUrl' ? 'Music' : 'Voiceover'} added.` : `${field === 'musicUrl' ? 'Music' : 'Voiceover'} removed.`,
-            })
+            const layer: AudioLayerData = await res.json()
+            setProject(p => p ? { ...p, audioLayers: [...p.audioLayers, layer] } : p)
+            pushNotice({ type: 'success', message: `${type === 'MUSIC' ? 'Music' : 'Voiceover'} added.` })
         } catch (err) {
-            console.error('Failed to save audio field:', err)
-            pushNotice({ type: 'error', message: 'Could not save audio changes. Please try again.' })
+            console.error('Failed to add audio layer:', err)
+            pushNotice({ type: 'error', message: 'Could not save audio. Please try again.' })
         }
     }, [projectId, pushNotice])
 
-    const patchAudioVolume = useCallback(async (
-        field: 'musicVolume' | 'voiceoverVolume',
-        volume: number,
+    const updateAudioLayer = useCallback((
+        layerId: string,
+        patch: Partial<Pick<AudioLayerData, 'volume' | 'startTime' | 'row'>>,
     ) => {
-        setProject(p => p ? { ...p, [field]: volume } : p)
-        try {
-            const res = await fetch(`/api/projects/${projectId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'update', [field]: volume }),
-            })
-            if (!res.ok) {
-                pushNotice({ type: 'error', message: 'Could not save volume. Please try again.' })
+        setProject(p => p ? {
+            ...p,
+            audioLayers: p.audioLayers.map(l => l.id === layerId ? { ...l, ...patch } : l),
+        } : p)
+
+        audioPatchPending.current[layerId] = { ...audioPatchPending.current[layerId], ...patch }
+        clearTimeout(audioPatchTimers.current[layerId])
+        audioPatchTimers.current[layerId] = setTimeout(async () => {
+            const body = audioPatchPending.current[layerId]
+            delete audioPatchPending.current[layerId]
+            try {
+                const res = await fetch(`/api/projects/${projectId}/audio-layers/${layerId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                })
+                if (!res.ok) pushNotice({ type: 'error', message: 'Could not save audio changes.' })
+            } catch (err) {
+                console.error('Failed to update audio layer:', err)
+                pushNotice({ type: 'error', message: 'Could not save audio changes.' })
             }
+        }, 400)
+    }, [projectId, pushNotice])
+
+    const removeAudioLayer = useCallback(async (layerId: string, label: string) => {
+        setProject(p => p ? { ...p, audioLayers: p.audioLayers.filter(l => l.id !== layerId) } : p)
+        try {
+            const res = await fetch(`/api/projects/${projectId}/audio-layers/${layerId}`, { method: 'DELETE' })
+            if (!res.ok) {
+                pushNotice({ type: 'error', message: `Could not remove ${label.toLowerCase()}.` })
+                return
+            }
+            pushNotice({ type: 'success', message: `${label} removed.` })
         } catch (err) {
-            console.error('Failed to save volume:', err)
-            pushNotice({ type: 'error', message: 'Could not save volume. Please try again.' })
+            console.error('Failed to remove audio layer:', err)
+            pushNotice({ type: 'error', message: `Could not remove ${label.toLowerCase()}.` })
         }
     }, [projectId, pushNotice])
 
     const musicUpload = useFileUpload({
         accept: 'audio/*',
-        onUploaded: url => patchProjectAudio('musicUrl', url, 'musicSource', 'UPLOAD'),
+        onUploaded: url => addAudioLayer('MUSIC', url),
     })
 
     const voiceoverUpload = useFileUpload({
         accept: 'audio/*',
-        onUploaded: url => patchProjectAudio('voiceoverUrl', url, 'voiceoverSource', 'UPLOAD'),
+        onUploaded: url => addAudioLayer('VOICEOVER', url),
     })
 
-    const handleAddMusic = useCallback(() => {
-        musicUpload.trigger('/api/upload/music', projectId)
-    }, [musicUpload, projectId])
-
     const handleRemoveMusic = useCallback(() => {
-        patchProjectAudio('musicUrl', null, 'musicSource', null)
-    }, [patchProjectAudio])
-
-    const handleAddVoiceover = useCallback(() => {
-        voiceoverUpload.trigger('/api/upload/voiceover', projectId)
-    }, [voiceoverUpload, projectId])
+        if (musicLayer) removeAudioLayer(musicLayer.id, 'Music')
+    }, [musicLayer, removeAudioLayer])
 
     const handleRemoveVoiceover = useCallback(() => {
-        patchProjectAudio('voiceoverUrl', null, 'voiceoverSource', null)
-    }, [patchProjectAudio])
+        if (voiceoverLayer) removeAudioLayer(voiceoverLayer.id, 'Voiceover')
+    }, [voiceoverLayer, removeAudioLayer])
+
+    const handleAddMusic = useCallback(() => {
+        if (!project || project.scenes.length === 0) {
+            pushNotice({ type: 'error', autoDismiss: true, message: "Add a clip first. Audio can't extend past the video." })
+            return
+        }
+        musicUpload.trigger('/api/upload/music', projectId)
+    }, [project, musicUpload, projectId, pushNotice])
+
+    const handleAddVoiceover = useCallback(() => {
+        if (!project || project.scenes.length === 0) {
+            pushNotice({ type: 'error', autoDismiss: true, message: "Add a clip first. Audio can't extend past the video." })
+            return
+        }
+        voiceoverUpload.trigger('/api/upload/voiceover', projectId)
+    }, [project, voiceoverUpload, projectId, pushNotice])
 
     useEffect(() => {
         if (musicUpload.error) pushNotice({ type: 'error', message: musicUpload.error })
@@ -398,8 +432,6 @@ export default function EditorPage() {
         if (voiceoverUpload.error) pushNotice({ type: 'error', message: voiceoverUpload.error })
     }, [voiceoverUpload.error, pushNotice])
 
-    useAudioTrack(project?.musicUrl ?? null, playing, globalTime, project?.musicVolume ?? 0.5)
-    useAudioTrack(project?.voiceoverUrl ?? null, playing, globalTime, project?.voiceoverVolume ?? 1.0)
 
     const toolPanels: Partial<Record<ToolId, React.ReactNode>> = {
         text: (
@@ -535,18 +567,22 @@ export default function EditorPage() {
                     onPlay={handlePlay}
                     onPause={handlePause}
                     onStop={handleStop}
-                    musicUrl={project.musicUrl}
-                    musicVolume={project.musicVolume ?? 0.5}
-                    onMusicVolumeChange={v => patchAudioVolume('musicVolume', v)}
                     onAddMusic={handleAddMusic}
-                    onRemoveMusic={handleRemoveMusic}
                     musicUploading={musicUpload.uploading}
-                    voiceoverUrl={project.voiceoverUrl}
-                    voiceoverVolume={project.voiceoverVolume ?? 1.0}
-                    onVoiceoverVolumeChange={v => patchAudioVolume('voiceoverVolume', v)}
+                    onRemoveMusic={handleRemoveMusic}
+                    musicUrl={musicLayer?.url ?? null}
+                    musicStartTime={musicLayer?.startTime ?? 0}
+                    onMusicStartTimeChange={v => { if (musicLayer) updateAudioLayer(musicLayer.id, { startTime: v }) }}
+                    musicVolume={musicLayer?.volume ?? 0.5}
+                    onMusicVolumeChange={v => { if (musicLayer) updateAudioLayer(musicLayer.id, { volume: v }) }}
                     onAddVoiceover={handleAddVoiceover}
-                    onRemoveVoiceover={handleRemoveVoiceover}
                     voiceoverUploading={voiceoverUpload.uploading}
+                    onRemoveVoiceover={handleRemoveVoiceover}
+                    voiceoverUrl={voiceoverLayer?.url ?? null}
+                    voiceoverStartTime={voiceoverLayer?.startTime ?? 0}
+                    onVoiceoverStartTimeChange={v => { if (voiceoverLayer) updateAudioLayer(voiceoverLayer.id, { startTime: v }) }}
+                    voiceoverVolume={voiceoverLayer?.volume ?? 1.0}
+                    onVoiceoverVolumeChange={v => { if (voiceoverLayer) updateAudioLayer(voiceoverLayer.id, { volume: v }) }}
                     pushNotice={pushNotice}
                 />
             </div>
@@ -591,6 +627,10 @@ export default function EditorPage() {
                     onClose={() => setAddSceneOpen(false)}
                 />
             )}
+
+            {project.audioLayers.map(layer => (
+                <AudioLayerPlayer key={layer.id} layer={layer} playing={playing} globalTime={globalTime} />
+            ))}
 
             <OperationNotice notices={notices} onDismiss={dismissNotice} />
         </div>
